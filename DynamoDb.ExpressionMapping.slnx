@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DynamoDb.ExpressionMapping/DynamoDb.ExpressionMapping.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DynamoDb.ExpressionMapping.Tests/DynamoDb.ExpressionMapping.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,12 @@
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\bin\Debug\net8.0\DynamoDb.ExpressionMapping.deps.json
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\bin\Debug\net8.0\DynamoDb.ExpressionMapping.dll
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\bin\Debug\net8.0\DynamoDb.ExpressionMapping.pdb
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\DynamoDb.ExpressionMapping.csproj.AssemblyReference.cache
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\DynamoDb.ExpressionMapping.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\DynamoDb.ExpressionMapping.AssemblyInfoInputs.cache
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\DynamoDb.ExpressionMapping.AssemblyInfo.cs
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\DynamoDb.ExpressionMapping.csproj.CoreCompileInputs.cache
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\DynamoDb.ExpressionMapping.dll
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\refint\DynamoDb.ExpressionMapping.dll
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\DynamoDb.ExpressionMapping.pdb
+C:\Users\lester.sanchez_myuni\source\repos\expression-tree-dynamodb\src\DynamoDb.ExpressionMapping\obj\Debug\net8.0\ref\DynamoDb.ExpressionMapping.dll

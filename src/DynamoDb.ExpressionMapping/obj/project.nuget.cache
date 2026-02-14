@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "7aZttDYxRQM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\lester.sanchez_myuni\\source\\repos\\expression-tree-dynamodb\\src\\DynamoDb.ExpressionMapping\\DynamoDb.ExpressionMapping.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\lester.sanchez_myuni\\.nuget\\packages\\awssdk.core\\3.7.500.77\\awssdk.core.3.7.500.77.nupkg.sha512",
+    "C:\\Users\\lester.sanchez_myuni\\.nuget\\packages\\awssdk.dynamodbv2\\3.7.511.2\\awssdk.dynamodbv2.3.7.511.2.nupkg.sha512",
+    "C:\\Users\\lester.sanchez_myuni\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\lester.sanchez_myuni\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

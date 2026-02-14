@@ -2,10 +2,10 @@
 
 ## Phase 0 — Project Scaffolding
 
-- [ ] Create solution file, class library project (`DynamoDb.ExpressionMapping`), and test project (`DynamoDb.ExpressionMapping.Tests`)
-- [ ] Configure `DynamoDb.ExpressionMapping.csproj`: `net8.0` TFM, root namespace, package metadata, dependencies (`AWSSDK.DynamoDBv2`, `Microsoft.Extensions.Logging.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions`)
-- [ ] Configure test project: xUnit, FluentAssertions, NSubstitute, Bogus, Testcontainers.DynamoDb
-- [ ] Create namespace folder structure: `Attributes/`, `Mapping/`, `Expressions/`, `ResultMapping/`, `ReservedKeywords/`, `Extensions/`, `Exceptions/`, `Caching/`
+- [x] Create solution file, class library project (`DynamoDb.ExpressionMapping`), and test project (`DynamoDb.ExpressionMapping.Tests`)
+- [x] Configure `DynamoDb.ExpressionMapping.csproj`: `net8.0` TFM, root namespace, package metadata, dependencies (`AWSSDK.DynamoDBv2`, `Microsoft.Extensions.Logging.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions`)
+- [x] Configure test project: xUnit, FluentAssertions, NSubstitute, Bogus, Testcontainers.DynamoDb
+- [x] Create namespace folder structure: `Attributes/`, `Mapping/`, `Expressions/`, `ResultMapping/`, `ReservedKeywords/`, `Extensions/`, `Exceptions/`, `Caching/`
 
 ---
 
