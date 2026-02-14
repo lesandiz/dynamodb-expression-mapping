@@ -1,0 +1,20 @@
+## .NET Build Artifacts
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.swp
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.DotSettings.user
+
+## Test Results
+TestResults/
+*.trx
+*.coverage
+
+## Scratchpad (per Agent Prompt)
+.ralph/core/scratchpad/
