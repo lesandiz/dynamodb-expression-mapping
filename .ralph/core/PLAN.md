@@ -36,7 +36,7 @@ These specs have zero dependencies on other specs. Build in any order; all three
 
 Depends on Phase 1 (exception hierarchy). These three specs can be parallelized.
 
-- [ ] **Spec 02 — Expression tree visitor** (`Expressions/`)
+- [x] **Spec 02 — Expression tree visitor** (`Expressions/`)
   - `PropertyPath` value object with `SegmentProperties` (`PropertyInfo[]`)
   - `ProjectionExpressionVisitor` — extracts paths from LINQ selectors
   - Supported patterns: member access, nested access, new anonymous/named types
