@@ -64,7 +64,7 @@ Depends on Phase 1 (exception hierarchy). These three specs can be parallelized.
 
 Depends on Phases 1 + 2. Can be parallelized within this phase.
 
-- [ ] **Spec 03 — Projection expression builder** (`Expressions/`)
+- [x] **Spec 03 — Projection expression builder** (`Expressions/`)
   - `ProjectionBuilder<TSource>` — selector → `ProjectionExpression` string
   - Uses `ProjectionExpressionVisitor` (Spec 02), `IAttributeNameResolverFactory` (Spec 01), `ReservedKeywordRegistry` + `AliasGenerator` (Spec 08), `IExpressionCache` (Spec 09)
   - Returns `ProjectionExpressionResult` with expression string + `ExpressionAttributeNames`
