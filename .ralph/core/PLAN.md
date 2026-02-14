@@ -43,7 +43,7 @@ Depends on Phase 1 (exception hierarchy). These three specs can be parallelized.
   - Throws `UnsupportedExpressionException` for unsupported node types
   - Unit tests per Spec 12
 
-- [ ] **Spec 01 — Attribute name mapping** (`Mapping/`)
+- [x] **Spec 01 — Attribute name mapping** (`Mapping/`)
   - `[DynamoDbAttribute]` custom attribute
   - `IAttributeNameResolver<T>` interface + default implementation
   - `IAttributeNameResolverFactory` — cross-type resolution for nested paths
