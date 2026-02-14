@@ -18,12 +18,12 @@ These specs have zero dependencies on other specs. Build in any order; all three
   - Structured diagnostic properties on each exception type
   - Unit tests for construction, message formatting, inner-exception chaining
 
-- [ ] **Spec 08 — Reserved keyword handling** (`ReservedKeywords/`)
+- [x] **Spec 08 — Reserved keyword handling** (`ReservedKeywords/`)
   - `ReservedKeywordRegistry` with 573+ words (frozen set)
   - `AliasGenerator` with scoped prefixes (`#proj_`, `#filt_`, `#cond_`, `#upd_`, `#key_` and value prefixes)
   - Unit tests for keyword detection, alias generation, prefix scoping
 
-- [ ] **Spec 09 — Expression caching** (`Caching/`)
+- [x] **Spec 09 — Expression caching** (`Caching/`)
   - `IExpressionCache` interface
   - `ExpressionKeyGenerator` (structural expression hashing)
   - `NullExpressionCache` (test bypass)
