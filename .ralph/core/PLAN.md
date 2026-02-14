@@ -50,7 +50,7 @@ Depends on Phase 1 (exception hierarchy). These three specs can be parallelized.
   - Resolution order: fluent overrides → `[DynamoDbAttribute]` → `[DynamoDBProperty]` → property name
   - Unit tests per Spec 12
 
-- [ ] **Spec 05 — Type converter system** (`Mapping/`)
+- [x] **Spec 05 — Type converter system** (`Mapping/`)
   - `IAttributeValueConverter<T>` interface
   - Built-in converters: primitives, `DateTime`/`DateTimeOffset`, `Guid`, `byte[]`, collections, `Dictionary<string, AttributeValue>`
   - `AttributeValueConverterRegistry` — frozen default singleton, clone-to-customize
