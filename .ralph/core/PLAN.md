@@ -13,7 +13,7 @@
 
 These specs have zero dependencies on other specs. Build in any order; all three can be parallelized.
 
-- [ ] **Spec 14 — Exception hierarchy** (`Exceptions/`)
+- [x] **Spec 14 — Exception hierarchy** (`Exceptions/`)
   - `ExpressionMappingException` abstract base and all concrete subtypes
   - Structured diagnostic properties on each exception type
   - Unit tests for construction, message formatting, inner-exception chaining

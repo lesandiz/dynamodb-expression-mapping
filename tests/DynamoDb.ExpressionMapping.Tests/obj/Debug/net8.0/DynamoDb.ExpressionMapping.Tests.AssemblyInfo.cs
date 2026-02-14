@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DynamoDb.ExpressionMapping.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0b412c704fdc633540fe335525d6a645ca17a9b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+66de2327c9c2f0aa7950b614698a6abed93c434e")]
 [assembly: System.Reflection.AssemblyProductAttribute("DynamoDb.ExpressionMapping.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DynamoDb.ExpressionMapping.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
