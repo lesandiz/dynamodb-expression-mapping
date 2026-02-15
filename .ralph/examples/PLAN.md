@@ -117,7 +117,8 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - Added Swagger, endpoints API explorer, and controllers
   - Repository registration placeholder added (will be completed in task 2.9)
   - Build verified - no errors or warnings
-- [ ] 2.9 Create `IOrderRepository` interface (Spec 02 §Repository Pattern)
+- [x] 2.9 Create `IOrderRepository` interface (Spec 02 §Repository Pattern)
+  - Created Repositories/IOrderRepository.cs with all 5 methods per Spec 02 - builds successfully
 - [ ] 2.10 Create `OrderRepository` — inject all typed builders, implement all methods (Spec 02 §Repository Pattern, §REST Endpoints)
 - [ ] 2.11 Pagination helpers: `EncodePaginationToken` / `DecodePaginationToken` (Spec 02 §Pagination)
 
