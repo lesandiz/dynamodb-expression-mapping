@@ -68,7 +68,9 @@ Priority order follows dependency chain: models → converter → infra → setu
   - Named DTO mapping working correctly - maps all 3 Alice orders to OrderSummary with nested City extraction
 - [x] 1.14 Create `examples/ConsoleQuickStart/README.md` (Spec 01 §README.md Contents)
   - Created README.md with all required sections from Spec 01: What's Demonstrated, Prerequisites, Run, Clean Up
-- [ ] 1.15 End-to-end verification: `docker compose up -d && dotnet run`, compare output to Spec 01 §Expected Console Output
+- [x] 1.15 End-to-end verification: `docker compose up -d && dotnet run`, compare output to Spec 01 §Expected Console Output
+  - Verified - console output matches Spec 01 expected output exactly
+  - All 8 scenarios working correctly with cumulative state mutations
 
 ---
 
