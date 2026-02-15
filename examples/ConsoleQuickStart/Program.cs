@@ -69,6 +69,22 @@ Console.WriteLine($"  Status: {getResponse.Item["Status"].S}");
 Console.WriteLine($"  Quantity: {getResponse.Item["Quantity"].N}");
 Console.WriteLine();
 
+// === Scenario 2: Filter Expression ===
+Console.WriteLine("=== Scenario 2: Filter ===");
+
+var scanRequest = new ScanRequest { TableName = "Orders" }
+    .WithFilter(filterBuilder,
+        o => o.Status == "Shipped" && o.Quantity >= 1);
+
+var scanResponse = await client.ScanAsync(scanRequest);
+
+Console.WriteLine($"  Found {scanResponse.Items.Count} shipped orders with quantity >= 1:");
+foreach (var item in scanResponse.Items)
+{
+    Console.WriteLine($"    - {item["Name"].S} (Qty: {item["Quantity"].N})");
+}
+Console.WriteLine();
+
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)
 {

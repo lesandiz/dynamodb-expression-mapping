@@ -41,7 +41,11 @@ Priority order follows dependency chain: models → converter → infra → setu
   - Projection working correctly - reserved keywords (`status`, `data`, `name`) properly aliased with `#proj_` prefix
   - Direct result mapping successfully returns `OrderSummary` with all fields populated
   - Console output matches expected format from Spec 01
-- [ ] 1.7 Scenario 2: Filter expression (Spec 01 §Scenario 2)
+- [x] 1.7 Scenario 2: Filter expression (Spec 01 §Scenario 2)
+  - Filter expression working correctly - filters orders with Status == "Shipped" AND Quantity >= 1
+  - Reserved keyword "Status" properly aliased with `#filt_` prefix
+  - Direct result mapping successfully returns filtered `OrderSummary` results
+  - Console output shows 2 shipped orders (Alice's Laptop and Bob's Keyboard)
 - [ ] 1.8 Scenario 3: Filter composition with `And()`/`Or()` (Spec 01 §Scenario 3)
 - [ ] 1.9 Scenario 4: Key condition query with `begins_with` (Spec 01 §Scenario 4)
 - [ ] 1.10 Scenario 5: Update expression — SET, Increment, SetIfNotExists, Remove (Spec 01 §Scenario 5)
