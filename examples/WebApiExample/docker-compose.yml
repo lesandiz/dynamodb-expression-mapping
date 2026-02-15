@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8000 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: ../../
+      dockerfile: examples/WebApiExample/Dockerfile
+    container_name: webapi-example
+    ports:
+      - "5000:8080"
+    environment:
+      - DynamoDb__ServiceUrl=http://dynamodb-local:8000
+    depends_on:
+      dynamodb-local:
+        condition: service_healthy

@@ -89,7 +89,8 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
 
 ### 2B — Infrastructure
 
-- [ ] 2.4 Create `docker-compose.yml` with DynamoDB Local + API container (Spec 02 §Infrastructure)
+- [x] 2.4 Create `docker-compose.yml` with DynamoDB Local + API container (Spec 02 §Infrastructure)
+  - Created docker-compose.yml with DynamoDB Local on port 8000 and API service on port 5000 with health checks and service dependencies per Spec 02
 - [ ] 2.5 Create `Dockerfile` — multi-stage .NET build (Spec 02 §Infrastructure)
 - [ ] 2.6 Create `DynamoDbSeeder` (`IHostedService`) — table creation + seed data (Spec 02 §Infrastructure, §DynamoDbSeeder)
 - [ ] 2.7 Create `TableDefinitions` — single-table schema with PK/SK (Spec 02 §Single-Table Design)
