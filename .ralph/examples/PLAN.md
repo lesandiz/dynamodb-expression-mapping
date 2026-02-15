@@ -150,7 +150,13 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - Uses And() method to safely compose independently-built filters with re-aliasing
   - Direct injection of typed builders (IProjectionBuilder, IFilterExpressionBuilder, IDirectResultMapper)
   - Build verified successfully
-- [ ] 2.14 `CustomersController` — GET with projection + nested path (Spec 02 §GET /api/customers/{id})
+- [x] 2.14 `CustomersController` — GET with projection + nested path (Spec 02 §GET /api/customers/{id})
+  - Created Controllers/CustomersController.cs with GET /api/customers/{id} endpoint per Spec 02
+  - Implements direct injection of typed builders (IProjectionBuilder, IDirectResultMapper)
+  - Demonstrates nested path projection (Address.City flattened to City in CustomerDto)
+  - Returns 404 when customer not found, 200 with CustomerDto on success
+  - Uses TableDefinitions.KeyPatterns.Customer for PK/SK construction (PK=CUSTOMER#{id}, SK=PROFILE)
+  - Build verified successfully
 
 ### 2E — Verification
 
