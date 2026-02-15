@@ -1,9 +1,9 @@
 name: Publish to NuGet
 
 on:
-  workflow_dispatch:  # Manual trigger only — re-enable push trigger when ready
-  # push:
-  #   branches: [ main ]
+  push:
+    tags:
+      - 'v*'
 
 env:
   DOTNET_NOLOGO: true
