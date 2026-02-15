@@ -1,5 +1,7 @@
 # DynamoDb.ExpressionMapping
 
+> **Disclaimer:** This repository and its code (library and examples) should be considered **experimental**. The implementation has been mostly generated from specs (see the [`.ralph/`](.ralph/) directory) and self-verified by an AI agent in a loop. **Not recommended for production use without thorough review and due scrutiny.**
+
 A type-safe .NET library that converts C# LINQ expression trees into AWS DynamoDB expression strings (`ProjectionExpression`, `FilterExpression`, `ConditionExpression`, `UpdateExpression`, `KeyConditionExpression`) with direct result mapping that avoids full entity hydration.
 
 [![NuGet](https://img.shields.io/nuget/v/DynamoDb.ExpressionMapping.svg)](https://www.nuget.org/packages/DynamoDb.ExpressionMapping/)
