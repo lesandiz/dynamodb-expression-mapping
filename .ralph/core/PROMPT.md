@@ -36,7 +36,7 @@
 - If you finish early, update PLAN.md, commit, and **end the turn**
 - Phase boundaries are hard stops—completing Phase 4 does NOT mean starting Phase 5
 
-**Subagents**: Workers spawned by the main agent to execute specific tasks (file edits, searches, builds). Subagents do NOT control turn boundaries—they report results back to the main agent.
+**Subagents**: Workers spawned by the main agent to execute specific tasks (study specs, discover implementation, file edits, searches, builds). Subagents do NOT control turn boundaries—they report results back to the main agent.
 
 ---
 

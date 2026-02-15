@@ -322,11 +322,25 @@ internal sealed class FilterExpressionVisitor : ExpressionVisitor
         }
 
         // Standard comparison: property OP value
-        if (node.Left is MemberExpression memberExpr)
+        // Unwrap Convert nodes (common with enum comparisons)
+        var left = node.Left;
+        var right = node.Right;
+
+        while (left is UnaryExpression { NodeType: ExpressionType.Convert or ExpressionType.ConvertChecked } unaryLeft)
+        {
+            left = unaryLeft.Operand;
+        }
+
+        while (right is UnaryExpression { NodeType: ExpressionType.Convert or ExpressionType.ConvertChecked } unaryRight)
+        {
+            right = unaryRight.Operand;
+        }
+
+        if (left is MemberExpression memberExpr)
         {
             var propertyPath = BuildPropertyPath(memberExpr);
             var attributeName = ResolveAttributeName(propertyPath);
-            var value = EvaluateExpression(node.Right);
+            var value = EvaluateExpression(right);
             var valueAlias = aliasGen.NextValue();
 
             values[valueAlias] = valueEmitter.Emit(value, propertyPath.PropertyInfo);

@@ -155,12 +155,20 @@ Depends on Phase 3.
 
 Depends on all prior phases.
 
-- [ ] **Spec 12 — Integration test suite**
+- [x] **Spec 12 — Integration test suite**
   - `DynamoDbFixture` with Testcontainers.DynamoDb (`IAsyncLifetime`)
   - `[Collection("DynamoDb")]` shared fixture, per-test-class table lifecycle
   - End-to-end scenarios: build expression → execute against DynamoDB Local → verify results
   - Round-trip tests for all expression types
   - Edge cases: deeply nested paths, reserved keywords in real queries, large batch operations
+  - **Status: 34/34 tests passing** — Full integration test coverage:
+    - `ProjectionIntegrationTests` (5 tests)
+    - `FilterIntegrationTests` (7 tests)
+    - `KeyConditionIntegrationTests` (6 tests)
+    - `UpdateIntegrationTests` (5 tests)
+    - `ConditionIntegrationTests` (3 tests)
+    - `DirectResultMapperIntegrationTests` (5 tests)
+    - `CombinedExpressionIntegrationTests` (3 tests)
 
 ---
 
