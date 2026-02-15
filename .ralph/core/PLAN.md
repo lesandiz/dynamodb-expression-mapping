@@ -120,11 +120,20 @@ Depends on Phases 1 + 2. Can be parallelized within this phase.
 
 Depends on Phase 3.
 
-- [ ] **Spec 10 — AWS SDK request extensions** (`Extensions/`)
+- [x] **Spec 10 — AWS SDK request extensions** (`Extensions/`)
   - Extension methods on `GetItemRequest`, `QueryRequest`, `ScanRequest`, `BatchGetItemRequest`, `PutItemRequest`, `UpdateItemRequest`, `DeleteItemRequest`
   - Fluent chaining API
   - `RequestMergeHelpers` — safe dictionary merging, throws `ExpressionAttributeConflictException` on collision
   - Unit tests per Spec 12
+  - **Status: 35/35 tests passing** — Full implementation complete:
+    - `RequestMergeHelpers` for safe attribute name/value merging with conflict detection
+    - `ProjectionExtensions` for GetItem, Query, Scan, BatchGetItem requests
+    - `FilterExtensions` for Query and Scan filter expressions
+    - `ConditionExtensions` for Put, Delete, Update condition expressions
+    - `KeyConditionExtensions` for Query key conditions with staged fluent API
+    - `UpdateExtensions` for UpdateItem update expressions
+    - `CombinedExtensions` for projection + filter in one call
+    - Full test coverage including happy paths, error cases, null checks, fluent chaining, and alias scope isolation
 
 - [ ] **Spec 11 — Configuration and dependency injection** (root + `Extensions/`)
   - `DynamoDbExpressionConfig` builder pattern
