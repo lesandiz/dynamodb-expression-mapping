@@ -8,7 +8,7 @@
 
 **Priority: Highest** — most likely to surface real bugs in expression builders and converters.
 
-- [ ] 1.1 Add `FsCheck.Xunit` (>= 3.x) to test project
+- [x] 1.1 Add `FsCheck.Xunit` (>= 3.x) to test project
 - [ ] 1.2 Create `PropertyBased/Generators/` folder and `ExpressionGenerators.cs` entry point
 - [ ] 1.3 Implement `ProjectionSelectorGenerator` (simple, composite, complex tiers)
 - [ ] 1.4 Implement `FilterPredicateGenerator` (simple, composite, complex tiers)
