@@ -30,8 +30,7 @@ public static class ExpressionGenerators
     /// <param name="complexity">Tier: Simple (single comparison), Composite (2-3 combined), Complex (nested + functions + NOT).</param>
     public static Arbitrary<Expression<Func<TestEntity, bool>>> FilterPredicate(Complexity complexity = Complexity.Simple)
     {
-        // TODO: Implementation in task 1.4
-        throw new NotImplementedException("FilterPredicateGenerator - see task 1.4");
+        return FilterPredicateGenerator.Generate(complexity);
     }
 
     /// <summary>
