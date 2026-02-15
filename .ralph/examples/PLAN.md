@@ -23,7 +23,8 @@ Priority order follows dependency chain: models → converter → infra → setu
 
 - [x] 1.1 Create entity models: `Order`, `Address`, `Money`, `OrderSummary` (Spec 01 §Entity Models)
   - Created Models.cs with all four classes matching Spec 01 requirements
-- [ ] 1.2 Create `MoneyConverter` implementing `IAttributeValueConverter<Money>` (Spec 01 §Custom Converter)
+- [x] 1.2 Create `MoneyConverter` implementing `IAttributeValueConverter<Money>` (Spec 01 §Custom Converter)
+  - Created MoneyConverter.cs with IAttributeValueConverter<Money> implementation - builds successfully
 - [ ] 1.3 Create `docker-compose.yml` for DynamoDB Local (Spec 01 §Infrastructure)
 - [ ] 1.4 `Program.cs` — DynamoDB client setup, table creation (idempotent), seed 5 orders (Spec 01 §Manual Instantiation, §Seed Data)
 - [ ] 1.5 `Program.cs` — Manual builder instantiation via `DynamoDbExpressionConfig.Builder` and `AttributeNameResolverFactory` (Spec 01 §Manual Instantiation)
