@@ -17,4 +17,8 @@ TestResults/
 *.coverage
 
 ## Scratchpad (per Agent Prompt)
-.ralph/core/scratchpad/
+.ralph/**/scratchpad/
+
+# Ralph Loop Signals
+ralph.done
+ralph.blocked

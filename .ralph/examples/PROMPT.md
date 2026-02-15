@@ -4,13 +4,24 @@
 
 **Base Path**: `.ralph/examples/`
 
-| File       | Relative Path        |
-| ---------- | -------------------- |
+| File       | Relative Path |
+| ---------- | ------------- |
 | PLAN.md    | `PLAN.md`     |
 | Specs      | `specs/`      |
 | ADRs       | `adrs/`       |
 | Scratchpad | `scratchpad/` |
 | Archive    | `archive/`    |
+
+### Signal Files
+
+Create these files in the Base Path to signal terminal states:
+
+| File | When to Create |
+| ---- | -------------- |
+| `ralph.done` | All PLAN.md items are complete - no more work to do |
+| `ralph.blocked` | Agent is blocked awaiting human decision (ADR review, escalation after 3+ turns) |
+
+> **Note:** These files signal to external systems that the agent has stopped. Do not commit them.
 
 ### Path Resolution Rules
 
@@ -49,7 +60,7 @@
 
 ### Execution Steps
 
-1. **Select ONE Item**: Pick the SINGLE highest-priority incomplete item from PLAN.md. Work ONLY on this item until completion, failure, or escalation. **Never work on multiple items or cross phase boundaries in a single turn.** If no actionable items remain, summarise status and stop.
+1. **Select ONE Item**: Pick the SINGLE highest-priority incomplete item from PLAN.md. Work ONLY on this item until completion, failure, or escalation. **Never work on multiple items or cross phase boundaries in a single turn.** If no actionable items remain, create `ralph.done` in the Base Path, summarise status, and stop.
 
    **Before writing any code, verify:**
    - [ ] I have selected exactly ONE item
@@ -62,7 +73,7 @@
 
 3. **Track Issues**: When you discover an issue, immediately update PLAN.md with your findings using a subagent. When the issue is resolved, update PLAN.md and remove the item using a subagent.
 
-4. **Commit and Push**: When all tests pass (full suite), use subagents to update PLAN.md with your progress and commit all changes with `git add -A && git commit` with a message that describes the changes and push. **Always co-author commits as "Ralph Agent <no-reply@ralph.local>"** using the `--trailer` flag.
+4. **Commit & Push**: When all tests pass (full suite), use subagents to update PLAN.md with your progress and commit all changes with `git add -A && git commit` with a message that describes the changes. **Always co-author commits as "Ralph Agent <no-reply@ralph.local>"** using the `--trailer` flag. After the commit, do a `git push` to push changes to the remote repository.
 
 5. **Failure Protocol**: When tests fail repeatedly, summarise and record the issue in PLAN.md. Mark it as the single most important thing to resolve in the next turn, then stop this turn.
 
@@ -84,12 +95,13 @@
     > 1. Document the decision needed in `adrs/`
     > 2. Mark related PLAN.md items as **BLOCKED - awaiting ADR review**
     > 3. Commit and push all changes (including the ADR)
-    > 4. End the turn - do NOT continue with other work
-    > 5. A human will review and communicate their decision
+    > 4. Create `ralph.blocked` in the Base Path
+    > 5. End the turn - do NOT continue with other work
+    > 6. A human will review and communicate their decision
 
 13. **CLAUDE.md Protection**: DO NOT place status report updates into CLAUDE.md.
 
-14. **Escalation**: If an item has been worked on for 3+ consecutive turns without completion, summarise and escalate by documenting blockers in PLAN.md and finish your turn.
+14. **Escalation**: If an item has been worked on for 3+ consecutive turns without completion, summarise and escalate by documenting blockers in PLAN.md, create `ralph.blocked` in the Base Path, and finish your turn.
 
 15. **Scratchpad**: Use `scratchpad/` directory for temporary files during your turn.
 
