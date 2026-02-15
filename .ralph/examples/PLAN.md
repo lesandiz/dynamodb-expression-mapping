@@ -144,7 +144,12 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - DELETE /api/orders/{customerId}/{orderId} — delete with condition guard, returns 404 if not found
   - All endpoints include proper validation, error handling, and integration with IOrderRepository
   - Build verified successfully
-- [ ] 2.13 `ProductsController` — GET with dynamic filter composition (Spec 02 §GET /api/products)
+- [x] 2.13 `ProductsController` — GET with dynamic filter composition (Spec 02 §GET /api/products)
+  - Created Controllers/ProductsController.cs with GET /api/products endpoint per Spec 02
+  - Implements dynamic filter composition with category and activeOnly query parameters
+  - Uses And() method to safely compose independently-built filters with re-aliasing
+  - Direct injection of typed builders (IProjectionBuilder, IFilterExpressionBuilder, IDirectResultMapper)
+  - Build verified successfully
 - [ ] 2.14 `CustomersController` — GET with projection + nested path (Spec 02 §GET /api/customers/{id})
 
 ### 2E — Verification
