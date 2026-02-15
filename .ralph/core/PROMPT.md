@@ -24,7 +24,7 @@
 ## Definitions
 
 **Turn**: The complete cycle of selecting and working on ONE item from PLAN.md until the **main agent** decides to:
-- ✅ Complete (tests pass, committed, pushed)
+- ✅ Complete (tests pass, committed)
 - ❌ Fail (document blocker, stop)
 - ⏸️ Escalate (3+ attempts without resolution, or blocked awaiting human decision)
 
@@ -33,7 +33,7 @@
 **Turn Scope Constraints**:
 - ONE item per turn (e.g., "Task 4.3 - Add unit tests")
 - NEVER start work on the next item if the current item completes early
-- If you finish early, commit, push, update PLAN.md, and **end the turn**
+- If you finish early, update PLAN.md, commit, and **end the turn**
 - Phase boundaries are hard stops—completing Phase 4 does NOT mean starting Phase 5
 
 **Subagents**: Workers spawned by the main agent to execute specific tasks (file edits, searches, builds). Subagents do NOT control turn boundaries—they report results back to the main agent.
@@ -83,7 +83,7 @@
     > **ADRs are escalation gates:**
     > 1. Document the decision needed in `adrs/`
     > 2. Mark related PLAN.md items as **BLOCKED - awaiting ADR review**
-    > 3. Commit and push all changes (including the ADR)
+    > 3. Commit all changes (including the ADR)
     > 4. End the turn - do NOT continue with other work
     > 5. A human will review and communicate their decision
 

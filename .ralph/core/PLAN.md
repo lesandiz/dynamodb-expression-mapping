@@ -83,12 +83,18 @@ Depends on Phases 1 + 2. Can be parallelized within this phase.
     - Array converter support (T[]) for all array types
     - Full test coverage including anonymous types, named types, records, and complex nested projections
 
-- [ ] **Spec 06 — Filter and condition expression builders** (`Expressions/`)
+- [x] **Spec 06 — Filter and condition expression builders** (`Expressions/`)
   - `FilterExpressionBuilder<TSource>` and `ConditionExpressionBuilder<TSource>`
   - Predicate → DynamoDB boolean expression string
   - Composability: `FilterExpressionResult.And()` / `Or()` with re-aliasing
   - Uses `ExpressionValueEmitter` (Spec 05), resolver factory (Spec 01), alias generator (Spec 08)
   - Unit tests per Spec 12
+  - **Status: 108/108 tests passing** — Full implementation complete:
+    - `FilterExpressionVisitor` for expression tree analysis
+    - `FilterExpressionBuilder` / `ConditionExpressionBuilder` with scoped aliases (#filt_/:filt_v, #cond_/:cond_v)
+    - `FilterExpressionResult` / `ConditionExpressionResult` with And/Or composition and re-aliasing
+    - `DynamoDbFunctions` static class for DynamoDB-specific functions
+    - Full test coverage including comparison ops, logical ops, string methods, null checks, DynamoDB functions, IN operator, nested properties, composition with re-aliasing
 
 - [ ] **Spec 07 — Update expression builder** (`Expressions/`)
   - `UpdateExpressionBuilder<TSource>` with fluent API
