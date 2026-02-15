@@ -34,7 +34,7 @@ public interface IAttributeValueConverter<T> : IAttributeValueConverter
     /// <summary>
     /// Converts a strongly-typed .NET value to a DynamoDB AttributeValue.
     /// </summary>
-    new AttributeValue ToAttributeValue(T value);
+    AttributeValue ToAttributeValue(T value);
 
     /// <summary>
     /// Converts a DynamoDB AttributeValue to a strongly-typed .NET value.

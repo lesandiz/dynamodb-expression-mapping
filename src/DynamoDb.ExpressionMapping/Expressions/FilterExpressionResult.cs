@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.Model;
+using DynamoDb.ExpressionMapping.Exceptions;
 
 namespace DynamoDb.ExpressionMapping.Expressions;
 
@@ -182,9 +183,8 @@ public sealed class FilterExpressionResult
     /// Merges source attribute names into target dictionary.
     /// Throws if a key already exists with a different value.
     /// </summary>
-    /// <exception cref="InvalidOperationException">
+    /// <exception cref="ExpressionAttributeConflictException">
     /// Thrown when a placeholder key already exists with a different value.
-    /// TODO: Replace with ExpressionAttributeConflictException when implemented.
     /// </exception>
     private static void MergeAttributeNames(
         Dictionary<string, string> target,
@@ -196,9 +196,7 @@ public sealed class FilterExpressionResult
             {
                 if (existing != kvp.Value)
                 {
-                    // TODO: Replace with ExpressionAttributeConflictException (Spec 14 §4)
-                    throw new InvalidOperationException(
-                        $"Attribute name conflict for key '{kvp.Key}': existing value '{existing}' conflicts with new value '{kvp.Value}'");
+                    throw new ExpressionAttributeConflictException(kvp.Key, existing, kvp.Value);
                 }
                 continue; // Same mapping already exists
             }
@@ -210,9 +208,8 @@ public sealed class FilterExpressionResult
     /// Merges source attribute values into target dictionary.
     /// Throws if a key already exists.
     /// </summary>
-    /// <exception cref="InvalidOperationException">
+    /// <exception cref="ExpressionAttributeConflictException">
     /// Thrown when a placeholder key already exists.
-    /// TODO: Replace with ExpressionAttributeConflictException when implemented.
     /// </exception>
     private static void MergeAttributeValues(
         Dictionary<string, AttributeValue> target,
@@ -222,9 +219,7 @@ public sealed class FilterExpressionResult
         {
             if (target.TryGetValue(kvp.Key, out var existing))
             {
-                // TODO: Replace with ExpressionAttributeConflictException (Spec 14 §4)
-                throw new InvalidOperationException(
-                    $"Attribute value conflict for key '{kvp.Key}'");
+                throw new ExpressionAttributeConflictException(kvp.Key, existing.ToString()!);
             }
             target[kvp.Key] = kvp.Value;
         }

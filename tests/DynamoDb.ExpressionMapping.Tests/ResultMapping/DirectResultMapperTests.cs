@@ -724,7 +724,7 @@ public class DirectResultMapperTests
     #region Concurrent Access
 
     [Fact]
-    public void CreateMapper_ConcurrentAccess_ThreadSafe()
+    public async Task CreateMapper_ConcurrentAccess_ThreadSafe()
     {
         // Arrange
         var attributes = new Dictionary<string, AttributeValue>
@@ -745,12 +745,12 @@ public class DirectResultMapperTests
             }));
         }
 
-        Task.WaitAll(tasks.ToArray());
+        var results = await Task.WhenAll(tasks.ToArray());
 
         // Assert - all should succeed with same result
-        foreach (var task in tasks)
+        foreach (var result in results)
         {
-            task.Result.Should().Be("concurrent-test");
+            result.Should().Be("concurrent-test");
         }
     }
 

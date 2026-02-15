@@ -296,7 +296,7 @@ public class ExpressionValueEmitterTests
     #region Thread Safety Tests
 
     [Fact]
-    public void Emit_ConcurrentCalls_NoRaceConditions()
+    public async Task Emit_ConcurrentCalls_NoRaceConditions()
     {
         var registry = AttributeValueConverterRegistry.Default;
         var emitter = new ExpressionValueEmitter(registry);
@@ -309,13 +309,13 @@ public class ExpressionValueEmitterTests
             result.S.Should().Be(value.ToString());
         })).ToArray();
 
-        var act = () => Task.WaitAll(tasks);
+        var act = async () => await Task.WhenAll(tasks);
 
-        act.Should().NotThrow();
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]
-    public void Emit_ConcurrentCalls_DifferentTypes_NoRaceConditions()
+    public async Task Emit_ConcurrentCalls_DifferentTypes_NoRaceConditions()
     {
         var registry = AttributeValueConverterRegistry.Default;
         var emitter = new ExpressionValueEmitter(registry);
@@ -336,13 +336,13 @@ public class ExpressionValueEmitterTests
             tasks.Add(Task.Run(() => emitter.Emit(ProductStatus.Available, enumProperty)));
         }
 
-        var act = () => Task.WaitAll(tasks.ToArray());
+        var act = async () => await Task.WhenAll(tasks.ToArray());
 
-        act.Should().NotThrow();
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]
-    public void Emit_ConcurrentCalls_GenericCollectionResolution_NoRaceConditions()
+    public async Task Emit_ConcurrentCalls_GenericCollectionResolution_NoRaceConditions()
     {
         var registry = AttributeValueConverterRegistry.Default;
         var emitter = new ExpressionValueEmitter(registry);
@@ -355,13 +355,13 @@ public class ExpressionValueEmitterTests
             result.L.Should().HaveCount(2);
         })).ToArray();
 
-        var act = () => Task.WaitAll(tasks);
+        var act = async () => await Task.WhenAll(tasks);
 
-        act.Should().NotThrow();
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]
-    public void Emit_ConcurrentCalls_NullableResolution_NoRaceConditions()
+    public async Task Emit_ConcurrentCalls_NullableResolution_NoRaceConditions()
     {
         var registry = AttributeValueConverterRegistry.Default;
         var emitter = new ExpressionValueEmitter(registry);
@@ -378,9 +378,9 @@ public class ExpressionValueEmitterTests
                 result.NULL.Should().BeTrue();
         })).ToArray();
 
-        var act = () => Task.WaitAll(tasks);
+        var act = async () => await Task.WhenAll(tasks);
 
-        act.Should().NotThrow();
+        await act.Should().NotThrowAsync();
     }
 
     #endregion
