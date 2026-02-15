@@ -85,6 +85,32 @@ foreach (var item in scanResponse.Items)
 }
 Console.WriteLine();
 
+// === Scenario 3: Filter Composition ===
+Console.WriteLine("=== Scenario 3: Filter Composition ===");
+
+var shippedFilter = filterBuilder.BuildFilter(o => o.Status == "Shipped");
+var deliveredFilter = filterBuilder.BuildFilter(o => o.Status == "Delivered");
+
+// Compose: (Status == "Shipped") OR (Status == "Delivered")
+var composedFilter = FilterExpressionResult.Or(shippedFilter, deliveredFilter);
+
+var composedScan = new ScanRequest
+{
+    TableName = "Orders",
+    FilterExpression = composedFilter.Expression,
+    ExpressionAttributeNames = new Dictionary<string, string>(composedFilter.ExpressionAttributeNames),
+    ExpressionAttributeValues = new Dictionary<string, AttributeValue>(composedFilter.ExpressionAttributeValues)
+};
+
+var composedResponse = await client.ScanAsync(composedScan);
+
+Console.WriteLine($"  Found {composedResponse.Items.Count} shipped or delivered orders:");
+foreach (var item in composedResponse.Items)
+{
+    Console.WriteLine($"    - {item["Name"].S} ({item["Status"].S})");
+}
+Console.WriteLine();
+
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)
 {
