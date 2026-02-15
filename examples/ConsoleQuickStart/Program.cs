@@ -159,6 +159,53 @@ Console.WriteLine($"    Notes: {updateResponse.Attributes["Notes"].S}");
 Console.WriteLine($"    Tags removed: {!updateResponse.Attributes.ContainsKey("Tags")}");
 Console.WriteLine();
 
+// === Scenario 6: Conditional Delete ===
+Console.WriteLine("=== Scenario 6: Conditional Delete ===");
+
+// First delete: bob/005 (Status = "Cancelled") — should succeed
+try
+{
+    var deleteRequest1 = new DeleteItemRequest
+    {
+        TableName = "Orders",
+        Key = new Dictionary<string, AttributeValue>
+        {
+            ["PK"] = new AttributeValue { S = "CUSTOMER#bob" },
+            ["SK"] = new AttributeValue { S = "ORDER#005" }
+        }
+    }.WithCondition(conditionBuilder, o => o.Status == "Cancelled");
+
+    await client.DeleteItemAsync(deleteRequest1);
+    Console.WriteLine("  Deleted Bob's cancelled notebook order.");
+}
+catch (ConditionalCheckFailedException)
+{
+    Console.WriteLine("  Delete skipped — Bob's notebook is not cancelled.");
+}
+
+// Second delete: bob/004 (Status = "Shipped") — should fail
+try
+{
+    var deleteRequest2 = new DeleteItemRequest
+    {
+        TableName = "Orders",
+        Key = new Dictionary<string, AttributeValue>
+        {
+            ["PK"] = new AttributeValue { S = "CUSTOMER#bob" },
+            ["SK"] = new AttributeValue { S = "ORDER#004" }
+        }
+    }.WithCondition(conditionBuilder, o => o.Status == "Cancelled");
+
+    await client.DeleteItemAsync(deleteRequest2);
+    Console.WriteLine("  Deleted Bob's cancelled keyboard order.");
+}
+catch (ConditionalCheckFailedException)
+{
+    Console.WriteLine("  Delete skipped — Bob's keyboard is not cancelled.");
+}
+
+Console.WriteLine();
+
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)
 {

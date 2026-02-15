@@ -57,7 +57,11 @@ Priority order follows dependency chain: models → converter → infra → setu
   - SetIfNotExists sets Notes to "No notes provided" (attribute didn't exist)
   - Remove deletes Tags attribute entirely
   - Console output matches expected format from Spec 01
-- [ ] 1.11 Scenario 6: Conditional delete with `ConditionalCheckFailedException` handling (Spec 01 §Scenario 6)
+- [x] 1.11 Scenario 6: Conditional delete with `ConditionalCheckFailedException` handling (Spec 01 §Scenario 6)
+  - Conditional delete working correctly - both attempts tested
+  - First delete (bob/005, Status="Cancelled") succeeded
+  - Second delete (bob/004, Status="Shipped") failed with ConditionalCheckFailedException, gracefully handled
+  - Console output matches expected format from Spec 01
 - [ ] 1.12 Scenario 7: Direct result mapping — anonymous type (Spec 01 §Scenario 7)
 - [ ] 1.13 Scenario 8: Direct result mapping — named DTO with nested path (Spec 01 §Scenario 8)
 - [ ] 1.14 Create `examples/ConsoleQuickStart/README.md` (Spec 01 §README.md Contents)
