@@ -41,8 +41,7 @@ public static class ExpressionGenerators
     /// <param name="complexity">Tier: Simple (single operation), Composite (2-3 operations), Complex (mixed clauses).</param>
     public static Arbitrary<Action<UpdateExpressionBuilder<TestEntity>>> UpdateOperation(Complexity complexity = Complexity.Simple)
     {
-        // TODO: Implementation in task 1.5
-        throw new NotImplementedException("UpdateOperationGenerator - see task 1.5");
+        return UpdateOperationGenerator.Generate(complexity);
     }
 
     /// <summary>
