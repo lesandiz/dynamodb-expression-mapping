@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-02-15
+## [0.1.0] - 2026-02-15
 
 ### Added
 
@@ -53,9 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **[DynamoDbIgnore]** — Exclude property from mapping
 - **[DynamoDbConverter]** — Specify custom converter for property
 
+#### Examples
+- **ConsoleQuickStart** — Console app demonstrating basic library usage with DynamoDB Local
+- **WebApiExample** — ASP.NET Core Web API with repository pattern, Swagger, and multi-table operations
+
 ### Testing
-- **Unit Tests** — 565 tests covering all expression builders, mappers, converters, and configuration
-- **Integration Tests** — 68 end-to-end tests using Testcontainers.DynamoDb against DynamoDB Local
+- **Unit Tests** — 541 tests covering all expression builders, mappers, converters, and configuration
+- **Integration Tests** — 34 end-to-end tests using Testcontainers.DynamoDb against DynamoDB Local
 - **Test Coverage** — 100% specification coverage across 15 specs
 
 ### Dependencies
@@ -63,5 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Microsoft.Extensions.Logging.Abstractions` (>= 8.0.0)
 - `Microsoft.Extensions.DependencyInjection.Abstractions` (>= 8.0.0)
 - `Microsoft.Extensions.Options` (>= 8.0.0)
+- `MinVer` (>= 6.0.0) — build-time only
 
-[1.0.0]: https://github.com/lesandiz/dynamodb-expression-mapping/releases/tag/v1.0.0
+[0.1.0]: https://github.com/lesandiz/dynamodb-expression-mapping/releases/tag/v0.1.0
