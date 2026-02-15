@@ -206,6 +206,60 @@ catch (ConditionalCheckFailedException)
 
 Console.WriteLine();
 
+// === Scenario 7: Result Mapping (Anonymous Type) ===
+Console.WriteLine("=== Scenario 7: Result Mapping (Anonymous) ===");
+
+var anonymousMapper = resultMapper.CreateMapper(o => new { o.Name, o.Status, o.Quantity });
+
+var getRequest7 = new GetItemRequest
+{
+    TableName = "Orders",
+    Key = new Dictionary<string, AttributeValue>
+    {
+        ["PK"] = new AttributeValue { S = "CUSTOMER#alice" },
+        ["SK"] = new AttributeValue { S = "ORDER#002" }
+    }
+};
+
+var getResponse7 = await client.GetItemAsync(getRequest7);
+var mapped7 = anonymousMapper(getResponse7.Item);
+
+Console.WriteLine($"  Name: {mapped7.Name}");
+Console.WriteLine($"  Status: {mapped7.Status}");
+Console.WriteLine($"  Quantity: {mapped7.Quantity}");
+Console.WriteLine();
+
+// === Scenario 8: Result Mapping (Named DTO) ===
+Console.WriteLine("=== Scenario 8: Result Mapping (Named DTO) ===");
+
+var dtoMapper = resultMapper.CreateMapper(o => new OrderSummary
+{
+    OrderId = o.SK,
+    CustomerName = o.Name,
+    Status = o.Status,
+    City = o.ShippingAddress.City
+});
+
+var queryRequest8 = new QueryRequest
+{
+    TableName = "Orders",
+    KeyConditionExpression = "PK = :pk",
+    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+    {
+        [":pk"] = new AttributeValue { S = "CUSTOMER#alice" }
+    }
+};
+
+var queryResponse8 = await client.QueryAsync(queryRequest8);
+
+Console.WriteLine($"  Alice's orders as OrderSummary DTOs:");
+foreach (var item in queryResponse8.Items)
+{
+    var dto = dtoMapper(item);
+    Console.WriteLine($"    - {dto.OrderId}: {dto.CustomerName} [{dto.Status}] ({dto.City})");
+}
+Console.WriteLine();
+
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)
 {

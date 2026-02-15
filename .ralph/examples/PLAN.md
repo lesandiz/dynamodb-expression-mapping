@@ -62,8 +62,10 @@ Priority order follows dependency chain: models → converter → infra → setu
   - First delete (bob/005, Status="Cancelled") succeeded
   - Second delete (bob/004, Status="Shipped") failed with ConditionalCheckFailedException, gracefully handled
   - Console output matches expected format from Spec 01
-- [ ] 1.12 Scenario 7: Direct result mapping — anonymous type (Spec 01 §Scenario 7)
-- [ ] 1.13 Scenario 8: Direct result mapping — named DTO with nested path (Spec 01 §Scenario 8)
+- [x] 1.12 Scenario 7: Direct result mapping — anonymous type (Spec 01 §Scenario 7)
+  - Anonymous type mapping working correctly - maps Name, Status, Quantity from Alice's Book order
+- [x] 1.13 Scenario 8: Direct result mapping — named DTO with nested path (Spec 01 §Scenario 8)
+  - Named DTO mapping working correctly - maps all 3 Alice orders to OrderSummary with nested City extraction
 - [ ] 1.14 Create `examples/ConsoleQuickStart/README.md` (Spec 01 §README.md Contents)
 - [ ] 1.15 End-to-end verification: `docker compose up -d && dotnet run`, compare output to Spec 01 §Expected Console Output
 
