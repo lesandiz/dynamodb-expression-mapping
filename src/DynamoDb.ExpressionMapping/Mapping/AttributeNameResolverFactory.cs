@@ -23,6 +23,23 @@ public sealed class AttributeNameResolverFactory : IAttributeNameResolverFactory
     }
 
     /// <summary>
+    /// Creates a new attribute name resolver factory with pre-registered resolvers.
+    /// Used by the DI container to seed the factory with fluent-configured resolvers.
+    /// </summary>
+    /// <param name="mode">The resolution mode for handling ignored properties.</param>
+    /// <param name="preRegisteredResolvers">Resolvers to pre-register before auto-discovery.</param>
+    internal AttributeNameResolverFactory(
+        NameResolutionMode mode,
+        IReadOnlyDictionary<Type, IAttributeNameResolver> preRegisteredResolvers)
+    {
+        this.mode = mode;
+        foreach (var kvp in preRegisteredResolvers)
+        {
+            cache[kvp.Key] = kvp.Value;
+        }
+    }
+
+    /// <summary>
     /// Gets or creates a resolver for the specified entity type.
     /// </summary>
     /// <param name="entityType">The entity type to resolve attribute names for.</param>

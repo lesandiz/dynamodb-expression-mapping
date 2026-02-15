@@ -135,12 +135,19 @@ Depends on Phase 3.
     - `CombinedExtensions` for projection + filter in one call
     - Full test coverage including happy paths, error cases, null checks, fluent chaining, and alias scope isolation
 
-- [ ] **Spec 11 — Configuration and dependency injection** (root + `Extensions/`)
+- [x] **Spec 11 — Configuration and dependency injection** (root + `Extensions/`)
   - `DynamoDbExpressionConfig` builder pattern
   - `IServiceCollection.AddDynamoDbExpressionMapping()` registration extension
   - Per-entity fluent configuration
   - Manual instantiation fallback (no-DI path)
   - Unit tests per Spec 12
+  - **Status: 23/23 tests passing** — Full implementation complete:
+    - `NullHandlingMode` enum for null value handling configuration
+    - `DynamoDbExpressionConfig` with fluent builder pattern for expression-wide settings
+    - `AttributeNameResolverFactoryOptions` for DI integration with pre-registration support
+    - `ServiceCollectionExtensions` with `AddDynamoDbExpressionMapping()` and `AddDynamoDbEntity<TEntity>()` for streamlined DI setup
+    - Enhanced `AttributeNameResolverFactory` with pre-registration capability for per-entity attribute mappings
+    - Full test coverage including config builder fluent API, DI registration, per-entity configuration chaining, null handling modes, and manual instantiation fallback
 
 ---
 
