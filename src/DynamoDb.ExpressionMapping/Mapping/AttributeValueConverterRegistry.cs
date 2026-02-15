@@ -132,6 +132,22 @@ public sealed class AttributeValueConverterRegistry : IAttributeValueConverterRe
             }
         }
 
+        // Step 5.5: Array type resolution (T[])
+        if (type.IsArray)
+        {
+            var elementType = type.GetElementType()!;
+            var elementConverter = GetConverter(elementType);
+
+            var arrayConverterType = typeof(ArrayConverter<>).MakeGenericType(elementType);
+            var arrayConverter = (IAttributeValueConverter)Activator.CreateInstance(
+                arrayConverterType,
+                elementConverter)!;
+
+            // Cache the composed converter
+            converters[type] = arrayConverter;
+            return arrayConverter;
+        }
+
         // Step 6: Throw MissingConverterException
         throw new MissingConverterException(type);
     }

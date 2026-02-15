@@ -70,12 +70,18 @@ Depends on Phases 1 + 2. Can be parallelized within this phase.
   - Returns `ProjectionExpressionResult` with expression string + `ExpressionAttributeNames`
   - Unit tests per Spec 12
 
-- [ ] **Spec 04 — Direct result mapping** (`ResultMapping/`)
+- [x] **Spec 04 — Direct result mapping** (`ResultMapping/`)
   - `IDirectResultMapper<TSource>` — `Dictionary<string, AttributeValue>` → `TResult`
   - Compiles mapping delegates via expression trees
   - Handles: anonymous types (constructor), named types (setters), records (parameterized ctor)
   - Uses converters (Spec 05) and attribute resolution (Spec 01)
   - Unit tests per Spec 12
+  - **Status: 36/36 tests passing** — Full implementation complete:
+    - `SinglePropertyMappingStrategy` for single-property mappers
+    - `CompositeMappingStrategy` with expression compilation for multi-property scenarios
+    - `DirectResultMapper<TSource>` with caching for compiled delegates
+    - Array converter support (T[]) for all array types
+    - Full test coverage including anonymous types, named types, records, and complex nested projections
 
 - [ ] **Spec 06 — Filter and condition expression builders** (`Expressions/`)
   - `FilterExpressionBuilder<TSource>` and `ConditionExpressionBuilder<TSource>`
