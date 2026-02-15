@@ -128,6 +128,37 @@ foreach (var item in queryResponse.Items)
 }
 Console.WriteLine();
 
+// === Scenario 5: Update Expression ===
+Console.WriteLine("=== Scenario 5: Update Expression ===");
+
+var updateResult = new UpdateExpressionBuilder<Order>(resolverFactory, config.ConverterRegistry)
+    .Set(o => o.Status, "Delivered")
+    .Increment(o => o.Quantity, 1)
+    .SetIfNotExists(o => o.Notes, "No notes provided")
+    .Remove(o => o.Tags)
+    .Build();
+
+var updateRequest = new UpdateItemRequest
+{
+    TableName = "Orders",
+    Key = new Dictionary<string, AttributeValue>
+    {
+        ["PK"] = new AttributeValue { S = "CUSTOMER#alice" },
+        ["SK"] = new AttributeValue { S = "ORDER#001" }
+    },
+    ReturnValues = ReturnValue.ALL_NEW
+}
+.WithUpdate(updateResult);
+
+var updateResponse = await client.UpdateItemAsync(updateRequest);
+
+Console.WriteLine($"  Updated order:");
+Console.WriteLine($"    Status: {updateResponse.Attributes["Status"].S}");
+Console.WriteLine($"    Quantity: {updateResponse.Attributes["Quantity"].N}");
+Console.WriteLine($"    Notes: {updateResponse.Attributes["Notes"].S}");
+Console.WriteLine($"    Tags removed: {!updateResponse.Attributes.ContainsKey("Tags")}");
+Console.WriteLine();
+
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)
 {

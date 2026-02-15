@@ -51,7 +51,12 @@ Priority order follows dependency chain: models → converter → infra → setu
   - Combined filter (Status == "Shipped" OR Status == "Delivered") returns expected 3 orders
   - Console output shows 2 Shipped orders (Alice's Laptop, Bob's Keyboard) + 1 Delivered order (Alice's Mouse)
 - [x] 1.9 Scenario 4: Key condition query with `begins_with` (Spec 01 §Scenario 4)
-- [ ] 1.10 Scenario 5: Update expression — SET, Increment, SetIfNotExists, Remove (Spec 01 §Scenario 5)
+- [x] 1.10 Scenario 5: Update expression — SET, Increment, SetIfNotExists, Remove (Spec 01 §Scenario 5)
+  - UpdateExpressionBuilder working correctly - demonstrates 4 operation types in single expression
+  - SET changes Status to "Delivered", Increment raises Quantity from 1 to 2
+  - SetIfNotExists sets Notes to "No notes provided" (attribute didn't exist)
+  - Remove deletes Tags attribute entirely
+  - Console output matches expected format from Spec 01
 - [ ] 1.11 Scenario 6: Conditional delete with `ConditionalCheckFailedException` handling (Spec 01 §Scenario 6)
 - [ ] 1.12 Scenario 7: Direct result mapping — anonymous type (Spec 01 §Scenario 7)
 - [ ] 1.13 Scenario 8: Direct result mapping — named DTO with nested path (Spec 01 §Scenario 8)
