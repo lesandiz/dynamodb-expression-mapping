@@ -19,7 +19,34 @@ await CreateTableAsync(client);
 // Seed data
 await SeedDataAsync(client);
 
-Console.WriteLine("Setup complete. Table created and seeded.");
+Console.WriteLine("Setup complete. Table created and seeded.\n");
+
+// 1. Build configuration with custom converter
+var config = new DynamoDbExpressionConfig.Builder()
+    .WithConverter(new MoneyConverter())
+    .Build();
+
+// 2. Create resolver factory (auto-discovers types via reflection)
+var resolverFactory = new AttributeNameResolverFactory();
+
+// 3. Create all builders manually
+var projectionBuilder = new ProjectionBuilder<Order>(
+    resolverFactory, config.ReservedKeywords, config.Cache);
+
+var filterBuilder = new FilterExpressionBuilder<Order>(
+    resolverFactory, config.ConverterRegistry);
+
+var conditionBuilder = new ConditionExpressionBuilder<Order>(
+    resolverFactory, config.ConverterRegistry);
+
+var updateBuilder = new UpdateExpressionBuilder<Order>(
+    resolverFactory, config.ConverterRegistry);
+
+var keyConditionBuilder = new KeyConditionExpressionBuilder<Order>(
+    resolverFactory, config.ConverterRegistry);
+
+var resultMapper = new DirectResultMapper<Order>(
+    resolverFactory, config.ConverterRegistry, config.Cache);
 
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)

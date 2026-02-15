@@ -32,7 +32,11 @@ Priority order follows dependency chain: models → converter → infra → setu
   - Table creation implemented with idempotent ResourceInUseException handling
   - 5 orders seeded across 2 customers (Alice: 3 orders, Bob: 2 orders)
   - Successfully tested - table created and data verified
-- [ ] 1.5 `Program.cs` — Manual builder instantiation via `DynamoDbExpressionConfig.Builder` and `AttributeNameResolverFactory` (Spec 01 §Manual Instantiation)
+- [x] 1.5 `Program.cs` — Manual builder instantiation via `DynamoDbExpressionConfig.Builder` and `AttributeNameResolverFactory` (Spec 01 §Manual Instantiation)
+  - Added config builder with MoneyConverter registration
+  - Created AttributeNameResolverFactory for type resolution
+  - Instantiated all 6 builders: ProjectionBuilder, FilterExpressionBuilder, ConditionExpressionBuilder, UpdateExpressionBuilder, KeyConditionExpressionBuilder, DirectResultMapper
+  - All builders ready for use in scenarios
 - [ ] 1.6 Scenario 1: Projection with reserved keywords (Spec 01 §Scenario 1)
 - [ ] 1.7 Scenario 2: Filter expression (Spec 01 §Scenario 2)
 - [ ] 1.8 Scenario 3: Filter composition with `And()`/`Or()` (Spec 01 §Scenario 3)
