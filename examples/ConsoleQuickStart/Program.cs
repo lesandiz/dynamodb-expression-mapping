@@ -4,6 +4,7 @@ using ConsoleQuickStart;
 using DynamoDb.ExpressionMapping;
 using DynamoDb.ExpressionMapping.Attributes;
 using DynamoDb.ExpressionMapping.Expressions;
+using DynamoDb.ExpressionMapping.Extensions;
 using DynamoDb.ExpressionMapping.Mapping;
 using DynamoDb.ExpressionMapping.ResultMapping;
 
@@ -47,6 +48,26 @@ var keyConditionBuilder = new KeyConditionExpressionBuilder<Order>(
 
 var resultMapper = new DirectResultMapper<Order>(
     resolverFactory, config.ConverterRegistry, config.Cache);
+
+// === Scenario 1: Projection with reserved keywords ===
+Console.WriteLine("=== Scenario 1: Projection ===");
+
+var getRequest = new GetItemRequest
+{
+    TableName = "Orders",
+    Key = new Dictionary<string, AttributeValue>
+    {
+        ["PK"] = new AttributeValue { S = "CUSTOMER#alice" },
+        ["SK"] = new AttributeValue { S = "ORDER#001" }
+    }
+}.WithProjection(projectionBuilder, o => new { o.Name, o.Status, o.Quantity });
+
+var getResponse = await client.GetItemAsync(getRequest);
+
+Console.WriteLine($"  Name: {getResponse.Item["Name"].S}");
+Console.WriteLine($"  Status: {getResponse.Item["Status"].S}");
+Console.WriteLine($"  Quantity: {getResponse.Item["Quantity"].N}");
+Console.WriteLine();
 
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)

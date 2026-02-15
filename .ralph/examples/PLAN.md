@@ -37,7 +37,10 @@ Priority order follows dependency chain: models → converter → infra → setu
   - Created AttributeNameResolverFactory for type resolution
   - Instantiated all 6 builders: ProjectionBuilder, FilterExpressionBuilder, ConditionExpressionBuilder, UpdateExpressionBuilder, KeyConditionExpressionBuilder, DirectResultMapper
   - All builders ready for use in scenarios
-- [ ] 1.6 Scenario 1: Projection with reserved keywords (Spec 01 §Scenario 1)
+- [x] 1.6 Scenario 1: Projection with reserved keywords (Spec 01 §Scenario 1)
+  - Projection working correctly - reserved keywords (`status`, `data`, `name`) properly aliased with `#proj_` prefix
+  - Direct result mapping successfully returns `OrderSummary` with all fields populated
+  - Console output matches expected format from Spec 01
 - [ ] 1.7 Scenario 2: Filter expression (Spec 01 §Scenario 2)
 - [ ] 1.8 Scenario 3: Filter composition with `And()`/`Or()` (Spec 01 §Scenario 3)
 - [ ] 1.9 Scenario 4: Key condition query with `begins_with` (Spec 01 §Scenario 4)
