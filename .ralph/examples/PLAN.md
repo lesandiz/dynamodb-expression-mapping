@@ -84,7 +84,8 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - Created all 5 entity model files in Models/ directory: Order, Product, Customer, Address, Money with [DynamoDbAttribute] annotations as per Spec 02 - builds successfully
 - [x] 2.2 Create DTOs: `OrderDto`, `OrderDetailDto`, `CreateOrderRequest`, `UpdateOrderRequest`, `ProductDto`, `CustomerDto`, `PagedResponse<T>` (Spec 02 §DTOs)
   - Created all 7 DTOs in DTOs/ directory: OrderDto, OrderDetailDto, CreateOrderRequest, UpdateOrderRequest, ProductDto, CustomerDto, PagedResponse<T> - builds successfully
-- [ ] 2.3 Create `MoneyConverter` (Spec 02 §Custom Converter)
+- [x] 2.3 Create `MoneyConverter` (Spec 02 §Custom Converter)
+  - Created MoneyConverter.cs in Converters/ directory implementing IAttributeValueConverter<Money> - builds successfully
 
 ### 2B — Infrastructure
 
