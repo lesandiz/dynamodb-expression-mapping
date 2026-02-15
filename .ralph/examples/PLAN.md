@@ -101,7 +101,10 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - Seeds 5 orders (3 for alice, 2 for bob) with CUSTOMER#<id>/ORDER#<id> pattern
   - Seeds 3 products (laptop, keyboard, notebook) with PRODUCT#<id>/METADATA pattern
   - Skips seeding if table already contains data - builds successfully
-- [ ] 2.7 Create `TableDefinitions` — single-table schema with PK/SK (Spec 02 §Single-Table Design)
+- [x] 2.7 Create `TableDefinitions` — single-table schema with PK/SK (Spec 02 §Single-Table Design)
+  - Created Infrastructure/TableDefinitions.cs with centralized constants for TableName, PartitionKey, SortKey
+  - Added KeyPatterns nested static class with Customer, Order, and Product key pattern helpers
+  - Provides methods for PK/SK construction (e.g., Customer.PK("alice") returns "CUSTOMER#alice")
 
 ### 2C — DI & Repository
 
