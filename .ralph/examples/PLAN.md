@@ -119,7 +119,17 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - Build verified - no errors or warnings
 - [x] 2.9 Create `IOrderRepository` interface (Spec 02 §Repository Pattern)
   - Created Repositories/IOrderRepository.cs with all 5 methods per Spec 02 - builds successfully
-- [ ] 2.10 Create `OrderRepository` — inject all typed builders, implement all methods (Spec 02 §Repository Pattern, §REST Endpoints)
+- [x] 2.10 Create `OrderRepository` — inject all typed builders, implement all methods (Spec 02 §Repository Pattern, §REST Endpoints)
+  - Created OrderRepository.cs with full implementation of all 5 methods per Spec 02
+  - Constructor injection of all typed builders: IProjectionBuilder, IFilterExpressionBuilder, IConditionExpressionBuilder, IKeyConditionExpressionBuilder, IDirectResultMapper, IAttributeValueConverterRegistry, IAttributeNameResolverFactory
+  - QueryOrdersAsync: Implements query with key conditions (PK + SK begins_with), optional status filter, projection to OrderDto, pagination support
+  - GetOrderAsync: Implements GetItem with projection to OrderDetailDto including nested path (ShippingAddress.City)
+  - CreateOrderAsync: Implements PutItem with condition guard (PK == null → attribute_not_exists) to prevent overwrites, includes MapToItem helper
+  - UpdateOrderAsync: Implements dynamic UpdateExpression builder based on which fields are present in UpdateOrderRequest
+  - DeleteOrderAsync: Implements DeleteItem with condition guard (PK != null → attribute_exists) to ensure item exists
+  - Pagination helpers: EncodePaginationToken/DecodePaginationToken using Base64-encoded JSON
+  - Registered OrderRepository in Program.cs DI container
+  - Build verified - no errors or warnings
 - [ ] 2.11 Pagination helpers: `EncodePaginationToken` / `DecodePaginationToken` (Spec 02 §Pagination)
 
 ### 2D — Controllers

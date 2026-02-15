@@ -3,6 +3,7 @@ using DynamoDb.ExpressionMapping;
 using WebApiExample.Converters;
 using WebApiExample.Infrastructure;
 using WebApiExample.Models;
+using WebApiExample.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +27,7 @@ builder.Services.AddDynamoDbEntity<Product>();
 builder.Services.AddDynamoDbEntity<Customer>();
 
 // Repository Registration
-// Note: IOrderRepository will be registered in task 2.9
-// builder.Services.AddSingleton<IOrderRepository, OrderRepository>();
+builder.Services.AddSingleton<IOrderRepository, OrderRepository>();
 
 // Database Seeder — runs on startup
 builder.Services.AddHostedService<DynamoDbSeeder>();
