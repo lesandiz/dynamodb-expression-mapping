@@ -12,7 +12,7 @@
     <Authors>DynamoDb.ExpressionMapping Contributors</Authors>
     <Description>A .NET library that converts C# LINQ expression trees into DynamoDB expression strings with direct result mapping</Description>
     <PackageTags>dynamodb;linq;expressions;aws</PackageTags>
-    <RepositoryUrl>https://github.com/yourusername/DynamoDb.ExpressionMapping</RepositoryUrl>
+    <RepositoryUrl>https://github.com/lesandiz/dynamodb-expression-mapping</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 

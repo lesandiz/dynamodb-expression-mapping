@@ -529,5 +529,5 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Links
 
 - [NuGet Package](https://www.nuget.org/packages/DynamoDb.ExpressionMapping/)
-- [GitHub Repository](https://github.com/yourusername/DynamoDb.ExpressionMapping)
-- [Issue Tracker](https://github.com/yourusername/DynamoDb.ExpressionMapping/issues)
+- [GitHub Repository](https://github.com/lesandiz/dynamodb-expression-mapping)
+- [Issue Tracker](https://github.com/lesandiz/dynamodb-expression-mapping/issues)
