@@ -408,7 +408,7 @@ public class KeyConditionTestEntity
     public string SK { get; set; } = string.Empty;
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty; // Reserved keyword
-    public Address Address { get; set; } = new();
+    public NestedAddress Address { get; set; } = new();
 
     [DynamoDbIgnore]
     public string InternalField { get; set; } = string.Empty;
@@ -429,7 +429,7 @@ public class RemappedEntity
 /// <summary>
 /// Nested address type for testing nested paths (should fail validation).
 /// </summary>
-public class Address
+public class NestedAddress
 {
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
