@@ -108,7 +108,15 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
 
 ### 2C — DI & Repository
 
-- [ ] 2.8 `Program.cs` — DI setup: `AddDynamoDbExpressionMapping()`, `AddDynamoDbEntity<T>()`, Swagger, DynamoDB client (Spec 02 §DI Setup)
+- [x] 2.8 `Program.cs` — DI setup: `AddDynamoDbExpressionMapping()`, `AddDynamoDbEntity<T>()`, Swagger, DynamoDB client (Spec 02 §DI Setup)
+  - Created appsettings.json with DynamoDb:ServiceUrl configuration (defaults to http://localhost:8000)
+  - Registered IAmazonDynamoDB singleton with ServiceURL from configuration
+  - Called AddDynamoDbExpressionMapping() with MoneyConverter registration
+  - Called AddDynamoDbEntity<Order>(), AddDynamoDbEntity<Product>(), AddDynamoDbEntity<Customer>()
+  - Registered DynamoDbSeeder as hosted service
+  - Added Swagger, endpoints API explorer, and controllers
+  - Repository registration placeholder added (will be completed in task 2.9)
+  - Build verified - no errors or warnings
 - [ ] 2.9 Create `IOrderRepository` interface (Spec 02 §Repository Pattern)
 - [ ] 2.10 Create `OrderRepository` — inject all typed builders, implement all methods (Spec 02 §Repository Pattern, §REST Endpoints)
 - [ ] 2.11 Pagination helpers: `EncodePaginationToken` / `DecodePaginationToken` (Spec 02 §Pagination)
