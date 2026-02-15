@@ -130,11 +130,20 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - Pagination helpers: EncodePaginationToken/DecodePaginationToken using Base64-encoded JSON
   - Registered OrderRepository in Program.cs DI container
   - Build verified - no errors or warnings
-- [ ] 2.11 Pagination helpers: `EncodePaginationToken` / `DecodePaginationToken` (Spec 02 §Pagination)
+- [x] 2.11 Pagination helpers: `EncodePaginationToken` / `DecodePaginationToken` (Spec 02 §Pagination)
+  - Completed as part of task 2.10 - both helpers implemented in OrderRepository.cs using Base64-encoded JSON
 
 ### 2D — Controllers
 
-- [ ] 2.12 `OrdersController` — GET (list), GET (single), POST, PUT, DELETE (Spec 02 §REST Endpoints)
+- [x] 2.12 `OrdersController` — GET (list), GET (single), POST, PUT, DELETE (Spec 02 §REST Endpoints)
+  - Created Controllers/OrdersController.cs with all 5 REST endpoints per Spec 02
+  - GET /api/orders — query with filters (customerId, status) and pagination support
+  - GET /api/orders/{customerId}/{orderId} — single order with 404 handling
+  - POST /api/orders — create with condition guard, returns 409 on duplicate, 400 on validation failure
+  - PUT /api/orders/{customerId}/{orderId} — partial update with 404 handling, 400 on validation failure
+  - DELETE /api/orders/{customerId}/{orderId} — delete with condition guard, returns 404 if not found
+  - All endpoints include proper validation, error handling, and integration with IOrderRepository
+  - Build verified successfully
 - [ ] 2.13 `ProductsController` — GET with dynamic filter composition (Spec 02 §GET /api/products)
 - [ ] 2.14 `CustomersController` — GET with projection + nested path (Spec 02 §GET /api/customers/{id})
 
