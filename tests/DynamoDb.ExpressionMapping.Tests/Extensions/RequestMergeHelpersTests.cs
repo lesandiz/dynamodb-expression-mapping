@@ -1,8 +1,8 @@
+using System.Reflection;
 using Amazon.DynamoDBv2.Model;
 using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.Extensions;
 using FluentAssertions;
-using System.Reflection;
 
 namespace DynamoDb.ExpressionMapping.Tests.Extensions;
 

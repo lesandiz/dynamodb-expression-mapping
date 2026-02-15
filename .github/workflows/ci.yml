@@ -20,6 +20,8 @@ jobs:
           dotnet-version: 8.0.x
 
       - run: dotnet restore
+      - name: Format check
+        run: dotnet format --verify-no-changes --no-restore
       - run: dotnet build --configuration Release --no-restore
       - name: Test
         run: >

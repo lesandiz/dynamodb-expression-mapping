@@ -1,9 +1,9 @@
+using System.Linq.Expressions;
 using Amazon.DynamoDBv2.Model;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Extensions;
 using FluentAssertions;
 using NSubstitute;
-using System.Linq.Expressions;
 
 namespace DynamoDb.ExpressionMapping.Tests.Extensions;
 
