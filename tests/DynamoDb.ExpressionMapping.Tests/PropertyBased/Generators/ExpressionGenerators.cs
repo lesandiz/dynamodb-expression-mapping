@@ -19,8 +19,7 @@ public static class ExpressionGenerators
     /// <param name="complexity">Tier: Simple (single property), Composite (2-3 properties), Complex (nested + multiple).</param>
     public static Arbitrary<Expression<Func<TestEntity, object>>> ProjectionSelector(Complexity complexity = Complexity.Simple)
     {
-        // TODO: Implementation in task 1.3
-        throw new NotImplementedException("ProjectionSelectorGenerator - see task 1.3");
+        return ProjectionSelectorGenerator.Generate(complexity);
     }
 
     /// <summary>

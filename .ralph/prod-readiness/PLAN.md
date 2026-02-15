@@ -10,7 +10,7 @@
 
 - [x] 1.1 Add `FsCheck.Xunit` (>= 3.x) to test project
 - [x] 1.2 Create `PropertyBased/Generators/` folder and `ExpressionGenerators.cs` entry point
-- [ ] 1.3 Implement `ProjectionSelectorGenerator` (simple, composite, complex tiers)
+- [x] 1.3 Implement `ProjectionSelectorGenerator` (simple, composite, complex tiers)
 - [ ] 1.4 Implement `FilterPredicateGenerator` (simple, composite, complex tiers)
 - [ ] 1.5 Implement `UpdateOperationGenerator` (simple, composite, complex tiers)
 - [ ] 1.6 Create `PropertyTestConfig` with env-var-driven max-test counts (10k local, 1k CI)
