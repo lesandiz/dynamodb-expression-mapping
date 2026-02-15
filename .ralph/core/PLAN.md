@@ -96,11 +96,16 @@ Depends on Phases 1 + 2. Can be parallelized within this phase.
     - `DynamoDbFunctions` static class for DynamoDB-specific functions
     - Full test coverage including comparison ops, logical ops, string methods, null checks, DynamoDB functions, IN operator, nested properties, composition with re-aliasing
 
-- [ ] **Spec 07 — Update expression builder** (`Expressions/`)
+- [x] **Spec 07 — Update expression builder** (`Expressions/`)
   - `UpdateExpressionBuilder<TSource>` with fluent API
   - SET, REMOVE, ADD, DELETE clauses
   - Uses resolver factory (Spec 01), `ExpressionValueEmitter` (Spec 05), alias generator (Spec 08)
   - Unit tests per Spec 12
+  - **Status: 20/20 tests passing** — Full implementation complete:
+    - `UpdateExpressionBuilder<TSource>` with all fluent methods (Set, Increment, Decrement, SetIfNotExists, AppendToList, Remove, Add, Delete)
+    - `UpdateExpressionResult` with scoped aliases (#upd_/:upd_v)
+    - Conflict detection between SET/REMOVE/ADD/DELETE clauses
+    - Full test coverage including all operations, nested properties, conflict validation, reserved keyword handling
 
 - [ ] **Spec 13 — Key condition expression builder** (`Expressions/`)
   - `KeyConditionExpressionBuilder<TSource>` with staged fluent API

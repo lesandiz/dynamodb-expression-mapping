@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute(("A .NET library that converts C# LINQ expression trees into DynamoDB expression st" +
     "rings with direct result mapping"))]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a99841b90068936e408e2dd97d7188ed0fc5ea4f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+961b641957ece065a9f6707d5ab730e826c1e6d8")]
 [assembly: System.Reflection.AssemblyProductAttribute("DynamoDb.ExpressionMapping")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DynamoDb.ExpressionMapping")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
