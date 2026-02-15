@@ -107,11 +107,12 @@ Depends on Phases 1 + 2. Can be parallelized within this phase.
     - Conflict detection between SET/REMOVE/ADD/DELETE clauses
     - Full test coverage including all operations, nested properties, conflict validation, reserved keyword handling
 
-- [ ] **Spec 13 — Key condition expression builder** (`Expressions/`)
+- [x] **Spec 13 — Key condition expression builder** (`Expressions/`)
   - `KeyConditionExpressionBuilder<TSource>` with staged fluent API
   - Partition key equality + optional sort key operators (equals, comparison, between, begins_with)
   - Uses resolver factory (Spec 01), `ExpressionValueEmitter` (Spec 05), alias generator (Spec 08)
   - Unit tests per Spec 12
+  - **Status: 24/24 tests passing** — Full implementation complete
 
 ---
 
