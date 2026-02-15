@@ -8,16 +8,17 @@
 
     <!-- Package metadata -->
     <PackageId>DynamoDb.ExpressionMapping</PackageId>
-    <Version>1.0.0</Version>
     <Authors>DynamoDb.ExpressionMapping Contributors</Authors>
     <Description>A .NET library that converts C# LINQ expression trees into DynamoDB expression strings with direct result mapping</Description>
     <PackageTags>dynamodb;linq;expressions;aws</PackageTags>
     <RepositoryUrl>https://github.com/lesandiz/dynamodb-expression-mapping</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.*" />
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
