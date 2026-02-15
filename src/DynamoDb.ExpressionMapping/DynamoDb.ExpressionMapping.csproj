@@ -8,7 +8,8 @@
 
     <!-- Package metadata -->
     <PackageId>DynamoDb.ExpressionMapping</PackageId>
-    <Authors>DynamoDb.ExpressionMapping Contributors</Authors>
+    <Authors>Lester Sanchez</Authors>
+    <Copyright>Copyright (c) 2026 Lester Sanchez</Copyright>
     <Description>A .NET library that converts C# LINQ expression trees into DynamoDB expression strings with direct result mapping</Description>
     <PackageTags>dynamodb;linq;expressions;aws</PackageTags>
     <RepositoryUrl>https://github.com/lesandiz/dynamodb-expression-mapping</RepositoryUrl>
