@@ -160,7 +160,8 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
 
 ### 2E — Verification
 
-- [ ] 2.15 Create `examples/WebApiExample/README.md` (Spec 02 §README.md Contents)
+- [x] 2.15 Create `examples/WebApiExample/README.md` (Spec 02 §README.md Contents)
+  - Created README.md with all required sections from Spec 02: What's Demonstrated, Prerequisites, Run, API Endpoints, Key Patterns, Clean Up
 - [ ] 2.16 Build verification: `dotnet build`
 - [ ] 2.17 Start services: `docker compose up --build`, wait for healthy
 - [ ] 2.18 Verify `GET /api/orders?customerId=alice` — returns seeded orders with pagination shape (Spec 02 §Query Orders)
