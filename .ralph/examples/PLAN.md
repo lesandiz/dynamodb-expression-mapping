@@ -50,7 +50,7 @@ Priority order follows dependency chain: models → converter → infra → setu
   - Filter composition working correctly - Or() method properly re-aliases independent filters to prevent collisions
   - Combined filter (Status == "Shipped" OR Status == "Delivered") returns expected 3 orders
   - Console output shows 2 Shipped orders (Alice's Laptop, Bob's Keyboard) + 1 Delivered order (Alice's Mouse)
-- [ ] 1.9 Scenario 4: Key condition query with `begins_with` (Spec 01 §Scenario 4)
+- [x] 1.9 Scenario 4: Key condition query with `begins_with` (Spec 01 §Scenario 4)
 - [ ] 1.10 Scenario 5: Update expression — SET, Increment, SetIfNotExists, Remove (Spec 01 §Scenario 5)
 - [ ] 1.11 Scenario 6: Conditional delete with `ConditionalCheckFailedException` handling (Spec 01 §Scenario 6)
 - [ ] 1.12 Scenario 7: Direct result mapping — anonymous type (Spec 01 §Scenario 7)

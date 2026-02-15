@@ -111,6 +111,23 @@ foreach (var item in composedResponse.Items)
 }
 Console.WriteLine();
 
+// === Scenario 4: Key Condition Query ===
+Console.WriteLine("=== Scenario 4: Key Condition Query ===");
+
+var queryRequest = new QueryRequest { TableName = "Orders" }
+    .WithKeyCondition(keyConditionBuilder,
+        b => b.WithPartitionKey(o => o.PK, "CUSTOMER#alice")
+              .WithSortKeyBeginsWith(o => o.SK, "ORDER#"));
+
+var queryResponse = await client.QueryAsync(queryRequest);
+
+Console.WriteLine($"  Alice's orders ({queryResponse.Items.Count}):");
+foreach (var item in queryResponse.Items)
+{
+    Console.WriteLine($"    - {item["SK"].S}: {item["Name"].S}");
+}
+Console.WriteLine();
+
 // Helper methods
 static async Task CreateTableAsync(IAmazonDynamoDB client)
 {
