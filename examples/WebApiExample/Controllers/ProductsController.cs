@@ -82,10 +82,20 @@ public class ProductsController : ControllerBase
         if (composedFilter is not null)
         {
             request.FilterExpression = composedFilter.Expression;
-            request.ExpressionAttributeNames = new Dictionary<string, string>(
-                composedFilter.ExpressionAttributeNames);
-            request.ExpressionAttributeValues = new Dictionary<string, AttributeValue>(
-                composedFilter.ExpressionAttributeValues);
+
+            // Initialize dictionaries if null (projection may have already populated them)
+            request.ExpressionAttributeNames ??= new Dictionary<string, string>();
+            request.ExpressionAttributeValues ??= new Dictionary<string, AttributeValue>();
+
+            // Merge filter attributes with existing attributes from projection
+            foreach (var kvp in composedFilter.ExpressionAttributeNames)
+            {
+                request.ExpressionAttributeNames[kvp.Key] = kvp.Value;
+            }
+            foreach (var kvp in composedFilter.ExpressionAttributeValues)
+            {
+                request.ExpressionAttributeValues[kvp.Key] = kvp.Value;
+            }
         }
 
         // 5. Execute scan and map results

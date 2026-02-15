@@ -162,16 +162,34 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
 
 - [x] 2.15 Create `examples/WebApiExample/README.md` (Spec 02 §README.md Contents)
   - Created README.md with all required sections from Spec 02: What's Demonstrated, Prerequisites, Run, API Endpoints, Key Patterns, Clean Up
-- [ ] 2.16 Build verification: `dotnet build`
-- [ ] 2.17 Start services: `docker compose up --build`, wait for healthy
-- [ ] 2.18 Verify `GET /api/orders?customerId=alice` — returns seeded orders with pagination shape (Spec 02 §Query Orders)
-- [ ] 2.19 Verify `GET /api/orders/alice/001` — returns full order detail with nested `city` field (Spec 02 §Get Single Order)
-- [ ] 2.20 Verify `POST /api/orders` — creates new order, second POST with same keys returns 409 (Spec 02 §Create Order)
-- [ ] 2.21 Verify `PUT /api/orders/alice/001` — partial update changes only specified fields (Spec 02 §Update Order)
-- [ ] 2.22 Verify `DELETE /api/orders/bob/005` — succeeds, second DELETE returns 404 (Spec 02 §Delete Order)
-- [ ] 2.23 Verify `GET /api/products?category=Electronics&activeOnly=true` — returns filtered products (Spec 02 §Get Products)
-- [ ] 2.24 Verify `GET /api/customers/alice` — returns customer with nested `city` (Spec 02 §Get Customer)
-- [ ] 2.25 Verify pagination: `GET /api/orders?customerId=alice&limit=2` — returns `nextToken`, second call with token returns remaining items
+- [x] 2.16 Build verification: `dotnet build`
+  - Build verified successfully - all projects compile without errors
+- [x] 2.17 Start services: `docker compose up --build`, wait for healthy
+  - Services started successfully after fixing docker-compose.yml to use port 8003 (ports 8000-8002 were in use)
+  - Fixed WebApiExample.csproj missing TargetFramework (added net8.0)
+  - Fixed Program.cs to use BasicAWSCredentials for DynamoDB Local authentication
+- [x] 2.18 Verify `GET /api/orders?customerId=alice` — returns seeded orders with pagination shape (Spec 02 §Query Orders)
+  - Verified - returns 3 orders for alice with pagination metadata (items, nextToken null, hasMore false)
+- [x] 2.19 Verify `GET /api/orders/alice/001` — returns full order detail with nested `city` field (Spec 02 §Get Single Order)
+  - Verified - returns order detail with city: "Seattle" from nested ShippingAddress.City path
+- [x] 2.20 Verify `POST /api/orders` — creates new order, second POST with same keys returns 409 (Spec 02 §Create Order)
+  - Verified - first POST returns 201 Created, second POST with same customerId/orderId returns 409 Conflict
+- [x] 2.21 Verify `PUT /api/orders/alice/001` — partial update changes only specified fields (Spec 02 §Update Order)
+  - Verified - partial update (status only) successfully modifies specified field, returns 200 OK
+- [x] 2.22 Verify `DELETE /api/orders/bob/005` — succeeds, second DELETE returns 404 (Spec 02 §Delete Order)
+  - Verified - first DELETE returns 204 No Content, second DELETE returns 404 Not Found
+- [x] 2.23 Verify `GET /api/products?category=Electronics&activeOnly=true` — returns filtered products (Spec 02 §Get Products)
+  - Verified - returns 2 filtered products (laptop, keyboard) after fixing ProductsController filter merging bug (was overwriting projection aliases)
+- [x] 2.24 Verify `GET /api/customers/alice` — returns customer with nested `city` (Spec 02 §Get Customer)
+  - Verified - returns customer with city: "Seattle" from nested Address.City path
+- [x] 2.25 Verify pagination: `GET /api/orders?customerId=alice&limit=2` — returns `nextToken`, second call with token returns remaining items
+  - Verified - first call returns 2 items with nextToken, second call with token returns remaining 1 item with nextToken null
+
+**Fixes Applied During Verification:**
+- Fixed `docker-compose.yml` to use port 8003 for DynamoDB Local (ports 8000-8002 were already in use)
+- Fixed `WebApiExample.csproj` missing `<TargetFramework>net8.0</TargetFramework>` element
+- Fixed `Program.cs` to use `BasicAWSCredentials` for DynamoDB Local authentication (prevents credential resolution errors)
+- Fixed `ProductsController` filter merging bug where composed filter was overwriting projection's ExpressionAttributeNames, causing missing alias errors
 
 ---
 

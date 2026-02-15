@@ -12,7 +12,10 @@ var dynamoDbServiceUrl = builder.Configuration["DynamoDb:ServiceUrl"] ?? "http:/
 builder.Services.AddSingleton<IAmazonDynamoDB>(sp =>
 {
     var config = new AmazonDynamoDBConfig { ServiceURL = dynamoDbServiceUrl };
-    return new AmazonDynamoDBClient(config);
+    // Use basic credentials for local DynamoDB (anonymous access)
+    return new AmazonDynamoDBClient(
+        new Amazon.Runtime.BasicAWSCredentials("fakeAccessKey", "fakeSecretKey"),
+        config);
 });
 
 // Expression Mapping — register custom converters
