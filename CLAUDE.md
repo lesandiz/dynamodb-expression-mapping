@@ -79,3 +79,12 @@ dotnet test --filter "Category=Integration"          # integration tests only (r
 Root namespace: `DynamoDb.ExpressionMapping`
 
 Sub-namespaces: `Attributes`, `Mapping`, `Expressions`, `ResultMapping`, `ReservedKeywords`, `Extensions`, `Exceptions`, `Caching`
+
+## ConsoleQuickStart
+
+Example project demonstrating library usage. DynamoDB Local runs on **port 8002** (port 8000 was in use).
+
+To run:
+```bash
+cd examples/ConsoleQuickStart && docker compose up -d && dotnet run
+```

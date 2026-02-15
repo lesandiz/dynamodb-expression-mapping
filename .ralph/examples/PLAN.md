@@ -27,7 +27,11 @@ Priority order follows dependency chain: models → converter → infra → setu
   - Created MoneyConverter.cs with IAttributeValueConverter<Money> implementation - builds successfully
 - [x] 1.3 Create `docker-compose.yml` for DynamoDB Local (Spec 01 §Infrastructure)
   - Created docker-compose.yml with DynamoDB Local container configuration per spec
-- [ ] 1.4 `Program.cs` — DynamoDB client setup, table creation (idempotent), seed 5 orders (Spec 01 §Manual Instantiation, §Seed Data)
+- [x] 1.4 `Program.cs` — DynamoDB client setup, table creation (idempotent), seed 5 orders (Spec 01 §Manual Instantiation, §Seed Data)
+  - DynamoDB client setup complete (using port 8002 due to port 8000 conflict)
+  - Table creation implemented with idempotent ResourceInUseException handling
+  - 5 orders seeded across 2 customers (Alice: 3 orders, Bob: 2 orders)
+  - Successfully tested - table created and data verified
 - [ ] 1.5 `Program.cs` — Manual builder instantiation via `DynamoDbExpressionConfig.Builder` and `AttributeNameResolverFactory` (Spec 01 §Manual Instantiation)
 - [ ] 1.6 Scenario 1: Projection with reserved keywords (Spec 01 §Scenario 1)
 - [ ] 1.7 Scenario 2: Filter expression (Spec 01 §Scenario 2)

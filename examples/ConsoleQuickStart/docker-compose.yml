@@ -1,7 +1,7 @@
 services:
   dynamodb-local:
     image: amazon/dynamodb-local:latest
-    container_name: dynamodb-local
+    container_name: console-quickstart-dynamodb
     ports:
-      - "8000:8000"
+      - "8002:8000"
     command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
