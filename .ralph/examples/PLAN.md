@@ -21,7 +21,8 @@ Console Quick Start first (validates library API surface with minimal moving par
 
 Priority order follows dependency chain: models → converter → infra → setup → scenarios.
 
-- [ ] 1.1 Create entity models: `Order`, `Address`, `Money`, `OrderSummary` (Spec 01 §Entity Models)
+- [x] 1.1 Create entity models: `Order`, `Address`, `Money`, `OrderSummary` (Spec 01 §Entity Models)
+  - Created Models.cs with all four classes matching Spec 01 requirements
 - [ ] 1.2 Create `MoneyConverter` implementing `IAttributeValueConverter<Money>` (Spec 01 §Custom Converter)
 - [ ] 1.3 Create `docker-compose.yml` for DynamoDB Local (Spec 01 §Infrastructure)
 - [ ] 1.4 `Program.cs` — DynamoDB client setup, table creation (idempotent), seed 5 orders (Spec 01 §Manual Instantiation, §Seed Data)
