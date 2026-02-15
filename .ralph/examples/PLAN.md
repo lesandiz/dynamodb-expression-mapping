@@ -80,7 +80,8 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
 
 ### 2A — Models, DTOs, Converter
 
-- [ ] 2.1 Create entity models: `Order`, `Product`, `Customer`, `Address`, `Money` with `[DynamoDbAttribute]` annotations (Spec 02 §Entity Models)
+- [x] 2.1 Create entity models: `Order`, `Product`, `Customer`, `Address`, `Money` with `[DynamoDbAttribute]` annotations (Spec 02 §Entity Models)
+  - Created all 5 entity model files in Models/ directory: Order, Product, Customer, Address, Money with [DynamoDbAttribute] annotations as per Spec 02 - builds successfully
 - [ ] 2.2 Create DTOs: `OrderDto`, `OrderDetailDto`, `CreateOrderRequest`, `UpdateOrderRequest`, `ProductDto`, `CustomerDto`, `PagedResponse<T>` (Spec 02 §DTOs)
 - [ ] 2.3 Create `MoneyConverter` (Spec 02 §Custom Converter)
 
