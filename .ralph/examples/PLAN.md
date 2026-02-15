@@ -93,7 +93,14 @@ Priority order: models/DTOs → converter → infra → DI → repository → co
   - Created docker-compose.yml with DynamoDB Local on port 8000 and API service on port 5000 with health checks and service dependencies per Spec 02
 - [x] 2.5 Create `Dockerfile` — multi-stage .NET build (Spec 02 §Infrastructure)
   - Created multi-stage Dockerfile (SDK 8.0 → ASP.NET 8.0 runtime) with project-specific publish path - builds successfully
-- [ ] 2.6 Create `DynamoDbSeeder` (`IHostedService`) — table creation + seed data (Spec 02 §Infrastructure, §DynamoDbSeeder)
+- [x] 2.6 Create `DynamoDbSeeder` (`IHostedService`) — table creation + seed data (Spec 02 §Infrastructure, §DynamoDbSeeder)
+  - Created Infrastructure/DynamoDbSeeder.cs implementing IHostedService
+  - Idempotent table creation for AppData with PK (Hash) and SK (Range) keys
+  - WaitForTableActiveAsync ensures table is ready before seeding
+  - Seeds 2 customers (alice, bob) with CUSTOMER#<id>/PROFILE pattern
+  - Seeds 5 orders (3 for alice, 2 for bob) with CUSTOMER#<id>/ORDER#<id> pattern
+  - Seeds 3 products (laptop, keyboard, notebook) with PRODUCT#<id>/METADATA pattern
+  - Skips seeding if table already contains data - builds successfully
 - [ ] 2.7 Create `TableDefinitions` — single-table schema with PK/SK (Spec 02 §Single-Table Design)
 
 ### 2C — DI & Repository
