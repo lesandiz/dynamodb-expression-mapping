@@ -18,6 +18,8 @@ public class TestEntity
     // Reserved keyword for testing
     public string Name { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+    public HashSet<string> EnabledFeatures { get; set; } = new();
+    public int Score { get; set; }
 }
 
 /// <summary>
@@ -49,3 +51,4 @@ public class OrderSummary
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
 }
+
