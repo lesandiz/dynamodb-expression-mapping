@@ -71,7 +71,24 @@
   3. Need to align workload key generation with InitializeTableAsync seeded data (customer IDs: CUST001-CUST100)
 - Infrastructure is solid; workload implementations need refinement for realistic operations
 
-- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria (infrastructure fixed, workload logic needs refinement)
+
+**WORKLOAD KEY GENERATION FIX (Task 2.11b)**:
+- Fixed all workloads to use seeded customer IDs (CUST0001-CUST0100) and order IDs (ORD000000-ORD000999)
+- Updated files: UpdateWorkload.cs, ProjectionWorkload.cs, KeyConditionWorkload.cs
+- Verified BuildMixedClauses doesn't have conflicting operations within single execution
+- 30-second soak test results: 126,933 ops, 594.8 ops/sec, 25.1% failure rate (31,900 failures)
+- Error breakdown: 62.2% DynamoDB, 25.3% InvalidOperation, 12.5% ExpressionMapping
+
+**CRITICAL BUG DISCOVERED (Task 2.11b - Thread-Safety Issue)**:
+- Error: `InvalidUpdateException: Property 'Notes' has conflicting update operations`
+- Root cause: All workloads use shared expression builder instance fields (e.g., `_updateBuilder`)
+- Multiple concurrent workers call methods on same builder instance, accumulating operations from different threads
+- Original "conflicting operations" diagnosis was incorrect - it's a concurrency bug in builder design, not workload logic
+- **Soak test is working correctly** - it successfully identified a real thread-safety issue in the library!
+- **RESOLUTION NEEDED**: Expression builders must either be thread-safe OR instantiated per-operation instead of shared
+- **Task 2.11 BLOCKED** until this architectural issue is resolved
+
+- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria (**BLOCKED** - thread-safety issue in expression builders)
 - [x] 2.11a Fix soak test infrastructure issues:
   - [x] Add configurable delay between operations in WorkerLoop (1-10ms)
   - [x] Implement actual DynamoDB operations in all workloads (Query, Scan, GetItem, UpdateItem, PutItem)
@@ -79,6 +96,12 @@
   - [x] Read actual cache statistics from expression builder caches
   - [x] Implement table creation and data seeding in InitializeTableAsync
   - [x] Add better error handling and logging to identify failure patterns
+- [x] 2.11b Fix workload key generation to use seeded data:
+  - [x] UpdateWorkload.cs: Changed to use CUST0001-CUST0100 and ORD000000-ORD000999
+  - [x] ProjectionWorkload.cs: Changed to use CUST0001-CUST0100
+  - [x] KeyConditionWorkload.cs: Fixed all 5 methods to use seeded data
+  - [x] Verified BuildMixedClauses has no conflicting operations within single execution
+  - [x] Ran 30-second soak test - discovered thread-safety issue (see above)
 - [ ] 2.12 Commit phase 2
 
 **Exit criteria**: Zero failures across 30min/16 workers. Memory delta < 20%. Cache entry count stabilises.

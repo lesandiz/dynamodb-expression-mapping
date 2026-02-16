@@ -155,8 +155,13 @@ public class UpdateWorkload : IWorkload
         IReadOnlyDictionary<string, AttributeValue> expressionAttributeValues,
         CancellationToken cancellationToken)
     {
-        var customerId = $"CUSTOMER#{Guid.NewGuid()}";
-        var orderId = $"ORDER#{Guid.NewGuid()}";
+        // Use seeded customer IDs (CUST0001-CUST0100)
+        var customerNum = _random.Next(1, 101);
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
+
+        // Use seeded order IDs (ORD000000-ORD000999)
+        var orderNum = _random.Next(0, 1000);
+        var orderId = $"ORDER#ORD{orderNum:D6}";
 
         var request = new UpdateItemRequest
         {
