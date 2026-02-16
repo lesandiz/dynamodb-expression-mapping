@@ -50,7 +50,35 @@
 - [x] 2.8 Implement CLI interface with `--duration`, `--concurrency`, `--workload` args
 - [x] 2.9 Implement Spectre.Console reporting output and exit-code logic
 - [x] 2.10 Write concurrency-specific test scenarios (PR-02.7 items 1–5)
-- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria
+
+**BUG FOUND (Task 2.11a - infrastructure fixes complete)**:
+- Initial 30min soak test failed with 574,673 operation failures and 13,119% memory growth
+- All 6 infrastructure sub-tasks completed:
+  1. Delays added (1-6ms random delay in WorkerLoop between operations)
+  2. DynamoDB operations implemented in all workloads (Query, Scan, GetItem, UpdateItem, PutItem)
+  3. Latency samples bounded (10k max retention in MetricsCollector)
+  4. Cache statistics read from actual cache (ProjectionBuilder, FilterBuilder, UpdateBuilder, KeyConditionBuilder)
+  5. Table creation/seeding implemented (creates table with PK/SK schema, seeds 100 test items)
+  6. Error handling added (categorized exceptions: DynamoDB, Argument, Expression, Concurrency, Unknown)
+
+**NEW BUGS FOUND (Task 2.11 - 30-second test run after infrastructure fixes)**:
+- Test ran successfully with corrected table schema (PK="CustomerId", SK="OrderId")
+- Workload logic issues discovered:
+  1. UpdateWorkload.BuildMixedClauses() has conflicting operations: SET Notes + REMOVE Notes on same property
+  2. Workloads attempt operations on non-existent items - 62.6% DynamoDB errors (ResourceNotFoundException)
+     - Root cause: Workloads generate random GUIDs for keys instead of using seeded data
+     - Example: FilterWorkload builds valid filter but queries non-existent customerIds
+  3. Need to align workload key generation with InitializeTableAsync seeded data (customer IDs: CUST001-CUST100)
+- Infrastructure is solid; workload implementations need refinement for realistic operations
+
+- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria (infrastructure fixed, workload logic needs refinement)
+- [x] 2.11a Fix soak test infrastructure issues:
+  - [x] Add configurable delay between operations in WorkerLoop (1-10ms)
+  - [x] Implement actual DynamoDB operations in all workloads (Query, Scan, GetItem, UpdateItem, PutItem)
+  - [x] Add bounded retention for latency samples (rolling window or periodic clear)
+  - [x] Read actual cache statistics from expression builder caches
+  - [x] Implement table creation and data seeding in InitializeTableAsync
+  - [x] Add better error handling and logging to identify failure patterns
 - [ ] 2.12 Commit phase 2
 
 **Exit criteria**: Zero failures across 30min/16 workers. Memory delta < 20%. Cache entry count stabilises.

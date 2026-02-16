@@ -28,7 +28,11 @@ public sealed class MetricsCollector : IDisposable
     // Thread-safe counters
     private long _totalOperations;
     private long _failedOperations;
-    private readonly ConcurrentBag<double> _latencySamples = new();
+    private readonly ConcurrentQueue<double> _latencySamples = new();
+    private const int MaxLatencySamples = 10_000;
+
+    // Error categorization
+    private readonly ConcurrentDictionary<string, long> _errorsByCategory = new();
 
     // GC baseline tracking
     private int _baselineGen0;
@@ -67,7 +71,13 @@ public sealed class MetricsCollector : IDisposable
         Interlocked.Increment(ref _totalOperations);
         _operationsTotal.Add(1);
         _operationDuration.Record(durationMs);
-        _latencySamples.Add(durationMs);
+
+        // Bounded retention: keep last 10,000 samples for percentile calculation
+        _latencySamples.Enqueue(durationMs);
+        if (_latencySamples.Count > MaxLatencySamples)
+        {
+            _latencySamples.TryDequeue(out _);
+        }
     }
 
     /// <summary>
@@ -77,6 +87,24 @@ public sealed class MetricsCollector : IDisposable
     {
         Interlocked.Increment(ref _failedOperations);
         _operationsFailed.Add(1);
+    }
+
+    /// <summary>
+    /// Records a failed operation with error category.
+    /// </summary>
+    public void RecordFailure(string errorCategory)
+    {
+        Interlocked.Increment(ref _failedOperations);
+        _operationsFailed.Add(1);
+        _errorsByCategory.AddOrUpdate(errorCategory, 1, (_, count) => count + 1);
+    }
+
+    /// <summary>
+    /// Gets error counts by category.
+    /// </summary>
+    public IReadOnlyDictionary<string, long> GetErrorsByCategory()
+    {
+        return new Dictionary<string, long>(_errorsByCategory);
     }
 
     /// <summary>
@@ -152,7 +180,8 @@ public sealed class MetricsCollector : IDisposable
             CacheEntries: _cacheEntries,
             CacheHitRatio: CalculateCacheHitRatio(),
             GC: totalGc,
-            Latency: CalculateLatencyPercentiles(latencies)
+            Latency: CalculateLatencyPercentiles(latencies),
+            ErrorsByCategory: GetErrorsByCategory()
         );
     }
 
@@ -201,7 +230,8 @@ public record MetricsSnapshot(
     long CacheEntries,
     double CacheHitRatio,
     GCStats GC,
-    LatencyStats Latency
+    LatencyStats Latency,
+    IReadOnlyDictionary<string, long>? ErrorsByCategory = null
 );
 
 public record GCStats(int Gen0, int Gen1, int Gen2);

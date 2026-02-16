@@ -16,6 +16,7 @@ public class CacheStressWorkload : IWorkload
     private readonly FilterExpressionBuilder<SoakOrder> _filterBuilder;
     private readonly UpdateExpressionBuilder<SoakOrder> _updateBuilder;
     private readonly MetricsCollector _metricsCollector;
+    private readonly SharedDependencies _sharedDependencies;
     private readonly Faker _faker;
     private readonly Random _random;
 
@@ -26,12 +27,12 @@ public class CacheStressWorkload : IWorkload
         SharedDependencies sharedDependencies)
     {
         ArgumentNullException.ThrowIfNull(sharedDependencies);
-        
+        _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
 
-        _projectionBuilder = new ProjectionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, null, null);
+        _sharedDependencies = sharedDependencies;
+        _projectionBuilder = new ProjectionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, null, sharedDependencies.ExpressionCache);
         _filterBuilder = new FilterExpressionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
         _updateBuilder = new UpdateExpressionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
-        _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
 
         _faker = new Faker();
         _random = new Random(Guid.NewGuid().GetHashCode());
@@ -122,10 +123,14 @@ public class CacheStressWorkload : IWorkload
 
     private void UpdateCacheStats()
     {
+        var stats = _sharedDependencies.GetCacheStatistics();
+        var totalHits = stats.ProjectionHits + stats.MapperHits + stats.FilterHits;
+        var totalMisses = stats.ProjectionMisses + stats.MapperMisses + stats.FilterMisses;
+
         _metricsCollector.UpdateCacheStats(
-            entries: _random.Next(100, 500),
-            hits: _random.Next(100, 1000),  // Lower hit ratio for cache stress
-            misses: _random.Next(500, 2000) // Higher miss ratio
+            entries: stats.TotalEntries,
+            hits: totalHits,
+            misses: totalMisses
         );
     }
 }

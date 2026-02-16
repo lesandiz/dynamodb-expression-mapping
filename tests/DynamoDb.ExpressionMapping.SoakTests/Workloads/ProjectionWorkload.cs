@@ -16,6 +16,7 @@ public class ProjectionWorkload : IWorkload
     private readonly ProjectionBuilder<SoakOrder> _projectionBuilder;
     private readonly IDirectResultMapper<SoakOrder> _resultMapper;
     private readonly MetricsCollector _metricsCollector;
+    private readonly SharedDependencies _sharedDependencies;
     private readonly Faker<SoakOrder> _faker;
     private readonly Random _random;
 
@@ -30,8 +31,9 @@ public class ProjectionWorkload : IWorkload
         _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
         ArgumentNullException.ThrowIfNull(sharedDependencies);
 
-        _projectionBuilder = new ProjectionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, null, null);
-        _resultMapper = new DirectResultMapper<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
+        _sharedDependencies = sharedDependencies;
+        _projectionBuilder = new ProjectionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, null, sharedDependencies.ExpressionCache);
+        _resultMapper = new DirectResultMapper<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry, sharedDependencies.ExpressionCache);
         _random = new Random(Guid.NewGuid().GetHashCode());
 
         _faker = new Faker<SoakOrder>()
@@ -153,15 +155,47 @@ public class ProjectionWorkload : IWorkload
         IReadOnlyDictionary<string, string> expressionAttributeNames,
         CancellationToken cancellationToken)
     {
-        await Task.Delay(_random.Next(1, 3), cancellationToken);
+        var customerId = $"CUSTOMER#{Guid.NewGuid()}";
+
+        var expressionNames = new Dictionary<string, string>(expressionAttributeNames)
+        {
+            ["#pk"] = "PK"
+        };
+
+        var expressionValues = new Dictionary<string, AttributeValue>
+        {
+            [":pk"] = new AttributeValue { S = customerId }
+        };
+
+        var request = new QueryRequest
+        {
+            TableName = _tableName,
+            KeyConditionExpression = "#pk = :pk",
+            ExpressionAttributeNames = expressionNames,
+            ExpressionAttributeValues = expressionValues,
+            ProjectionExpression = projectionExpression,
+            Limit = 10
+        };
+
+        var response = await _dynamoDb.QueryAsync(request, cancellationToken);
+
+        // Verify response received
+        if (response == null)
+        {
+            throw new InvalidOperationException("DynamoDB Query returned null response");
+        }
     }
 
     private void UpdateCacheStats()
     {
+        var stats = _sharedDependencies.GetCacheStatistics();
+        var totalHits = stats.ProjectionHits + stats.MapperHits + stats.FilterHits;
+        var totalMisses = stats.ProjectionMisses + stats.MapperMisses + stats.FilterMisses;
+
         _metricsCollector.UpdateCacheStats(
-            entries: _random.Next(100, 500),
-            hits: _random.Next(1000, 10000),
-            misses: _random.Next(10, 500)
+            entries: stats.TotalEntries,
+            hits: totalHits,
+            misses: totalMisses
         );
     }
 }
