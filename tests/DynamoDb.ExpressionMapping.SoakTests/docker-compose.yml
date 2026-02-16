@@ -1,0 +1,7 @@
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: soak-tests-dynamodb
+    ports:
+      - "8004:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
