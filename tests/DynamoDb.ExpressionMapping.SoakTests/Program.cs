@@ -1,3 +1,4 @@
+using DynamoDb.ExpressionMapping.SoakTests.ConcurrencyScenarios;
 using DynamoDb.ExpressionMapping.SoakTests.Metrics;
 using Spectre.Console;
 
@@ -15,6 +16,21 @@ internal class Program
         {
             await MetricsDemo.RunDemo();
             return 0;
+        }
+
+        // Run concurrency scenarios if requested
+        if (args.Length > 0 && args[0] == "--concurrency-scenarios")
+        {
+            var concurrency = 8; // Default
+            if (args.Length > 1 && int.TryParse(args[1], out var parsedConcurrency))
+            {
+                concurrency = parsedConcurrency;
+            }
+
+            var sharedDeps = new SharedDependencies();
+            var scenarioRunner = new ConcurrencyScenarioRunner(sharedDeps);
+            var scenarioResult = await scenarioRunner.RunAllAsync(concurrency);
+            return scenarioResult.AllPassed ? 0 : 1;
         }
 
         // Parse CLI arguments
