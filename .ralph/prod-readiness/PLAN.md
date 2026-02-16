@@ -26,11 +26,13 @@ All property-based tests implemented and passing at 10k iterations. Critical bug
 
 ## Phase 3 — Mutation Testing (PR-03)
 
+**STATUS: BLOCKED (Turn 3)** — Stryker 4.12.0 setup issue. See task 3.3 for details.
+
 **Priority: High** — validates that the existing + phase-1 test suite actually catches bugs.
 
-- [ ] 3.1 Install `dotnet-stryker` as local tool
-- [ ] 3.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
-- [ ] 3.3 Run initial full mutation analysis
+- [x] 3.1 Install `dotnet-stryker` as local tool
+- [x] 3.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
+- [ ] 3.3 Run initial full mutation analysis — **BLOCKED: Stryker 4.12.0 fails with "No project found" after successful project analysis. Attempted fixes: traditional .sln file creation, .NET 8 SDK via global.json, CLI-only configuration, project path corrections. Root cause: Stryker analyzes both projects successfully but then reports "Analyzing 0 projects". Awaiting human decision on: (1) alternative mutation testing tool, (2) Stryker version change, or (3) different project structure.**
 - [ ] 3.4 Analyse Priority 1 subsystems (expression builders) — triage surviving mutants (PR-03.4)
 - [ ] 3.5 Write tests to kill surviving non-equivalent mutants in expression builders
 - [ ] 3.6 Analyse Priority 2 subsystems (type conversion) — triage and fix

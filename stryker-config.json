@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-net/master/src/Stryker.Core/Stryker.Core/stryker-config.schema.json",
   "stryker-config": {
-    "project": "DynamoDb.ExpressionMapping.csproj",
+    "project": "src/DynamoDb.ExpressionMapping/DynamoDb.ExpressionMapping.csproj",
     "test-projects": [
       "tests/DynamoDb.ExpressionMapping.Tests/DynamoDb.ExpressionMapping.Tests.csproj"
     ],
@@ -20,6 +20,6 @@
       "string"
     ],
     "concurrency": 4,
-    "solution": "DynamoDb.ExpressionMapping.slnx"
+    "solution": "DynamoDb.ExpressionMapping.sln"
   }
 }
