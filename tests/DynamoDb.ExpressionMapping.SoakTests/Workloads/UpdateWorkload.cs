@@ -119,17 +119,18 @@ public class UpdateWorkload : IWorkload
     }
 
     /// <summary>
-    /// Mixed clauses: SET, ADD, REMOVE in one expression.
+    /// Mixed clauses: SET and ADD in one expression.
     /// </summary>
     private async Task BuildMixedClauses(CancellationToken cancellationToken)
     {
         var newStatus = _faker.PickRandom("Shipped", "Delivered");
         var incrementQty = _random.Next(1, 3);
+        var newNotes = _faker.Lorem.Sentence();
 
         var result = _updateBuilder
             .Set(o => o.Status, newStatus)
+            .Set(o => o.Notes, newNotes)
             .Increment(o => o.Quantity, incrementQty)
-            .Remove(o => o.Notes)
             .Build();
 
         await ExecuteUpdateAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
