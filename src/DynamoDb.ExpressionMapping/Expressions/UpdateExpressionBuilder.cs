@@ -65,6 +65,13 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
 
         var propertyPath = ExtractPropertyPath(property);
         var attributeName = ResolveAttributeName(propertyPath);
+
+        // Remove old value placeholder if this property was already set (last-wins semantics)
+        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        {
+            RemoveOldValuePlaceholders(existingOp.Expression);
+        }
+
         var valueAlias = aliasGen.NextValue();
 
         values[valueAlias] = valueEmitter.Emit(value!, propertyPath.PropertyInfo);
@@ -88,6 +95,13 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
 
         var propertyPath = ExtractPropertyPath(property);
         var attributeName = ResolveAttributeName(propertyPath);
+
+        // Remove old value placeholder if this property was already set (last-wins semantics)
+        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        {
+            RemoveOldValuePlaceholders(existingOp.Expression);
+        }
+
         var valueAlias = aliasGen.NextValue();
 
         values[valueAlias] = valueEmitter.Emit(amount, propertyPath.PropertyInfo);
@@ -111,6 +125,13 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
 
         var propertyPath = ExtractPropertyPath(property);
         var attributeName = ResolveAttributeName(propertyPath);
+
+        // Remove old value placeholder if this property was already set (last-wins semantics)
+        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        {
+            RemoveOldValuePlaceholders(existingOp.Expression);
+        }
+
         var valueAlias = aliasGen.NextValue();
 
         values[valueAlias] = valueEmitter.Emit(amount, propertyPath.PropertyInfo);
@@ -134,6 +155,13 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
 
         var propertyPath = ExtractPropertyPath(property);
         var attributeName = ResolveAttributeName(propertyPath);
+
+        // Remove old value placeholder if this property was already set (last-wins semantics)
+        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        {
+            RemoveOldValuePlaceholders(existingOp.Expression);
+        }
+
         var valueAlias = aliasGen.NextValue();
 
         values[valueAlias] = valueEmitter.Emit(value!, propertyPath.PropertyInfo);
@@ -157,6 +185,13 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
 
         var propertyPath = ExtractPropertyPath(property);
         var attributeName = ResolveAttributeName(propertyPath);
+
+        // Remove old value placeholder if this property was already set (last-wins semantics)
+        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        {
+            RemoveOldValuePlaceholders(existingOp.Expression);
+        }
+
         var valueAlias = aliasGen.NextValue();
 
         this.values[valueAlias] = valueEmitter.Emit(values, propertyPath.PropertyInfo);
@@ -194,6 +229,13 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
 
         var propertyPath = ExtractPropertyPath(property);
         var attributeName = ResolveAttributeName(propertyPath);
+
+        // Remove old value placeholder if this property was already set (last-wins semantics)
+        if (addOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        {
+            RemoveOldValuePlaceholders(existingOp.Expression);
+        }
+
         var valueAlias = aliasGen.NextValue();
 
         values[valueAlias] = valueEmitter.Emit(value!, propertyPath.PropertyInfo);
@@ -217,6 +259,13 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
 
         var propertyPath = ExtractPropertyPath(property);
         var attributeName = ResolveAttributeName(propertyPath);
+
+        // Remove old value placeholder if this property was already set (last-wins semantics)
+        if (deleteOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        {
+            RemoveOldValuePlaceholders(existingOp.Expression);
+        }
+
         var valueAlias = aliasGen.NextValue();
 
         this.values[valueAlias] = valueEmitter.Emit(values, propertyPath.PropertyInfo);
@@ -401,6 +450,36 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
             throw new InvalidUpdateException(
                 $"Property '{propertyPath}' has conflicting update operations",
                 propertyPath);
+        }
+    }
+
+    /// <summary>
+    /// Removes old value placeholders from the values dictionary when overwriting an existing operation.
+    /// This prevents orphaned placeholders that are created but not used in the final expression.
+    /// </summary>
+    private void RemoveOldValuePlaceholders(string expression)
+    {
+        if (string.IsNullOrEmpty(expression))
+            return;
+
+        // Extract all value placeholders from the expression (e.g., :upd_v0, :upd_v1)
+        var valuePlaceholderPattern = System.Text.RegularExpressions.Regex.Matches(
+            expression,
+            @":upd_v\d+");
+
+        foreach (System.Text.RegularExpressions.Match match in valuePlaceholderPattern)
+        {
+            values.Remove(match.Value);
+        }
+
+        // Extract all name aliases from the expression (e.g., #upd_0, #upd_1)
+        var nameAliasPattern = System.Text.RegularExpressions.Regex.Matches(
+            expression,
+            @"#upd_\d+");
+
+        foreach (System.Text.RegularExpressions.Match match in nameAliasPattern)
+        {
+            names.Remove(match.Value);
         }
     }
 
