@@ -119,9 +119,9 @@ public class FilterWorkload : IWorkload
         var composed = FilterExpressionResult.And(filter1, filter2);
 
         // Verify no alias collisions (basic check)
-        if (composed.ExpressionAttributeNames.Count == 0 || composed.ExpressionAttributeValues.Count == 0)
+        if (string.IsNullOrEmpty(composed.Expression) || composed.ExpressionAttributeValues.Count == 0)
         {
-            throw new InvalidOperationException("Filter composition produced empty attribute dictionaries");
+            throw new InvalidOperationException("Filter composition produced invalid result");
         }
 
         await ExecuteScanAsync(composed.Expression, composed.ExpressionAttributeNames, composed.ExpressionAttributeValues);
@@ -140,9 +140,9 @@ public class FilterWorkload : IWorkload
 
         var composed = FilterExpressionResult.Or(filter1, filter2);
 
-        if (composed.ExpressionAttributeNames.Count == 0)
+        if (string.IsNullOrEmpty(composed.Expression) || composed.ExpressionAttributeValues.Count == 0)
         {
-            throw new InvalidOperationException("Filter composition produced empty attribute name dictionary");
+            throw new InvalidOperationException("Filter composition produced invalid result");
         }
 
         await ExecuteScanAsync(composed.Expression, composed.ExpressionAttributeNames, composed.ExpressionAttributeValues);
