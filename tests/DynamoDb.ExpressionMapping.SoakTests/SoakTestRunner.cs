@@ -208,6 +208,7 @@ public sealed class SoakTestRunner
                 var errorType = dbEx.GetType().Name;
                 Debug.WriteLine($"[Worker {workerId}] DynamoDB error ({errorType}): {dbEx.Message}");
                 Debug.WriteLine($"[Worker {workerId}] Stack trace: {dbEx.StackTrace}");
+                LogErrorToFile(workerId, dbEx);
 
                 // Log to console for critical errors (throttling, service unavailable)
                 if (dbEx.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
@@ -449,7 +450,7 @@ Stack Trace:
                 ["ShippingStreet"] = new AttributeValue { S = faker.Address.StreetAddress() },
                 ["ShippingCity"] = new AttributeValue { S = faker.Address.City() },
                 ["ShippingPostCode"] = new AttributeValue { S = faker.Address.ZipCode() },
-                ["Tags"] = new AttributeValue { SS = Enumerable.Range(0, faker.Random.Int(1, 5)).Select(_ => faker.Commerce.Categories(1)[0]).Distinct().ToList() },
+                ["Tags"] = new AttributeValue { L = Enumerable.Range(0, faker.Random.Int(1, 5)).Select(_ => new AttributeValue { S = faker.Commerce.Categories(1)[0] }).Distinct(new AttributeValueComparer()).ToList() },
                 ["CreatedAt"] = new AttributeValue { S = createdAt.ToString("O") },
                 ["IsGift"] = new AttributeValue { BOOL = faker.Random.Bool() },
                 ["Priority"] = new AttributeValue { N = ((int)priority).ToString() }
@@ -638,3 +639,21 @@ public record SoakTestResult(
     MemoryAnalysis MemoryAnalysis,
     IReadOnlyList<string> Failures
 );
+
+/// <summary>
+/// Comparer for AttributeValue to support Distinct() on List items.
+/// </summary>
+internal class AttributeValueComparer : IEqualityComparer<AttributeValue>
+{
+    public bool Equals(AttributeValue? x, AttributeValue? y)
+    {
+        if (x == null && y == null) return true;
+        if (x == null || y == null) return false;
+        return x.S == y.S;
+    }
+
+    public int GetHashCode(AttributeValue obj)
+    {
+        return obj.S?.GetHashCode() ?? 0;
+    }
+}
