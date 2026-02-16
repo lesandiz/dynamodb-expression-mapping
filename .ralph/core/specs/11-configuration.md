@@ -158,11 +158,15 @@ public static class ServiceCollectionExtensions
             new AttributeNameResolverFactory(config.NameResolutionMode));
 
         // Open generic registrations — container creates one instance per TSource.
-        // Individual resolvers are still available for direct injection if needed.
+        // All expression builders are singleton-safe: they hold only immutable dependencies
+        // and create mutable state locally per method call (or per fluent chain via clone-on-use
+        // for UpdateExpressionBuilder — see ADR-001).
         services.AddSingleton(typeof(IAttributeNameResolver<>), typeof(AttributeNameResolver<>));
         services.AddSingleton(typeof(IProjectionBuilder<>), typeof(ProjectionBuilder<>));
         services.AddSingleton(typeof(IFilterExpressionBuilder<>), typeof(FilterExpressionBuilder<>));
         services.AddSingleton(typeof(IConditionExpressionBuilder<>), typeof(ConditionExpressionBuilder<>));
+        services.AddSingleton(typeof(IUpdateExpressionBuilder<>), typeof(UpdateExpressionBuilder<>));
+        services.AddSingleton(typeof(IKeyConditionExpressionBuilder<>), typeof(KeyConditionExpressionBuilder<>));
         services.AddSingleton(typeof(IDirectResultMapper<>), typeof(DirectResultMapper<>));
 
         return services;

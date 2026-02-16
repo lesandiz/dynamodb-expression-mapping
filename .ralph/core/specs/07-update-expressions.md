@@ -153,3 +153,20 @@ Values are converted via `ExpressionValueEmitter` (Spec 05 §11), which applies 
 | No operations added before `Build()` | Returns `UpdateExpressionResult.Empty` |
 | Duplicate property in same clause | Last operation wins (overwrites previous) |
 | Conflicting clauses (SET + REMOVE same property) | `InvalidUpdateException` with `PropertyName` (Spec 14 §8) |
+
+### 8. Thread Safety
+
+`UpdateExpressionBuilder<TSource>` is thread-safe and designed for singleton/DI registration (one instance per entity type), consistent with all other expression builders (Spec 03 §8).
+
+**Implementation**: Clone-on-use pattern (ADR-001). The singleton instance holds only immutable dependencies (`resolverFactory`, `converterRegistry`, `keywordRegistry`). Each fluent method (`.Set()`, `.Increment()`, etc.) returns a **new instance** with its own operation state. This ensures each fluent chain is fully isolated — no shared mutable state between threads.
+
+```csharp
+// Thread-safe: each chain operates on its own instance
+var singleton = serviceProvider.GetRequiredService<IUpdateExpressionBuilder<Order>>();
+
+// These can run concurrently without interference
+var task1 = Task.Run(() => singleton.Set(x => x.Name, "Alice").Build());
+var task2 = Task.Run(() => singleton.Set(x => x.Name, "Bob").Build());
+```
+
+`UpdateExpressionResult` is immutable.
