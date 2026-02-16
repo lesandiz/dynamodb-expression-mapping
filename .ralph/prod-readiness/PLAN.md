@@ -47,9 +47,9 @@
 - [x] 2.5 Implement workloads: `ProjectionWorkload`, `FilterWorkload`, `UpdateWorkload`, `KeyConditionWorkload` (PR-02.4)
 - [x] 2.6 Implement `MixedWorkload` and `CacheStressWorkload` (PR-02.4)
 - [x] 2.7 Implement concurrency model — shared DI instances, configurable worker count (PR-02.2)
-- [ ] 2.8 Implement CLI interface with `--duration`, `--concurrency`, `--workload` args
-- [ ] 2.9 Implement Spectre.Console reporting output and exit-code logic
-- [ ] 2.10 Write concurrency-specific test scenarios (PR-02.7 items 1–5)
+- [x] 2.8 Implement CLI interface with `--duration`, `--concurrency`, `--workload` args
+- [x] 2.9 Implement Spectre.Console reporting output and exit-code logic
+- [x] 2.10 Write concurrency-specific test scenarios (PR-02.7 items 1–5)
 - [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria
 - [ ] 2.12 Commit phase 2
 
