@@ -81,14 +81,20 @@
 
 **CRITICAL BUG DISCOVERED (Task 2.11b - Thread-Safety Issue)**:
 - Error: `InvalidUpdateException: Property 'Notes' has conflicting update operations`
-- Root cause: All workloads use shared expression builder instance fields (e.g., `_updateBuilder`)
-- Multiple concurrent workers call methods on same builder instance, accumulating operations from different threads
-- Original "conflicting operations" diagnosis was incorrect - it's a concurrency bug in builder design, not workload logic
+- Root cause: `UpdateExpressionBuilder` accumulates mutable state in instance fields; concurrent threads corrupt shared dictionaries
+- Code audit confirmed this is the **only** affected builder — all others (Projection, Filter, Condition, KeyCondition) already create local state per method call
 - **Soak test is working correctly** - it successfully identified a real thread-safety issue in the library!
-- **RESOLUTION NEEDED**: Expression builders must either be thread-safe OR instantiated per-operation instead of shared
-- **Task 2.11 BLOCKED** until this architectural issue is resolved
 
-- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria (**BLOCKED - ADR-001** - awaiting human decision on thread-safety fix)
+**RESOLUTION APPROVED (ADR-001 — Clone-on-Use)**:
+- Refactor `UpdateExpressionBuilder` so each fluent method returns a new instance with its own operation state
+- Singleton instance holds only immutable dependencies, acts as a stateless seed
+- Same principle as all other builders: no mutable instance state
+- Zero breaking changes to public API
+- See ADR-001 for full decision record
+
+- [ ] 2.11c Implement ADR-001: refactor `UpdateExpressionBuilder` to clone-on-use pattern
+- [ ] 2.11d Add concurrency unit tests for `UpdateExpressionBuilder` thread-safety
+- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria
 - [x] 2.11a Fix soak test infrastructure issues:
   - [x] Add configurable delay between operations in WorkerLoop (1-10ms)
   - [x] Implement actual DynamoDB operations in all workloads (Query, Scan, GetItem, UpdateItem, PutItem)
