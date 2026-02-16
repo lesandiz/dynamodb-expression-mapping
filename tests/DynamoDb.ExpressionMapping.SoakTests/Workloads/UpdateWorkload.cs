@@ -22,16 +22,17 @@ public class UpdateWorkload : IWorkload
     public UpdateWorkload(
         IAmazonDynamoDB dynamoDb,
         string tableName,
-        MetricsCollector metricsCollector)
+        MetricsCollector metricsCollector,
+        SharedDependencies sharedDependencies)
     {
         _dynamoDb = dynamoDb ?? throw new ArgumentNullException(nameof(dynamoDb));
         _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
         _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
 
-        var resolverFactory = new AttributeNameResolverFactory();
-        var converterRegistry = AttributeValueConverterRegistry.Default;
+        ArgumentNullException.ThrowIfNull(sharedDependencies);
+        
 
-        _updateBuilder = new UpdateExpressionBuilder<SoakOrder>(resolverFactory, converterRegistry);
+        _updateBuilder = new UpdateExpressionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
         _faker = new Faker();
         _random = new Random(Guid.NewGuid().GetHashCode());
     }

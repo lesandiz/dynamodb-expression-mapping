@@ -9,10 +9,6 @@ using DynamoDb.ExpressionMapping.SoakTests.Metrics;
 
 namespace DynamoDb.ExpressionMapping.SoakTests.Workloads;
 
-/// <summary>
-/// Workload that builds projection expressions, executes DynamoDB queries, and maps results.
-/// Exercises: ProjectionBuilder, DirectResultMapper, reserved keyword aliasing.
-/// </summary>
 public class ProjectionWorkload : IWorkload
 {
     private readonly IAmazonDynamoDB _dynamoDb;
@@ -26,20 +22,18 @@ public class ProjectionWorkload : IWorkload
     public ProjectionWorkload(
         IAmazonDynamoDB dynamoDb,
         string tableName,
-        MetricsCollector metricsCollector)
+        MetricsCollector metricsCollector,
+        SharedDependencies sharedDependencies)
     {
         _dynamoDb = dynamoDb ?? throw new ArgumentNullException(nameof(dynamoDb));
         _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
         _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
+        ArgumentNullException.ThrowIfNull(sharedDependencies);
 
-        var resolverFactory = new AttributeNameResolverFactory();
-        var converterRegistry = AttributeValueConverterRegistry.Default;
-
-        _projectionBuilder = new ProjectionBuilder<SoakOrder>(resolverFactory, null, null);
-        _resultMapper = new DirectResultMapper<SoakOrder>(resolverFactory, converterRegistry);
+        _projectionBuilder = new ProjectionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, null, null);
+        _resultMapper = new DirectResultMapper<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
         _random = new Random(Guid.NewGuid().GetHashCode());
 
-        // Configure Faker for diverse test data
         _faker = new Faker<SoakOrder>()
             .RuleFor(o => o.PK, f => $"CUSTOMER#{f.Random.Guid()}")
             .RuleFor(o => o.SK, f => $"ORDER#{f.Random.Guid()}")
@@ -67,7 +61,6 @@ public class ProjectionWorkload : IWorkload
 
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        // Select a random projection type
         var projectionType = _random.Next(0, 4);
 
         switch (projectionType)
@@ -86,13 +79,9 @@ public class ProjectionWorkload : IWorkload
                 break;
         }
 
-        // Update cache stats
         UpdateCacheStats();
     }
 
-    /// <summary>
-    /// Simple projection: 2-3 scalar properties.
-    /// </summary>
     private async Task ExecuteSimpleProjectionAsync(CancellationToken cancellationToken)
     {
         var result = _projectionBuilder.BuildProjection(o => new
@@ -105,9 +94,6 @@ public class ProjectionWorkload : IWorkload
         await ExecuteQueryAsync(result.ProjectionExpression, result.ExpressionAttributeNames, cancellationToken);
     }
 
-    /// <summary>
-    /// Composite projection: nested object access, collections.
-    /// </summary>
     private async Task ExecuteCompositeProjectionAsync(CancellationToken cancellationToken)
     {
         var result = _projectionBuilder.BuildProjection(o => new
@@ -122,29 +108,23 @@ public class ProjectionWorkload : IWorkload
         await ExecuteQueryAsync(result.ProjectionExpression, result.ExpressionAttributeNames, cancellationToken);
     }
 
-    /// <summary>
-    /// Complex projection: reserved keywords, nullables, enums.
-    /// </summary>
     private async Task ExecuteComplexProjectionAsync(CancellationToken cancellationToken)
     {
         var result = _projectionBuilder.BuildProjection(o => new
         {
             o.PK,
             o.SK,
-            o.Name,           // Reserved keyword
-            o.Status,         // Reserved keyword
-            o.Priority,       // Enum
-            o.ShippedAt,      // Nullable
-            o.Notes,          // Nullable
-            o.Metadata        // Nullable dictionary
+            o.Name,
+            o.Status,
+            o.Priority,
+            o.ShippedAt,
+            o.Notes,
+            o.Metadata
         });
 
         await ExecuteQueryAsync(result.ProjectionExpression, result.ExpressionAttributeNames, cancellationToken);
     }
 
-    /// <summary>
-    /// Projection with result mapping to a different type.
-    /// </summary>
     private async Task ExecuteProjectionWithMappingAsync(CancellationToken cancellationToken)
     {
         var result = _projectionBuilder.BuildProjection(o => new OrderSummary
@@ -158,7 +138,6 @@ public class ProjectionWorkload : IWorkload
 
         await ExecuteQueryAsync(result.ProjectionExpression, result.ExpressionAttributeNames, cancellationToken);
 
-        // Also exercise result mapper (even though we're not using real DynamoDB responses in this workload)
         var mapper = _resultMapper.CreateMapper<OrderSummary>(o => new OrderSummary
         {
             OrderId = o.OrderId,
@@ -169,24 +148,16 @@ public class ProjectionWorkload : IWorkload
         });
     }
 
-    /// <summary>
-    /// Executes a dummy query to simulate DynamoDB interaction.
-    /// In a real soak test, this would query actual data.
-    /// </summary>
     private async Task ExecuteQueryAsync(
         string projectionExpression,
         IReadOnlyDictionary<string, string> expressionAttributeNames,
         CancellationToken cancellationToken)
     {
-        // For now, just simulate a small delay to represent DynamoDB latency
-        // Real implementation would execute an actual query
         await Task.Delay(_random.Next(1, 3), cancellationToken);
     }
 
     private void UpdateCacheStats()
     {
-        // TODO: Get actual cache statistics from library when available
-        // For now, use dummy values
         _metricsCollector.UpdateCacheStats(
             entries: _random.Next(100, 500),
             hits: _random.Next(1000, 10000),

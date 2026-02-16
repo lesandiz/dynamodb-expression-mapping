@@ -18,6 +18,7 @@ public sealed class SoakTestRunner
     private readonly MemoryMonitor _memoryMonitor;
     private readonly IAmazonDynamoDB _dynamoDb;
     private readonly string _tableName;
+    private readonly SharedDependencies _sharedDependencies;
 
     public SoakTestRunner(SoakTestConfig config, IAmazonDynamoDB? dynamoDb = null)
     {
@@ -28,6 +29,7 @@ public sealed class SoakTestRunner
         // Create DynamoDB client if not provided (for testing)
         _dynamoDb = dynamoDb ?? CreateDynamoDbClient();
         _tableName = "SoakTestOrders";
+        _sharedDependencies = new SharedDependencies();
     }
 
     /// <summary>
@@ -159,7 +161,8 @@ public sealed class SoakTestRunner
             _config.WorkloadType,
             _dynamoDb,
             _tableName,
-            _metricsCollector);
+            _metricsCollector,
+            _sharedDependencies);
 
         while (phaseStopwatch.Elapsed < duration && !cancellationToken.IsCancellationRequested)
         {

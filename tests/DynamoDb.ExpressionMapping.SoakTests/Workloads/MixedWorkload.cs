@@ -31,13 +31,14 @@ public class MixedWorkload : IWorkload
     public MixedWorkload(
         IAmazonDynamoDB dynamoDb,
         string tableName,
-        MetricsCollector metricsCollector)
+        MetricsCollector metricsCollector,
+        SharedDependencies sharedDependencies)
     {
-        _projectionWorkload = new ProjectionWorkload(dynamoDb, tableName, metricsCollector);
-        _filterWorkload = new FilterWorkload(dynamoDb, tableName, metricsCollector);
-        _updateWorkload = new UpdateWorkload(dynamoDb, tableName, metricsCollector);
-        _keyConditionWorkload = new KeyConditionWorkload(dynamoDb, tableName, metricsCollector);
-        _cacheStressWorkload = new CacheStressWorkload(dynamoDb, tableName, metricsCollector);
+        _projectionWorkload = new ProjectionWorkload(dynamoDb, tableName, metricsCollector, sharedDependencies);
+        _filterWorkload = new FilterWorkload(dynamoDb, tableName, metricsCollector, sharedDependencies);
+        _updateWorkload = new UpdateWorkload(dynamoDb, tableName, metricsCollector, sharedDependencies);
+        _keyConditionWorkload = new KeyConditionWorkload(dynamoDb, tableName, metricsCollector, sharedDependencies);
+        _cacheStressWorkload = new CacheStressWorkload(dynamoDb, tableName, metricsCollector, sharedDependencies);
         _random = new Random(Guid.NewGuid().GetHashCode());
     }
 

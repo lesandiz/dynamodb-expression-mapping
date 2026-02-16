@@ -22,16 +22,18 @@ public class FilterWorkload : IWorkload
     public FilterWorkload(
         IAmazonDynamoDB dynamoDb,
         string tableName,
-        MetricsCollector metricsCollector)
+        MetricsCollector metricsCollector,
+        SharedDependencies sharedDependencies)
     {
         _dynamoDb = dynamoDb ?? throw new ArgumentNullException(nameof(dynamoDb));
         _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
         _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
+        ArgumentNullException.ThrowIfNull(sharedDependencies);
 
-        var resolverFactory = new AttributeNameResolverFactory();
-        var converterRegistry = AttributeValueConverterRegistry.Default;
+        // Use shared DI instances (PR-02.2)
+        
 
-        _filterBuilder = new FilterExpressionBuilder<SoakOrder>(resolverFactory, converterRegistry);
+        _filterBuilder = new FilterExpressionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
         _faker = new Faker();
         _random = new Random(Guid.NewGuid().GetHashCode());
     }
