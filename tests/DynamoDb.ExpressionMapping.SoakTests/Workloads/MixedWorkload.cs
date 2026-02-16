@@ -13,6 +13,7 @@ public class MixedWorkload : IWorkload
     private readonly FilterWorkload _filterWorkload;
     private readonly UpdateWorkload _updateWorkload;
     private readonly KeyConditionWorkload _keyConditionWorkload;
+    private readonly CacheStressWorkload _cacheStressWorkload;
     private readonly Random _random;
 
     // Weight distribution per PR-02.4
@@ -36,6 +37,7 @@ public class MixedWorkload : IWorkload
         _filterWorkload = new FilterWorkload(dynamoDb, tableName, metricsCollector);
         _updateWorkload = new UpdateWorkload(dynamoDb, tableName, metricsCollector);
         _keyConditionWorkload = new KeyConditionWorkload(dynamoDb, tableName, metricsCollector);
+        _cacheStressWorkload = new CacheStressWorkload(dynamoDb, tableName, metricsCollector);
         _random = new Random(Guid.NewGuid().GetHashCode());
     }
 
@@ -70,8 +72,8 @@ public class MixedWorkload : IWorkload
         }
         else
         {
-            // 10% - Cache stress (use projection with unique selectors)
-            await _projectionWorkload.ExecuteAsync(cancellationToken);
+            // 10% - Cache stress (unique expressions to force cache misses)
+            await _cacheStressWorkload.ExecuteAsync(cancellationToken);
         }
     }
 }

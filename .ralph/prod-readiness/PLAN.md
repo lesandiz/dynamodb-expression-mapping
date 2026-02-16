@@ -45,7 +45,7 @@
 - [x] 2.3 Implement `MetricsCollector` and `MemoryMonitor` (PR-02.5, PR-02.6)
 - [x] 2.4 Implement `SoakTestRunner` with warm-up / sustained / cool-down phases (PR-02.1)
 - [x] 2.5 Implement workloads: `ProjectionWorkload`, `FilterWorkload`, `UpdateWorkload`, `KeyConditionWorkload` (PR-02.4)
-- [ ] 2.6 Implement `MixedWorkload` and `CacheStressWorkload` (PR-02.4)
+- [x] 2.6 Implement `MixedWorkload` and `CacheStressWorkload` (PR-02.4)
 - [ ] 2.7 Implement concurrency model — shared DI instances, configurable worker count (PR-02.2)
 - [ ] 2.8 Implement CLI interface with `--duration`, `--concurrency`, `--workload` args
 - [ ] 2.9 Implement Spectre.Console reporting output and exit-code logic
