@@ -17,7 +17,7 @@
 - [x] 1.7 Write `ProjectionBuilderProperties` — invariant PR-01.1 (alias prefix, reserved keyword aliasing)
 - [x] 1.8 Write `FilterExpressionBuilderProperties` — invariant PR-01.2 (non-empty, balanced parens, placeholder/dictionary consistency, scope isolation)
 - [x] 1.9 Write `UpdateExpressionBuilderProperties` — invariant PR-01.3 (well-formed clauses, correct alias prefixes)
-- [ ] 1.10 Write `KeyConditionBuilderProperties` — invariant PR-01.6 (partition key equality present)
+- [x] 1.10 Write `KeyConditionBuilderProperties` — invariant PR-01.6 (partition key equality present)
 - [ ] 1.11 Write `ComposabilityProperties` — invariant PR-01.4 (no alias collisions after composition)
 - [ ] 1.12 Write `TypeConverterProperties` — invariant PR-01.5 (round-trip, nullable semantics)
 - [ ] 1.13 Run full suite at 10k iterations, fix any discovered bugs
