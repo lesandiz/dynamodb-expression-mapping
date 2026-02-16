@@ -155,7 +155,9 @@ public class ProjectionWorkload : IWorkload
         IReadOnlyDictionary<string, string> expressionAttributeNames,
         CancellationToken cancellationToken)
     {
-        var customerId = $"CUSTOMER#{Guid.NewGuid()}";
+        // Use seeded customer IDs (CUST0001-CUST0100)
+        var customerNum = _random.Next(1, 101);
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
 
         var expressionNames = new Dictionary<string, string>(expressionAttributeNames)
         {

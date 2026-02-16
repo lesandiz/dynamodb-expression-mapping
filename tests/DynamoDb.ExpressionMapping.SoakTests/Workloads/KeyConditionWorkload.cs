@@ -69,7 +69,9 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildPartitionKeyOnly(CancellationToken cancellationToken)
     {
-        var customerId = $"CUSTOMER#{_faker.Random.Guid()}";
+        // Use seeded customer IDs (CUST0001-CUST0100)
+        var customerNum = _random.Next(1, 101);
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
         var result = _keyConditionBuilder.WithPartitionKey(o => o.PK, customerId).Build();
 
         await ExecuteQueryAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
@@ -80,8 +82,13 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildWithSortKeyEquals(CancellationToken cancellationToken)
     {
-        var customerId = $"CUSTOMER#{_faker.Random.Guid()}";
-        var orderId = $"ORDER#{_faker.Random.Guid()}";
+        // Use seeded customer IDs (CUST0001-CUST0100)
+        var customerNum = _random.Next(1, 101);
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
+
+        // Use seeded order IDs (ORD000000-ORD000999)
+        var orderNum = _random.Next(0, 1000);
+        var orderId = $"ORDER#ORD{orderNum:D6}";
 
         var result = _keyConditionBuilder
             .WithPartitionKey(o => o.PK, customerId)
@@ -95,8 +102,13 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildWithSortKeyComparison(CancellationToken cancellationToken)
     {
-        var customerId = $"CUSTOMER#{_faker.Random.Guid()}";
-        var orderIdPrefix = $"ORDER#2024";
+        // Use seeded customer IDs (CUST0001-CUST0100)
+        var customerNum = _random.Next(1, 101);
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
+
+        // Use a random starting point in the order range
+        var orderNum = _random.Next(0, 900);
+        var orderIdPrefix = $"ORDER#ORD{orderNum:D6}";
 
         var result = _keyConditionBuilder
             .WithPartitionKey(o => o.PK, customerId)
@@ -110,9 +122,15 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildWithSortKeyBetween(CancellationToken cancellationToken)
     {
-        var customerId = $"CUSTOMER#{_faker.Random.Guid()}";
-        var startKey = $"ORDER#2024-01";
-        var endKey = $"ORDER#2024-12";
+        // Use seeded customer IDs (CUST0001-CUST0100)
+        var customerNum = _random.Next(1, 101);
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
+
+        // Use a random range within the seeded order IDs
+        var startNum = _random.Next(0, 800);
+        var endNum = startNum + _random.Next(100, 200);
+        var startKey = $"ORDER#ORD{startNum:D6}";
+        var endKey = $"ORDER#ORD{endNum:D6}";
 
         var result = _keyConditionBuilder
             .WithPartitionKey(o => o.PK, customerId)
@@ -126,8 +144,10 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildWithSortKeyBeginsWith(CancellationToken cancellationToken)
     {
-        var customerId = $"CUSTOMER#{_faker.Random.Guid()}";
-        var orderPrefix = "ORDER#";
+        // Use seeded customer IDs (CUST0001-CUST0100)
+        var customerNum = _random.Next(1, 101);
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
+        var orderPrefix = "ORDER#ORD";
 
         var result = _keyConditionBuilder
             .WithPartitionKey(o => o.PK, customerId)
