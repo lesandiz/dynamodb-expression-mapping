@@ -61,6 +61,10 @@ public sealed class SoakTestRunner
                 cancellationToken
             );
 
+            // Force GC to reduce memory baseline after warm-up
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
             // Capture baseline memory after warm-up
             var baselineSnapshot = _metricsCollector.GetSnapshot();
 
@@ -70,6 +74,11 @@ public sealed class SoakTestRunner
                 _config.SustainedDuration,
                 cancellationToken
             );
+
+            // Force GC between sustained and cool-down phases
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
 
             // Phase 3: Cool-down
             await RunPhaseAsync(
@@ -384,7 +393,9 @@ public sealed class SoakTestRunner
         // Generate 1000 orders
         for (int i = 0; i < 1000; i++)
         {
-            var customerId = faker.PickRandom(customerIds);
+            // Deterministic assignment: 10 orders per customer (CUST0001: ORD0-9, CUST0002: ORD10-19, etc.)
+            var customerNum = (i / 10) + 1;
+            var customerId = $"CUST{customerNum:D4}";
             var orderId = $"ORD{i:D6}";
             var status = faker.PickRandom(statuses);
             var priority = faker.PickRandom(priorities);

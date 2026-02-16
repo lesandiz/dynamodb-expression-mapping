@@ -82,12 +82,10 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildWithSortKeyEquals(CancellationToken cancellationToken)
     {
-        // Use seeded customer IDs (CUST0001-CUST0100)
-        var customerNum = _random.Next(1, 101);
-        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
-
-        // Use seeded order IDs (ORD000000-ORD000999)
+        // Deterministic: 10 orders per customer (order 0-9 -> CUST0001, 10-19 -> CUST0002, etc.)
         var orderNum = _random.Next(0, 1000);
+        var customerNum = (orderNum / 10) + 1;
+        var customerId = $"CUSTOMER#CUST{customerNum:D4}";
         var orderId = $"ORDER#ORD{orderNum:D6}";
 
         var result = _keyConditionBuilder
@@ -102,13 +100,15 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildWithSortKeyComparison(CancellationToken cancellationToken)
     {
-        // Use seeded customer IDs (CUST0001-CUST0100)
+        // Deterministic: pick customer, then query orders >= random start within that customer's range
         var customerNum = _random.Next(1, 101);
         var customerId = $"CUSTOMER#CUST{customerNum:D4}";
 
-        // Use a random starting point in the order range
-        var orderNum = _random.Next(0, 900);
-        var orderIdPrefix = $"ORDER#ORD{orderNum:D6}";
+        // Pick a start order within this customer's 10 orders
+        var baseOrderNum = (customerNum - 1) * 10;
+        var offsetWithinCustomer = _random.Next(0, 10);
+        var startOrderNum = baseOrderNum + offsetWithinCustomer;
+        var orderIdPrefix = $"ORDER#ORD{startOrderNum:D6}";
 
         var result = _keyConditionBuilder
             .WithPartitionKey(o => o.PK, customerId)
@@ -122,13 +122,16 @@ public class KeyConditionWorkload : IWorkload
     /// </summary>
     private async Task BuildWithSortKeyBetween(CancellationToken cancellationToken)
     {
-        // Use seeded customer IDs (CUST0001-CUST0100)
+        // Deterministic: pick customer, then query a range within that customer's 10 orders
         var customerNum = _random.Next(1, 101);
         var customerId = $"CUSTOMER#CUST{customerNum:D4}";
 
-        // Use a random range within the seeded order IDs
-        var startNum = _random.Next(0, 800);
-        var endNum = startNum + _random.Next(100, 200);
+        // Pick a range within this customer's 10 orders
+        var baseOrderNum = (customerNum - 1) * 10;
+        var startOffset = _random.Next(0, 8); // Leave room for range
+        var rangeSize = _random.Next(1, 10 - startOffset); // At least 1, at most to end of range
+        var startNum = baseOrderNum + startOffset;
+        var endNum = startNum + rangeSize;
         var startKey = $"ORDER#ORD{startNum:D6}";
         var endKey = $"ORDER#ORD{endNum:D6}";
 

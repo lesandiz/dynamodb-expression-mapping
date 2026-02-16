@@ -261,3 +261,23 @@
 | Phase 6 → 7 | Phase 6 fully committed before starting phase 7 |
 
 Each phase is a hard stop. Completing one phase does **not** auto-start the next.
+
+**SOAK TEST INVESTIGATION - Task 2.11c (Current Turn)**:
+
+Root cause: Data mismatch - seeding assigns orders randomly to customers, but workloads pick random PK+SK pairs independently → most don't exist.
+
+Fixes applied:
+- Deterministic seeding: 10 orders per customer (CUST0001: ORD000000-000009, CUST0002: ORD000010-000019, etc.)
+- UpdateWorkload.cs: Deterministic key generation (customerNum = orderNum/10 + 1)  
+- KeyConditionWorkload.cs: Fixed 3 methods with deterministic keys (Equals, Comparison, Between)
+- UpdateWorkload.BuildMixedClauses: Removed `.Remove(Notes)`, replaced with `.AppendToList(Tags)`
+- SoakTestRunner.cs: Added GC.Collect() between phases
+
+Test results (5-minute, 16 workers): 55,242 failures (8.1%), 5,180% memory growth
+- DynamoDB errors: 59.8% → 33.4% (✅ improved)
+- InvalidOperation: 40.2% → 66.6% (❌ increased)
+- Spec requires ZERO failures - still far from passing
+
+Blocker: 3+ turns of work, fundamental issues remain. InvalidOperation source unclear. May need individual workload testing or live debugging.
+
+Files modified: SoakTestRunner.cs, UpdateWorkload.cs, KeyConditionWorkload.cs
