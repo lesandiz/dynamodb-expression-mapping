@@ -12,24 +12,25 @@ namespace DynamoDb.ExpressionMapping.Expressions;
 
 /// <summary>
 /// Builds DynamoDB UpdateExpression strings from a fluent builder API.
+/// Thread-safe: designed for singleton registration. Each fluent method returns a new instance.
 /// </summary>
 /// <typeparam name="TSource">The entity type to build update expressions for.</typeparam>
 public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<TSource>
 {
+    // Immutable dependencies — shared across all instances in a fluent chain
     private readonly IAttributeNameResolverFactory resolverFactory;
     private readonly IAttributeValueConverterRegistry converterRegistry;
     private readonly ReservedKeywordRegistry keywordRegistry;
+
+    // Mutable state — each fluent method creates a new instance with cloned + extended state
     private readonly AliasGenerator aliasGen;
     private readonly ExpressionValueEmitter valueEmitter;
-
-    private readonly Dictionary<string, string> names = new();
-    private readonly Dictionary<string, AttributeValue> values = new();
-
-    // Track operations by property path to detect conflicts and allow last-wins
-    private readonly Dictionary<string, UpdateOperation> setOperations = new();
-    private readonly HashSet<string> removeProperties = new();
-    private readonly Dictionary<string, UpdateOperation> addOperations = new();
-    private readonly Dictionary<string, UpdateOperation> deleteOperations = new();
+    private readonly Dictionary<string, string> names;
+    private readonly Dictionary<string, AttributeValue> values;
+    private readonly Dictionary<string, UpdateOperation> setOperations;
+    private readonly HashSet<string> removeProperties;
+    private readonly Dictionary<string, UpdateOperation> addOperations;
+    private readonly Dictionary<string, UpdateOperation> deleteOperations;
 
     /// <summary>
     /// Creates a new update expression builder.
@@ -53,8 +54,43 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
         this.converterRegistry = converterRegistry ?? throw new ArgumentNullException(nameof(converterRegistry));
         this.keywordRegistry = keywordRegistry ?? throw new ArgumentNullException(nameof(keywordRegistry));
 
+        // Initialize fresh state for a new fluent chain
         aliasGen = new AliasGenerator("upd");
         valueEmitter = new ExpressionValueEmitter(converterRegistry);
+        names = new Dictionary<string, string>();
+        values = new Dictionary<string, AttributeValue>();
+        setOperations = new Dictionary<string, UpdateOperation>();
+        removeProperties = new HashSet<string>();
+        addOperations = new Dictionary<string, UpdateOperation>();
+        deleteOperations = new Dictionary<string, UpdateOperation>();
+    }
+
+    /// <summary>
+    /// Private constructor for cloning — creates a new instance with copied state.
+    /// </summary>
+    private UpdateExpressionBuilder(
+        IAttributeNameResolverFactory resolverFactory,
+        IAttributeValueConverterRegistry converterRegistry,
+        ReservedKeywordRegistry keywordRegistry,
+        AliasGenerator aliasGen,
+        Dictionary<string, string> names,
+        Dictionary<string, AttributeValue> values,
+        Dictionary<string, UpdateOperation> setOperations,
+        HashSet<string> removeProperties,
+        Dictionary<string, UpdateOperation> addOperations,
+        Dictionary<string, UpdateOperation> deleteOperations)
+    {
+        this.resolverFactory = resolverFactory;
+        this.converterRegistry = converterRegistry;
+        this.keywordRegistry = keywordRegistry;
+        this.aliasGen = aliasGen;
+        this.valueEmitter = new ExpressionValueEmitter(converterRegistry);
+        this.names = names;
+        this.values = values;
+        this.setOperations = setOperations;
+        this.removeProperties = removeProperties;
+        this.addOperations = addOperations;
+        this.deleteOperations = deleteOperations;
     }
 
     public IUpdateExpressionBuilder<TSource> Set<TValue>(
@@ -63,28 +99,31 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
+
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
         // Remove old value placeholder if this property was already set (last-wins semantics)
-        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        if (clone.setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
         {
-            RemoveOldValuePlaceholders(existingOp.Expression);
+            clone.RemoveOldValuePlaceholders(existingOp.Expression);
         }
 
-        var valueAlias = aliasGen.NextValue();
+        var valueAlias = clone.aliasGen.NextValue();
 
-        values[valueAlias] = valueEmitter.Emit(value!, propertyPath.PropertyInfo);
+        clone.values[valueAlias] = clone.valueEmitter.Emit(value!, propertyPath.PropertyInfo);
 
         var operation = new UpdateOperation(
             UpdateOperationType.Set,
             attributeName,
             $"{attributeName} = {valueAlias}");
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
-        setOperations[propertyPath.FullPath] = operation;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
+        clone.setOperations[propertyPath.FullPath] = operation;
 
-        return this;
+        return clone;
     }
 
     public IUpdateExpressionBuilder<TSource> Increment<TValue>(
@@ -93,28 +132,31 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
+
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
         // Remove old value placeholder if this property was already set (last-wins semantics)
-        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        if (clone.setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
         {
-            RemoveOldValuePlaceholders(existingOp.Expression);
+            clone.RemoveOldValuePlaceholders(existingOp.Expression);
         }
 
-        var valueAlias = aliasGen.NextValue();
+        var valueAlias = clone.aliasGen.NextValue();
 
-        values[valueAlias] = valueEmitter.Emit(amount, propertyPath.PropertyInfo);
+        clone.values[valueAlias] = clone.valueEmitter.Emit(amount, propertyPath.PropertyInfo);
 
         var operation = new UpdateOperation(
             UpdateOperationType.Set,
             attributeName,
             $"{attributeName} = {attributeName} + {valueAlias}");
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
-        setOperations[propertyPath.FullPath] = operation;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
+        clone.setOperations[propertyPath.FullPath] = operation;
 
-        return this;
+        return clone;
     }
 
     public IUpdateExpressionBuilder<TSource> Decrement<TValue>(
@@ -123,28 +165,31 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
+
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
         // Remove old value placeholder if this property was already set (last-wins semantics)
-        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        if (clone.setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
         {
-            RemoveOldValuePlaceholders(existingOp.Expression);
+            clone.RemoveOldValuePlaceholders(existingOp.Expression);
         }
 
-        var valueAlias = aliasGen.NextValue();
+        var valueAlias = clone.aliasGen.NextValue();
 
-        values[valueAlias] = valueEmitter.Emit(amount, propertyPath.PropertyInfo);
+        clone.values[valueAlias] = clone.valueEmitter.Emit(amount, propertyPath.PropertyInfo);
 
         var operation = new UpdateOperation(
             UpdateOperationType.Set,
             attributeName,
             $"{attributeName} = {attributeName} - {valueAlias}");
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
-        setOperations[propertyPath.FullPath] = operation;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
+        clone.setOperations[propertyPath.FullPath] = operation;
 
-        return this;
+        return clone;
     }
 
     public IUpdateExpressionBuilder<TSource> SetIfNotExists<TValue>(
@@ -153,28 +198,31 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
+
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
         // Remove old value placeholder if this property was already set (last-wins semantics)
-        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        if (clone.setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
         {
-            RemoveOldValuePlaceholders(existingOp.Expression);
+            clone.RemoveOldValuePlaceholders(existingOp.Expression);
         }
 
-        var valueAlias = aliasGen.NextValue();
+        var valueAlias = clone.aliasGen.NextValue();
 
-        values[valueAlias] = valueEmitter.Emit(value!, propertyPath.PropertyInfo);
+        clone.values[valueAlias] = clone.valueEmitter.Emit(value!, propertyPath.PropertyInfo);
 
         var operation = new UpdateOperation(
             UpdateOperationType.Set,
             attributeName,
             $"{attributeName} = if_not_exists({attributeName}, {valueAlias})");
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
-        setOperations[propertyPath.FullPath] = operation;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
+        clone.setOperations[propertyPath.FullPath] = operation;
 
-        return this;
+        return clone;
     }
 
     public IUpdateExpressionBuilder<TSource> AppendToList<TValue>(
@@ -183,28 +231,31 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
+
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
         // Remove old value placeholder if this property was already set (last-wins semantics)
-        if (setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        if (clone.setOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
         {
-            RemoveOldValuePlaceholders(existingOp.Expression);
+            clone.RemoveOldValuePlaceholders(existingOp.Expression);
         }
 
-        var valueAlias = aliasGen.NextValue();
+        var valueAlias = clone.aliasGen.NextValue();
 
-        this.values[valueAlias] = valueEmitter.Emit(values, propertyPath.PropertyInfo);
+        clone.values[valueAlias] = clone.valueEmitter.Emit(values, propertyPath.PropertyInfo);
 
         var operation = new UpdateOperation(
             UpdateOperationType.Set,
             attributeName,
             $"{attributeName} = list_append({attributeName}, {valueAlias})");
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
-        setOperations[propertyPath.FullPath] = operation;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Set);
+        clone.setOperations[propertyPath.FullPath] = operation;
 
-        return this;
+        return clone;
     }
 
     public IUpdateExpressionBuilder<TSource> Remove<TValue>(
@@ -212,13 +263,16 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Remove);
-        removeProperties.Add(propertyPath.FullPath);
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
-        return this;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Remove);
+        clone.removeProperties.Add(propertyPath.FullPath);
+
+        return clone;
     }
 
     public IUpdateExpressionBuilder<TSource> Add<TValue>(
@@ -227,28 +281,31 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
+
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
         // Remove old value placeholder if this property was already set (last-wins semantics)
-        if (addOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        if (clone.addOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
         {
-            RemoveOldValuePlaceholders(existingOp.Expression);
+            clone.RemoveOldValuePlaceholders(existingOp.Expression);
         }
 
-        var valueAlias = aliasGen.NextValue();
+        var valueAlias = clone.aliasGen.NextValue();
 
-        values[valueAlias] = valueEmitter.Emit(value!, propertyPath.PropertyInfo);
+        clone.values[valueAlias] = clone.valueEmitter.Emit(value!, propertyPath.PropertyInfo);
 
         var operation = new UpdateOperation(
             UpdateOperationType.Add,
             attributeName,
             $"{attributeName} {valueAlias}");
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Add);
-        addOperations[propertyPath.FullPath] = operation;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Add);
+        clone.addOperations[propertyPath.FullPath] = operation;
 
-        return this;
+        return clone;
     }
 
     public IUpdateExpressionBuilder<TSource> Delete<TValue>(
@@ -257,28 +314,31 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var propertyPath = ExtractPropertyPath(property);
-        var attributeName = ResolveAttributeName(propertyPath);
+        // Clone current state
+        var clone = Clone();
+
+        var propertyPath = clone.ExtractPropertyPath(property);
+        var attributeName = clone.ResolveAttributeName(propertyPath);
 
         // Remove old value placeholder if this property was already set (last-wins semantics)
-        if (deleteOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
+        if (clone.deleteOperations.TryGetValue(propertyPath.FullPath, out var existingOp))
         {
-            RemoveOldValuePlaceholders(existingOp.Expression);
+            clone.RemoveOldValuePlaceholders(existingOp.Expression);
         }
 
-        var valueAlias = aliasGen.NextValue();
+        var valueAlias = clone.aliasGen.NextValue();
 
-        this.values[valueAlias] = valueEmitter.Emit(values, propertyPath.PropertyInfo);
+        clone.values[valueAlias] = clone.valueEmitter.Emit(values, propertyPath.PropertyInfo);
 
         var operation = new UpdateOperation(
             UpdateOperationType.Delete,
             attributeName,
             $"{attributeName} {valueAlias}");
 
-        CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Delete);
-        deleteOperations[propertyPath.FullPath] = operation;
+        clone.CheckForConflicts(propertyPath.FullPath, UpdateOperationType.Delete);
+        clone.deleteOperations[propertyPath.FullPath] = operation;
 
-        return this;
+        return clone;
     }
 
     public UpdateExpressionResult Build()
@@ -318,7 +378,7 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
             expressionParts.Add($"ADD {string.Join(", ", addClauses)}");
         }
 
-        // Build DELETE clause
+        // BUILD DELETE clause
         if (deleteOperations.Count > 0)
         {
             var deleteClauses = deleteOperations.Values.Select(op => op.Expression);
@@ -328,6 +388,24 @@ public sealed class UpdateExpressionBuilder<TSource> : IUpdateExpressionBuilder<
         var expression = string.Join(" ", expressionParts);
 
         return new UpdateExpressionResult(expression, names, values);
+    }
+
+    /// <summary>
+    /// Clones this instance with all current state, creating a new independent fluent chain.
+    /// </summary>
+    private UpdateExpressionBuilder<TSource> Clone()
+    {
+        return new UpdateExpressionBuilder<TSource>(
+            resolverFactory,
+            converterRegistry,
+            keywordRegistry,
+            aliasGen.Clone(),
+            new Dictionary<string, string>(names),
+            new Dictionary<string, AttributeValue>(values),
+            new Dictionary<string, UpdateOperation>(setOperations),
+            new HashSet<string>(removeProperties),
+            new Dictionary<string, UpdateOperation>(addOperations),
+            new Dictionary<string, UpdateOperation>(deleteOperations));
     }
 
     private PropertyPath ExtractPropertyPath<TValue>(Expression<Func<TSource, TValue>> property)

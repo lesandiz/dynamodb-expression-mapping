@@ -42,13 +42,17 @@ public class UpdateOperationGeneratorTests
 
             // Verify it can be executed against a builder without throwing
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            var buildAction = () => operation(builder);
+            var buildAction = () =>
+            {
+                var updatedBuilder = operation(builder);
+                return (UpdateExpressionBuilder<TestEntity>)updatedBuilder;
+            };
 
             // Should not throw
-            buildAction.Should().NotThrow();
+            var finalBuilder = buildAction.Should().NotThrow().Subject;
 
             // Verify the builder produces a valid result
-            var result = builder.Build();
+            var result = finalBuilder.Build();
             result.Should().NotBeNull();
             result.Expression.Should().NotBeNullOrWhiteSpace("expression should not be empty");
         }
@@ -69,13 +73,17 @@ public class UpdateOperationGeneratorTests
 
             // Verify it can be executed against a builder without throwing
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            var buildAction = () => operation(builder);
+            var buildAction = () =>
+            {
+                var updatedBuilder = operation(builder);
+                return (UpdateExpressionBuilder<TestEntity>)updatedBuilder;
+            };
 
             // Should not throw
-            buildAction.Should().NotThrow();
+            var finalBuilder = buildAction.Should().NotThrow().Subject;
 
             // Verify the builder produces a valid result
-            var result = builder.Build();
+            var result = finalBuilder.Build();
             result.Should().NotBeNull();
             result.Expression.Should().NotBeNullOrWhiteSpace("expression should not be empty");
 
@@ -97,13 +105,17 @@ public class UpdateOperationGeneratorTests
 
             // Verify it can be executed against a builder without throwing
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            var buildAction = () => operation(builder);
+            var buildAction = () =>
+            {
+                var updatedBuilder = operation(builder);
+                return (UpdateExpressionBuilder<TestEntity>)updatedBuilder;
+            };
 
             // Should not throw
-            buildAction.Should().NotThrow();
+            var finalBuilder = buildAction.Should().NotThrow().Subject;
 
             // Verify the builder produces a valid result
-            var result = builder.Build();
+            var result = finalBuilder.Build();
             result.Should().NotBeNull();
             result.Expression.Should().NotBeNullOrWhiteSpace("expression should not be empty");
 
@@ -125,8 +137,8 @@ public class UpdateOperationGeneratorTests
         var setOperations = samples.Where(op =>
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            op(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)op(builder);
+            var result = finalBuilder.Build();
             return result.Expression.StartsWith("SET");
         }).ToList();
 
@@ -145,8 +157,8 @@ public class UpdateOperationGeneratorTests
         var removeOperations = samples.Where(op =>
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            op(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)op(builder);
+            var result = finalBuilder.Build();
             return result.Expression.StartsWith("REMOVE");
         }).ToList();
 
@@ -165,8 +177,8 @@ public class UpdateOperationGeneratorTests
         var mathOperations = samples.Where(op =>
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            op(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)op(builder);
+            var result = finalBuilder.Build();
             return result.Expression.Contains(" + ") || result.Expression.Contains(" - ");
         }).ToList();
 
@@ -185,8 +197,8 @@ public class UpdateOperationGeneratorTests
         var ifNotExistsOps = samples.Where(op =>
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            op(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)op(builder);
+            var result = finalBuilder.Build();
             return result.Expression.Contains("if_not_exists");
         }).ToList();
 
@@ -205,8 +217,8 @@ public class UpdateOperationGeneratorTests
         var addOperations = samples.Where(op =>
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            op(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)op(builder);
+            var result = finalBuilder.Build();
             return result.Expression.StartsWith("ADD");
         }).ToList();
 
@@ -225,8 +237,8 @@ public class UpdateOperationGeneratorTests
         var deleteOperations = samples.Where(op =>
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            op(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)op(builder);
+            var result = finalBuilder.Build();
             return result.Expression.StartsWith("DELETE");
         }).ToList();
 
@@ -245,8 +257,8 @@ public class UpdateOperationGeneratorTests
         var clauseTypeCounts = samples.Select(op =>
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            op(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)op(builder);
+            var result = finalBuilder.Build();
             return CountClauseTypes(result.Expression);
         }).ToList();
 
@@ -271,8 +283,8 @@ public class UpdateOperationGeneratorTests
         foreach (var operation in allSamples)
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            operation(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)operation(builder);
+            var result = finalBuilder.Build();
 
             // Most operations should produce values (except pure REMOVE)
             if (!result.Expression.StartsWith("REMOVE") || result.Expression.Contains("SET"))
@@ -294,8 +306,8 @@ public class UpdateOperationGeneratorTests
         foreach (var operation in samples)
         {
             var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-            operation(builder);
-            var result = builder.Build();
+            var finalBuilder = (UpdateExpressionBuilder<TestEntity>)operation(builder);
+            var result = finalBuilder.Build();
 
             // All name aliases should start with #upd_
             foreach (var nameKey in result.ExpressionAttributeNames.Keys)
@@ -313,12 +325,12 @@ public class UpdateOperationGeneratorTests
 
     #region Helper Methods
 
-    private static List<Action<UpdateExpressionBuilder<TestEntity>>> GenerateSamples(
-        FsCheck.Arbitrary<Action<UpdateExpressionBuilder<TestEntity>>> arbitrary,
+    private static List<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> GenerateSamples(
+        FsCheck.Arbitrary<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> arbitrary,
         int count)
     {
         var gen = arbitrary.Generator;
-        var samples = new List<Action<UpdateExpressionBuilder<TestEntity>>>();
+        var samples = new List<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>();
 
         for (int i = 0; i < count; i++)
         {
