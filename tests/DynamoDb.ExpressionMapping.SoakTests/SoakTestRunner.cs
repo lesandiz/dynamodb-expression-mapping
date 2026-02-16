@@ -1,5 +1,8 @@
 using System.Diagnostics;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using DynamoDb.ExpressionMapping.SoakTests.Metrics;
+using DynamoDb.ExpressionMapping.SoakTests.Workloads;
 using Spectre.Console;
 
 namespace DynamoDb.ExpressionMapping.SoakTests;
@@ -13,12 +16,18 @@ public sealed class SoakTestRunner
     private readonly SoakTestConfig _config;
     private readonly MetricsCollector _metricsCollector;
     private readonly MemoryMonitor _memoryMonitor;
+    private readonly IAmazonDynamoDB _dynamoDb;
+    private readonly string _tableName;
 
-    public SoakTestRunner(SoakTestConfig config)
+    public SoakTestRunner(SoakTestConfig config, IAmazonDynamoDB? dynamoDb = null)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _metricsCollector = new MetricsCollector();
         _memoryMonitor = new MemoryMonitor(_metricsCollector);
+
+        // Create DynamoDB client if not provided (for testing)
+        _dynamoDb = dynamoDb ?? CreateDynamoDbClient();
+        _tableName = "SoakTestOrders";
     }
 
     /// <summary>
@@ -33,8 +42,12 @@ public sealed class SoakTestRunner
         {
             AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════════════[/]");
             AnsiConsole.MarkupLine($"[bold cyan]  Soak Test — {_config.SustainedDuration.TotalMinutes:F0} min, {_config.ConcurrentWorkers} workers[/]");
+            AnsiConsole.MarkupLine($"[bold cyan]  Workload: {_config.WorkloadType}[/]");
             AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════════════[/]");
             AnsiConsole.WriteLine();
+
+            // Initialize DynamoDB table (in real implementation, this would create/seed table)
+            await InitializeTableAsync(cancellationToken);
 
             // Phase 1: Warm-up
             await RunPhaseAsync(
@@ -76,6 +89,7 @@ public sealed class SoakTestRunner
         {
             _memoryMonitor.Dispose();
             _metricsCollector.Dispose();
+            _dynamoDb?.Dispose();
         }
     }
 
@@ -140,18 +154,21 @@ public sealed class SoakTestRunner
     /// </summary>
     private async Task WorkerLoop(int workerId, Stopwatch phaseStopwatch, TimeSpan duration, CancellationToken cancellationToken)
     {
-        var random = new Random(Guid.NewGuid().GetHashCode());
+        // Create workload instance for this worker
+        var workload = WorkloadFactory.CreateWorkload(
+            _config.WorkloadType,
+            _dynamoDb,
+            _tableName,
+            _metricsCollector);
 
         while (phaseStopwatch.Elapsed < duration && !cancellationToken.IsCancellationRequested)
         {
             try
             {
-                // Select a workload based on configured distribution
-                // For now, just simulate work with a delay
                 var operationStopwatch = Stopwatch.StartNew();
 
-                // TODO: Replace with actual workload execution
-                await SimulateWorkAsync(random, cancellationToken);
+                // Execute workload
+                await workload.ExecuteAsync(cancellationToken);
 
                 operationStopwatch.Stop();
                 _metricsCollector.RecordOperation(operationStopwatch.Elapsed.TotalMilliseconds);
@@ -171,20 +188,28 @@ public sealed class SoakTestRunner
     }
 
     /// <summary>
-    /// Temporary method to simulate work until real workloads are implemented.
+    /// Initializes DynamoDB table for soak testing.
     /// </summary>
-    private async Task SimulateWorkAsync(Random random, CancellationToken cancellationToken)
+    private async Task InitializeTableAsync(CancellationToken cancellationToken)
     {
-        // Simulate varying operation durations (0.5ms to 5ms)
-        var delayMs = random.Next(1, 5);
-        await Task.Delay(delayMs, cancellationToken);
+        // In a real implementation, this would:
+        // 1. Create the table if it doesn't exist
+        // 2. Seed it with test data
+        // For now, just a placeholder
+        await Task.CompletedTask;
+    }
 
-        // Simulate cache statistics (dummy values)
-        _metricsCollector.UpdateCacheStats(
-            entries: random.Next(100, 500),
-            hits: random.Next(1000, 10000),
-            misses: random.Next(10, 500)
-        );
+    /// <summary>
+    /// Creates a DynamoDB client configured for local testing.
+    /// </summary>
+    private static IAmazonDynamoDB CreateDynamoDbClient()
+    {
+        var config = new AmazonDynamoDBConfig
+        {
+            ServiceURL = "http://localhost:8004"  // Port from docker-compose.yml
+        };
+
+        return new AmazonDynamoDBClient(config);
     }
 
     /// <summary>
