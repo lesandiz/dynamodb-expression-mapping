@@ -20,6 +20,17 @@ public sealed class AliasGenerator
         this.valuePrefix = $":{scope}_v";
     }
 
+    /// <summary>
+    /// Private constructor for cloning with current counter state.
+    /// </summary>
+    private AliasGenerator(string namePrefix, string valuePrefix, uint nameIndex, uint valueIndex)
+    {
+        this.namePrefix = namePrefix;
+        this.valuePrefix = valuePrefix;
+        this.nameIndex = nameIndex;
+        this.valueIndex = valueIndex;
+    }
+
     /// <summary>Generates next attribute name alias. E.g. "#proj_0", "#proj_1"</summary>
     public string NextName() => $"{namePrefix}{nameIndex++}";
 
@@ -28,4 +39,7 @@ public sealed class AliasGenerator
 
     /// <summary>Resets the counters.</summary>
     public void Reset() { nameIndex = 0; valueIndex = 0; }
+
+    /// <summary>Creates a clone of this generator with the current counter state.</summary>
+    public AliasGenerator Clone() => new AliasGenerator(namePrefix, valuePrefix, nameIndex, valueIndex);
 }

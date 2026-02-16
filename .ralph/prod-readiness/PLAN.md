@@ -92,8 +92,8 @@
 - Zero breaking changes to public API
 - See ADR-001 for full decision record
 
-- [ ] 2.11c Implement ADR-001: refactor `UpdateExpressionBuilder` to clone-on-use pattern
-- [ ] 2.11d Add concurrency unit tests for `UpdateExpressionBuilder` thread-safety
+- [x] 2.11c Implement ADR-001: refactor `UpdateExpressionBuilder` to clone-on-use pattern
+- [x] 2.11d Add concurrency unit tests for `UpdateExpressionBuilder` thread-safety
 - [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria
 - [x] 2.11a Fix soak test infrastructure issues:
   - [x] Add configurable delay between operations in WorkerLoop (1-10ms)

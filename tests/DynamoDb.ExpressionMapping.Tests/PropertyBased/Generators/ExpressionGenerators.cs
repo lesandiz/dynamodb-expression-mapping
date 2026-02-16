@@ -35,11 +35,11 @@ public static class ExpressionGenerators
 
     /// <summary>
     /// Generates random update operation sequences for TestEntity.
-    /// Produces: Arbitrary&lt;Action&lt;UpdateExpressionBuilder&lt;TestEntity&gt;&gt;&gt;
+    /// Produces: Arbitrary&lt;Func&lt;UpdateExpressionBuilder&lt;TestEntity&gt;, IUpdateExpressionBuilder&lt;TestEntity&gt;&gt;&gt;
     /// Combines: SET, REMOVE, ADD, DELETE operations chained via fluent API.
     /// </summary>
     /// <param name="complexity">Tier: Simple (single operation), Composite (2-3 operations), Complex (mixed clauses).</param>
-    public static Arbitrary<Action<UpdateExpressionBuilder<TestEntity>>> UpdateOperation(Complexity complexity = Complexity.Simple)
+    public static Arbitrary<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> UpdateOperation(Complexity complexity = Complexity.Simple)
     {
         return UpdateOperationGenerator.Generate(complexity);
     }

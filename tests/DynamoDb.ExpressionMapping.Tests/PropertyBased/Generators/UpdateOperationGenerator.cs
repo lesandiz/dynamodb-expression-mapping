@@ -8,7 +8,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased.Generators;
 
 /// <summary>
 /// FsCheck generator for update operation sequences.
-/// Generates Action&lt;UpdateExpressionBuilder&lt;TestEntity&gt;&gt; across three complexity tiers.
+/// Generates Func&lt;UpdateExpressionBuilder&lt;TestEntity&gt;, IUpdateExpressionBuilder&lt;TestEntity&gt;&gt; across three complexity tiers.
 /// </summary>
 public static class UpdateOperationGenerator
 {
@@ -16,7 +16,7 @@ public static class UpdateOperationGenerator
     /// Generates random update operation sequences for TestEntity.
     /// </summary>
     /// <param name="complexity">Tier: Simple (single operation), Composite (2-3 operations), Complex (mixed clauses).</param>
-    public static Arbitrary<Action<UpdateExpressionBuilder<TestEntity>>> Generate(Complexity complexity = Complexity.Simple)
+    public static Arbitrary<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> Generate(Complexity complexity = Complexity.Simple)
     {
         var generator = complexity switch
         {
@@ -34,7 +34,7 @@ public static class UpdateOperationGenerator
     /// <summary>
     /// Generates single update operation from one of: SET, REMOVE, ADD, DELETE
     /// </summary>
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> SimpleOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> SimpleOperationGen()
     {
         return Gen.OneOf(
             SetOperationGen(),
@@ -46,14 +46,14 @@ public static class UpdateOperationGenerator
         );
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> SetOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> SetOperationGen()
     {
         return Gen.OneOf(
             // Set string property
             Gen.SelectMany(Gen.Elements("", "test", "foo", "bar", "updated", "new-value"), value =>
                 Gen.Select(Gen.Elements(0, 1, 2, 3), propIndex =>
                 {
-                    Action<UpdateExpressionBuilder<TestEntity>> action = propIndex switch
+                    Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> action = propIndex switch
                     {
                         0 => builder => builder.Set(x => x.OrderId, value),
                         1 => builder => builder.Set(x => x.CustomerId, value),
@@ -65,31 +65,31 @@ public static class UpdateOperationGenerator
 
             // Set decimal property
             Gen.SelectMany(Gen.Elements(0m, 1m, 10m, 99.99m, 100m, 1000m), value =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.Set(x => x.Price, value))),
 
             // Set boolean property
             Gen.SelectMany(Gen.Elements(true, false), value =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.Set(x => x.IsActive, value))),
 
             // Set DateTime property
             Gen.SelectMany(Gen.Elements(DateTime.MinValue, DateTime.UtcNow, new DateTime(2024, 1, 1)), value =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.Set(x => x.StartDate, value))),
 
             // Set nullable DateTime property
             Gen.SelectMany(Gen.Elements<DateTime?>(null, DateTime.MinValue, DateTime.UtcNow), value =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.Set(x => x.EndDate, value)))
         );
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> RemoveOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> RemoveOperationGen()
     {
         return Gen.Select(Gen.Elements(0, 1, 2, 3, 4), propIndex =>
         {
-            Action<UpdateExpressionBuilder<TestEntity>> action = propIndex switch
+            Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> action = propIndex switch
             {
                 0 => builder => builder.Remove(x => x.Title),
                 1 => builder => builder.Remove(x => x.EndDate),
@@ -101,27 +101,27 @@ public static class UpdateOperationGenerator
         });
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> IncrementDecrementOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> IncrementDecrementOperationGen()
     {
         var incrementGen = Gen.SelectMany(Gen.Elements(1m, 5m, 10m, 100m), amount =>
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Increment(x => x.Price, amount)));
 
         var decrementGen = Gen.SelectMany(Gen.Elements(1m, 5m, 10m, 50m), amount =>
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Decrement(x => x.Price, amount)));
 
         return Gen.OneOf(incrementGen, decrementGen);
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> SetIfNotExistsOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> SetIfNotExistsOperationGen()
     {
         return Gen.OneOf(
             // SetIfNotExists for string
             Gen.SelectMany(Gen.Elements("default", "fallback", "initial"), value =>
                 Gen.Select(Gen.Elements(0, 1), propIndex =>
                 {
-                    Action<UpdateExpressionBuilder<TestEntity>> action = propIndex switch
+                    Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> action = propIndex switch
                     {
                         0 => builder => builder.SetIfNotExists(x => x.Title, value),
                         _ => builder => builder.SetIfNotExists(x => x.Name, value)
@@ -131,26 +131,26 @@ public static class UpdateOperationGenerator
 
             // SetIfNotExists for decimal
             Gen.SelectMany(Gen.Elements(0m, 1m, 10m), value =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.SetIfNotExists(x => x.Price, value))),
 
             // SetIfNotExists for boolean
             Gen.SelectMany(Gen.Elements(true, false), value =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.SetIfNotExists(x => x.IsActive, value)))
         );
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> AddOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> AddOperationGen()
     {
         // ADD is used for number sets or incrementing numeric values in DynamoDB
         // For simplicity, we'll generate ADD operations for decimal properties
         return Gen.SelectMany(Gen.Elements(1m, 5m, 10m, 100m), value =>
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Add(x => x.Score, (int)value)));
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> DeleteOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> DeleteOperationGen()
     {
         // DELETE is used for removing elements from a set
         // For TestEntity, we'll use Tags (string array/set)
@@ -161,7 +161,7 @@ public static class UpdateOperationGenerator
                 new[] { "test" }
             ),
             tags =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.Delete(x => x.EnabledFeatures, new HashSet<string>(tags))));
     }
 
@@ -173,15 +173,15 @@ public static class UpdateOperationGenerator
     /// Generates 2-3 chained update operations.
     /// Ensures no conflicting operations on the same property.
     /// </summary>
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> CompositeOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> CompositeOperationGen()
     {
         var twoOpsGen = Gen.SelectMany(GetNonConflictingOperation(), op1 =>
             Gen.Select(GetNonConflictingOperation(), op2 =>
             {
-                Action<UpdateExpressionBuilder<TestEntity>> combined = builder =>
+                Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> combined = builder =>
                 {
-                    op1(builder);
-                    op2(builder);
+                    var b1 = (UpdateExpressionBuilder<TestEntity>)op1(builder);
+                    return op2(b1);
                 };
                 return combined;
             }));
@@ -190,11 +190,11 @@ public static class UpdateOperationGenerator
             Gen.SelectMany(GetNonConflictingOperation(), op2 =>
                 Gen.Select(GetNonConflictingOperation(), op3 =>
                 {
-                    Action<UpdateExpressionBuilder<TestEntity>> combined = builder =>
+                    Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> combined = builder =>
                     {
-                        op1(builder);
-                        op2(builder);
-                        op3(builder);
+                        var b1 = (UpdateExpressionBuilder<TestEntity>)op1(builder);
+                        var b2 = (UpdateExpressionBuilder<TestEntity>)op2(b1);
+                        return op3(b2);
                     };
                     return combined;
                 })));
@@ -206,37 +206,37 @@ public static class UpdateOperationGenerator
     /// Returns a generator that produces operations on different properties to avoid conflicts.
     /// Strategy: Use a diverse set of operations on different properties.
     /// </summary>
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> GetNonConflictingOperation()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> GetNonConflictingOperation()
     {
         return Gen.OneOf(
             // Set operations on different string properties
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Set(x => x.OrderId, Guid.NewGuid().ToString())),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Set(x => x.CustomerId, "CUST-" + Random.Shared.Next(1000))),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Set(x => x.Title, "Title-" + Random.Shared.Next(100))),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Set(x => x.Name, "Name-" + Random.Shared.Next(100))),
 
             // Increment/Decrement on Price
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Increment(x => x.Price, 10m)),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Decrement(x => x.Price, 5m)),
 
             // Set boolean
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Set(x => x.IsActive, Random.Shared.Next(2) == 0)),
 
             // Set DateTime
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Set(x => x.StartDate, DateTime.UtcNow)),
 
             // Remove nullable properties
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Remove(x => x.EndDate)),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Remove(x => x.Address))
         );
     }
@@ -249,16 +249,16 @@ public static class UpdateOperationGenerator
     /// Generates complex update operations combining multiple clause types: SET, REMOVE, ADD, DELETE
     /// Example: SET Price = 100, Name = "foo" REMOVE EndDate ADD Price 10 DELETE Tags {"tag1"}
     /// </summary>
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> ComplexOperationGen()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> ComplexOperationGen()
     {
         // Simplified: Generate operations with 2-3 different clause types
         var setAndRemoveGen = Gen.SelectMany(GetSetClauseOperation(), setOp =>
             Gen.Select(GetRemoveClauseOperation(), removeOp =>
             {
-                Action<UpdateExpressionBuilder<TestEntity>> combined = builder =>
+                Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> combined = builder =>
                 {
-                    setOp(builder);
-                    removeOp(builder);
+                    var b1 = (UpdateExpressionBuilder<TestEntity>)setOp(builder);
+                    return removeOp(b1);
                 };
                 return combined;
             }));
@@ -267,11 +267,11 @@ public static class UpdateOperationGenerator
             Gen.SelectMany(GetRemoveClauseOperation(), removeOp =>
                 Gen.Select(GetAddClauseOperation(), addOp =>
                 {
-                    Action<UpdateExpressionBuilder<TestEntity>> combined = builder =>
+                    Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> combined = builder =>
                     {
-                        setOp(builder);
-                        removeOp(builder);
-                        addOp(builder);
+                        var b1 = (UpdateExpressionBuilder<TestEntity>)setOp(builder);
+                        var b2 = (UpdateExpressionBuilder<TestEntity>)removeOp(b1);
+                        return addOp(b2);
                     };
                     return combined;
                 })));
@@ -280,11 +280,11 @@ public static class UpdateOperationGenerator
             Gen.SelectMany(GetRemoveClauseOperation(), removeOp =>
                 Gen.Select(GetDeleteClauseOperation(), deleteOp =>
                 {
-                    Action<UpdateExpressionBuilder<TestEntity>> combined = builder =>
+                    Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> combined = builder =>
                     {
-                        setOp(builder);
-                        removeOp(builder);
-                        deleteOp(builder);
+                        var b1 = (UpdateExpressionBuilder<TestEntity>)setOp(builder);
+                        var b2 = (UpdateExpressionBuilder<TestEntity>)removeOp(b1);
+                        return deleteOp(b2);
                     };
                     return combined;
                 })));
@@ -295,65 +295,65 @@ public static class UpdateOperationGenerator
                 Gen.SelectMany(GetAddClauseOperation(), addOp =>
                     Gen.Select(GetDeleteClauseOperation(), deleteOp =>
                     {
-                        Action<UpdateExpressionBuilder<TestEntity>> combined = builder =>
+                        Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>> combined = builder =>
                         {
-                            setOp(builder);
-                            removeOp(builder);
-                            addOp(builder);
-                            deleteOp(builder);
+                            var b1 = (UpdateExpressionBuilder<TestEntity>)setOp(builder);
+                            var b2 = (UpdateExpressionBuilder<TestEntity>)removeOp(b1);
+                            var b3 = (UpdateExpressionBuilder<TestEntity>)addOp(b2);
+                            return deleteOp(b3);
                         };
                         return combined;
                     }))));
 
         return Gen.OneOf(setAndRemoveGen, setRemoveAndAddGen, setRemoveAndDeleteGen, allClausesGen);
     }
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> GetSetClauseOperation()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> GetSetClauseOperation()
     {
         return Gen.OneOf(
             // Multiple SET operations
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(builder =>
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(builder =>
             {
-                builder.Set(x => x.OrderId, "ORD-" + Guid.NewGuid());
-                builder.Set(x => x.Title, "Updated Title");
-                builder.Increment(x => x.Price, 10m);
+                var b1 = (UpdateExpressionBuilder<TestEntity>)builder.Set(x => x.OrderId, "ORD-" + Guid.NewGuid());
+                var b2 = (UpdateExpressionBuilder<TestEntity>)b1.Set(x => x.Title, "Updated Title");
+                return b2.Increment(x => x.Price, 10m);
             }),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(builder =>
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(builder =>
             {
-                builder.Set(x => x.Name, "New Name");
-                builder.Set(x => x.Status, "Active");
-                builder.Set(x => x.IsActive, true);
+                var b1 = (UpdateExpressionBuilder<TestEntity>)builder.Set(x => x.Name, "New Name");
+                var b2 = (UpdateExpressionBuilder<TestEntity>)b1.Set(x => x.Status, "Active");
+                return b2.Set(x => x.IsActive, true);
             }),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(builder =>
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(builder =>
             {
-                builder.SetIfNotExists(x => x.Title, "Default Title");
-                builder.Set(x => x.StartDate, DateTime.UtcNow);
+                var b1 = (UpdateExpressionBuilder<TestEntity>)builder.SetIfNotExists(x => x.Title, "Default Title");
+                return b1.Set(x => x.StartDate, DateTime.UtcNow);
             })
         );
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> GetRemoveClauseOperation()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> GetRemoveClauseOperation()
     {
         return Gen.OneOf(
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Remove(x => x.EndDate)),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Remove(x => x.Address)),
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(builder =>
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(builder =>
             {
-                builder.Remove(x => x.EndDate);
-                builder.Remove(x => x.Address);
+                var b1 = (UpdateExpressionBuilder<TestEntity>)builder.Remove(x => x.EndDate);
+                return b1.Remove(x => x.Address);
             })
         );
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> GetAddClauseOperation()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> GetAddClauseOperation()
     {
         return Gen.SelectMany(Gen.Elements(1m, 5m, 10m, 100m), value =>
-            Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+            Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                 builder => builder.Add(x => x.Score, (int)value)));
     }
 
-    private static Gen<Action<UpdateExpressionBuilder<TestEntity>>> GetDeleteClauseOperation()
+    private static Gen<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> GetDeleteClauseOperation()
     {
         return Gen.SelectMany(
             Gen.Elements(
@@ -362,7 +362,7 @@ public static class UpdateOperationGenerator
                 new[] { "test", "foo" }
             ),
             tags =>
-                Gen.Constant<Action<UpdateExpressionBuilder<TestEntity>>>(
+                Gen.Constant<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>>(
                     builder => builder.Delete(x => x.EnabledFeatures, new HashSet<string>(tags))));
     }
 
