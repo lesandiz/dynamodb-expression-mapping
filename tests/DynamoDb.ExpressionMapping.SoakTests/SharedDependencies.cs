@@ -31,4 +31,9 @@ public sealed class SharedDependencies
         ConverterRegistry = AttributeValueConverterRegistry.Default;
         ExpressionCache = ExpressionCache.Default;
     }
+
+    /// <summary>
+    /// Gets current cache statistics across all expression types.
+    /// </summary>
+    public CacheStatistics GetCacheStatistics() => ExpressionCache.GetStatistics();
 }

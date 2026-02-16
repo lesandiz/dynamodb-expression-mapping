@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.SoakTests.Metrics;
 using DynamoDb.ExpressionMapping.SoakTests.Workloads;
 using Spectre.Console;
@@ -19,6 +20,8 @@ public sealed class SoakTestRunner
     private readonly IAmazonDynamoDB _dynamoDb;
     private readonly string _tableName;
     private readonly SharedDependencies _sharedDependencies;
+    private long _operationCounter = 0;
+    private long _lastErrorSummaryAt = 0;
 
     public SoakTestRunner(SoakTestConfig config, IAmazonDynamoDB? dynamoDb = null)
     {
@@ -175,17 +178,88 @@ public sealed class SoakTestRunner
 
                 operationStopwatch.Stop();
                 _metricsCollector.RecordOperation(operationStopwatch.Elapsed.TotalMilliseconds);
+
+                // Add small delay to prevent tight loop (1-5ms)
+                await Task.Delay(Random.Shared.Next(1, 6), cancellationToken);
             }
             catch (OperationCanceledException)
             {
                 // Expected during shutdown
                 break;
             }
+            catch (AmazonDynamoDBException dbEx)
+            {
+                // DynamoDB service errors
+                _metricsCollector.RecordFailure("DynamoDB");
+                var errorType = dbEx.GetType().Name;
+                Debug.WriteLine($"[Worker {workerId}] DynamoDB error ({errorType}): {dbEx.Message}");
+                Debug.WriteLine($"[Worker {workerId}] Stack trace: {dbEx.StackTrace}");
+
+                // Log to console for critical errors (throttling, service unavailable)
+                if (dbEx.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
+                    dbEx.ErrorCode == "ProvisionedThroughputExceededException")
+                {
+                    Console.Error.WriteLine($"[CRITICAL] Worker {workerId} - {errorType}: {dbEx.Message}");
+                }
+            }
+            catch (ExpressionMappingException expEx)
+            {
+                // Expression builder errors
+                _metricsCollector.RecordFailure("ExpressionMapping");
+                var errorType = expEx.GetType().Name;
+                Debug.WriteLine($"[Worker {workerId}] Expression mapping error ({errorType}): {expEx.Message}");
+                Debug.WriteLine($"[Worker {workerId}] Stack trace: {expEx.StackTrace}");
+                Console.Error.WriteLine($"[CRITICAL] Worker {workerId} - {errorType}: {expEx.Message}");
+            }
+            catch (InvalidOperationException invEx)
+            {
+                // Invalid operation errors (likely workload issues)
+                _metricsCollector.RecordFailure("InvalidOperation");
+                Debug.WriteLine($"[Worker {workerId}] Invalid operation: {invEx.Message}");
+                Debug.WriteLine($"[Worker {workerId}] Stack trace: {invEx.StackTrace}");
+            }
             catch (Exception ex)
             {
-                // Record failure but continue
-                _metricsCollector.RecordFailure();
-                Debug.WriteLine($"Worker {workerId} error: {ex.Message}");
+                // Unexpected errors
+                _metricsCollector.RecordFailure("Other");
+                var errorType = ex.GetType().Name;
+                Debug.WriteLine($"[Worker {workerId}] Unexpected error ({errorType}): {ex.Message}");
+                Debug.WriteLine($"[Worker {workerId}] Stack trace: {ex.StackTrace}");
+                Console.Error.WriteLine($"[ERROR] Worker {workerId} - Unexpected {errorType}: {ex.Message}");
+            }
+            finally
+            {
+                // Periodic error summary every 1000 operations
+                var currentOps = Interlocked.Increment(ref _operationCounter);
+                if (currentOps % 1000 == 0)
+                {
+                    LogErrorSummary(currentOps);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Logs periodic error summary to Debug output.
+    /// </summary>
+    private void LogErrorSummary(long currentOps)
+    {
+        var lastSummary = Interlocked.Read(ref _lastErrorSummaryAt);
+        if (currentOps - lastSummary < 1000)
+        {
+            return; // Avoid duplicate summaries from concurrent workers
+        }
+
+        if (Interlocked.CompareExchange(ref _lastErrorSummaryAt, currentOps, lastSummary) == lastSummary)
+        {
+            var errorsByCategory = _metricsCollector.GetErrorsByCategory();
+            if (errorsByCategory.Count > 0)
+            {
+                Debug.WriteLine($"[Error Summary @ {currentOps} ops]");
+                foreach (var (category, count) in errorsByCategory.OrderByDescending(kvp => kvp.Value))
+                {
+                    Debug.WriteLine($"  {category}: {count}");
+                }
             }
         }
     }
@@ -195,11 +269,189 @@ public sealed class SoakTestRunner
     /// </summary>
     private async Task InitializeTableAsync(CancellationToken cancellationToken)
     {
-        // In a real implementation, this would:
-        // 1. Create the table if it doesn't exist
-        // 2. Seed it with test data
-        // For now, just a placeholder
-        await Task.CompletedTask;
+        AnsiConsole.MarkupLine("[dim]Initializing DynamoDB table...[/]");
+
+        // 1. Create table if it doesn't exist
+        await CreateTableIfNotExistsAsync(cancellationToken);
+
+        // 2. Seed with test data
+        await SeedTestDataAsync(cancellationToken);
+
+        AnsiConsole.MarkupLine("[dim]  ✓ Table initialized with 1000 test orders[/]");
+        AnsiConsole.WriteLine();
+    }
+
+    /// <summary>
+    /// Creates the SoakTestOrders table if it doesn't exist.
+    /// </summary>
+    private async Task CreateTableIfNotExistsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _dynamoDb.CreateTableAsync(new CreateTableRequest
+            {
+                TableName = _tableName,
+                KeySchema = new List<KeySchemaElement>
+                {
+                    new KeySchemaElement { AttributeName = "PK", KeyType = KeyType.HASH },
+                    new KeySchemaElement { AttributeName = "SK", KeyType = KeyType.RANGE }
+                },
+                AttributeDefinitions = new List<AttributeDefinition>
+                {
+                    new AttributeDefinition { AttributeName = "PK", AttributeType = ScalarAttributeType.S },
+                    new AttributeDefinition { AttributeName = "SK", AttributeType = ScalarAttributeType.S }
+                },
+                BillingMode = BillingMode.PAY_PER_REQUEST
+            }, cancellationToken);
+
+            // Wait for table to become active
+            await WaitForTableActiveAsync(cancellationToken);
+        }
+        catch (ResourceInUseException)
+        {
+            // Table already exists - clear it
+            await ClearExistingDataAsync(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Waits for table to become active.
+    /// </summary>
+    private async Task WaitForTableActiveAsync(CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            var response = await _dynamoDb.DescribeTableAsync(_tableName, cancellationToken);
+            if (response.Table.TableStatus == TableStatus.ACTIVE)
+                break;
+
+            await Task.Delay(500, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Clears existing data from the table.
+    /// </summary>
+    private async Task ClearExistingDataAsync(CancellationToken cancellationToken)
+    {
+        var scanResponse = await _dynamoDb.ScanAsync(new ScanRequest
+        {
+            TableName = _tableName,
+            ProjectionExpression = "PK, SK"
+        }, cancellationToken);
+
+        if (scanResponse.Items.Count > 0)
+        {
+            // Delete in batches of 25
+            foreach (var batch in scanResponse.Items.Chunk(25))
+            {
+                var writeRequests = batch.Select(item => new WriteRequest
+                {
+                    DeleteRequest = new DeleteRequest
+                    {
+                        Key = new Dictionary<string, AttributeValue>
+                        {
+                            ["PK"] = item["PK"],
+                            ["SK"] = item["SK"]
+                        }
+                    }
+                }).ToList();
+
+                await _dynamoDb.BatchWriteItemAsync(new BatchWriteItemRequest
+                {
+                    RequestItems = new Dictionary<string, List<WriteRequest>>
+                    {
+                        [_tableName] = writeRequests
+                    }
+                }, cancellationToken);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Seeds the table with 1000 test orders using Bogus.
+    /// </summary>
+    private async Task SeedTestDataAsync(CancellationToken cancellationToken)
+    {
+        var faker = new Bogus.Faker();
+        var orders = new List<Dictionary<string, AttributeValue>>();
+
+        var statuses = new[] { "Processing", "Shipped", "Delivered", "Cancelled" };
+        var priorities = Enum.GetValues<OrderPriority>();
+        var productNames = new[] { "Laptop", "Book", "Monitor", "Keyboard", "Mouse", "Desk", "Chair", "Headphones", "Tablet", "Phone" };
+        var customerIds = Enumerable.Range(1, 100).Select(i => $"CUST{i:D4}").ToArray();
+
+        // Generate 1000 orders
+        for (int i = 0; i < 1000; i++)
+        {
+            var customerId = faker.PickRandom(customerIds);
+            var orderId = $"ORD{i:D6}";
+            var status = faker.PickRandom(statuses);
+            var priority = faker.PickRandom(priorities);
+            var createdAt = faker.Date.Between(DateTime.UtcNow.AddDays(-90), DateTime.UtcNow);
+
+            var item = new Dictionary<string, AttributeValue>
+            {
+                ["CustomerId"] = new AttributeValue { S = customerId },
+                ["OrderId"] = new AttributeValue { S = orderId },
+                ["PK"] = new AttributeValue { S = $"CUSTOMER#{customerId}" },
+                ["SK"] = new AttributeValue { S = $"ORDER#{orderId}" },
+                ["Name"] = new AttributeValue { S = faker.PickRandom(productNames) },
+                ["Status"] = new AttributeValue { S = status },
+                ["TotalAmount"] = new AttributeValue { N = faker.Finance.Amount(10, 2000, 2).ToString() },
+                ["TotalCurrency"] = new AttributeValue { S = "USD" },
+                ["Quantity"] = new AttributeValue { N = faker.Random.Int(1, 10).ToString() },
+                ["ShippingStreet"] = new AttributeValue { S = faker.Address.StreetAddress() },
+                ["ShippingCity"] = new AttributeValue { S = faker.Address.City() },
+                ["ShippingPostCode"] = new AttributeValue { S = faker.Address.ZipCode() },
+                ["Tags"] = new AttributeValue { SS = Enumerable.Range(0, faker.Random.Int(1, 5)).Select(_ => faker.Commerce.Categories(1)[0]).Distinct().ToList() },
+                ["CreatedAt"] = new AttributeValue { S = createdAt.ToString("O") },
+                ["IsGift"] = new AttributeValue { BOOL = faker.Random.Bool() },
+                ["Priority"] = new AttributeValue { N = ((int)priority).ToString() }
+            };
+
+            // Add optional fields
+            if (faker.Random.Bool(0.7f))
+            {
+                item["Notes"] = new AttributeValue { S = faker.Lorem.Sentence() };
+            }
+
+            if (status == "Shipped" || status == "Delivered")
+            {
+                item["ShippedAt"] = new AttributeValue { S = createdAt.AddDays(faker.Random.Int(1, 5)).ToString("O") };
+            }
+
+            if (faker.Random.Bool(0.3f))
+            {
+                item["Metadata"] = new AttributeValue
+                {
+                    M = new Dictionary<string, AttributeValue>
+                    {
+                        ["Source"] = new AttributeValue { S = faker.PickRandom("Web", "Mobile", "API") },
+                        ["Campaign"] = new AttributeValue { S = faker.Lorem.Word() }
+                    }
+                };
+            }
+
+            orders.Add(item);
+        }
+
+        // Batch write in chunks of 25 (DynamoDB limit)
+        foreach (var batch in orders.Chunk(25))
+        {
+            var writeRequests = batch.Select(item => new WriteRequest
+            {
+                PutRequest = new PutRequest { Item = item }
+            }).ToList();
+
+            await _dynamoDb.BatchWriteItemAsync(new BatchWriteItemRequest
+            {
+                RequestItems = new Dictionary<string, List<WriteRequest>>
+                {
+                    [_tableName] = writeRequests
+                }
+            }, cancellationToken);
+        }
     }
 
     /// <summary>
@@ -276,6 +528,17 @@ public sealed class SoakTestRunner
         AnsiConsole.MarkupLine($"  [bold]Operations:[/]     {result.Metrics.TotalOperations:N0} total, {result.Metrics.FailedOperations:N0} failed");
         AnsiConsole.MarkupLine($"  [bold]Throughput:[/]     {throughput:F1} ops/sec");
         AnsiConsole.MarkupLine($"  [bold]Latency:[/]        p50={result.Metrics.Latency.P50:F1}ms  p95={result.Metrics.Latency.P95:F1}ms  p99={result.Metrics.Latency.P99:F1}ms");
+
+        // Display error breakdown if there are failures
+        if (result.Metrics.FailedOperations > 0 && result.Metrics.ErrorsByCategory?.Count > 0)
+        {
+            AnsiConsole.MarkupLine($"  [bold]Error Breakdown:[/]");
+            foreach (var (category, count) in result.Metrics.ErrorsByCategory.OrderByDescending(kvp => kvp.Value))
+            {
+                var percentage = (count / (double)result.Metrics.FailedOperations) * 100.0;
+                AnsiConsole.MarkupLine($"    [yellow]{category}:[/] {count:N0} ({percentage:F1}%)");
+            }
+        }
 
         var startMB = result.MemoryAnalysis.StartMemoryBytes / (1024.0 * 1024.0);
         var endMB = result.MemoryAnalysis.EndMemoryBytes / (1024.0 * 1024.0);

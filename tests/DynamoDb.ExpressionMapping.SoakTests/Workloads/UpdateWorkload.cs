@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Bogus;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Mapping;
@@ -16,6 +17,7 @@ public class UpdateWorkload : IWorkload
     private readonly string _tableName;
     private readonly UpdateExpressionBuilder<SoakOrder> _updateBuilder;
     private readonly MetricsCollector _metricsCollector;
+    private readonly SharedDependencies _sharedDependencies;
     private readonly Faker _faker;
     private readonly Random _random;
 
@@ -28,10 +30,9 @@ public class UpdateWorkload : IWorkload
         _dynamoDb = dynamoDb ?? throw new ArgumentNullException(nameof(dynamoDb));
         _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
         _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
-
         ArgumentNullException.ThrowIfNull(sharedDependencies);
-        
 
+        _sharedDependencies = sharedDependencies;
         _updateBuilder = new UpdateExpressionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
         _faker = new Faker();
         _random = new Random(Guid.NewGuid().GetHashCode());
@@ -44,105 +45,152 @@ public class UpdateWorkload : IWorkload
         switch (operationType)
         {
             case 0:
-                BuildSingleSetOperation();
+                await BuildSingleSetOperation(cancellationToken);
                 break;
             case 1:
-                BuildMultipleSetOperations();
+                await BuildMultipleSetOperations(cancellationToken);
                 break;
             case 2:
-                BuildIncrementOperation();
+                await BuildIncrementOperation(cancellationToken);
                 break;
             case 3:
-                BuildListOperations();
+                await BuildListOperations(cancellationToken);
                 break;
             case 4:
-                BuildMixedClauses();
+                await BuildMixedClauses(cancellationToken);
                 break;
             case 5:
-                BuildConditionalUpdate();
+                await BuildConditionalUpdate(cancellationToken);
                 break;
         }
 
-        await Task.CompletedTask;
         UpdateCacheStats();
     }
 
     /// <summary>
     /// Single SET operation.
     /// </summary>
-    private void BuildSingleSetOperation()
+    private async Task BuildSingleSetOperation(CancellationToken cancellationToken)
     {
         var newStatus = _faker.PickRandom("Processing", "Shipped", "Delivered");
-        _updateBuilder.Set(o => o.Status, newStatus).Build();
+        var result = _updateBuilder.Set(o => o.Status, newStatus).Build();
+
+        await ExecuteUpdateAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
     }
 
     /// <summary>
     /// Multiple SET operations on different properties.
     /// </summary>
-    private void BuildMultipleSetOperations()
+    private async Task BuildMultipleSetOperations(CancellationToken cancellationToken)
     {
         var newStatus = _faker.PickRandom("Processing", "Shipped");
         var newNotes = _faker.Lorem.Sentence();
         var shippedAt = DateTime.UtcNow;
 
-        _updateBuilder
+        var result = _updateBuilder
             .Set(o => o.Status, newStatus)
             .Set(o => o.Notes, newNotes)
             .Set(o => o.ShippedAt, shippedAt)
             .Build();
+
+        await ExecuteUpdateAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
     }
 
     /// <summary>
     /// Increment operation (ADD clause).
     /// </summary>
-    private void BuildIncrementOperation()
+    private async Task BuildIncrementOperation(CancellationToken cancellationToken)
     {
         var incrementValue = _random.Next(1, 5);
-        _updateBuilder.Increment(o => o.Quantity, incrementValue).Build();
+        var result = _updateBuilder.Increment(o => o.Quantity, incrementValue).Build();
+
+        await ExecuteUpdateAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
     }
 
     /// <summary>
     /// List operations: AppendToList.
     /// </summary>
-    private void BuildListOperations()
+    private async Task BuildListOperations(CancellationToken cancellationToken)
     {
         var newTags = new List<string> { _faker.Lorem.Word(), _faker.Lorem.Word() };
-        _updateBuilder.AppendToList(o => o.Tags, newTags).Build();
+        var result = _updateBuilder.AppendToList(o => o.Tags, newTags).Build();
+
+        await ExecuteUpdateAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
     }
 
     /// <summary>
     /// Mixed clauses: SET, ADD, REMOVE in one expression.
     /// </summary>
-    private void BuildMixedClauses()
+    private async Task BuildMixedClauses(CancellationToken cancellationToken)
     {
         var newStatus = _faker.PickRandom("Shipped", "Delivered");
         var incrementQty = _random.Next(1, 3);
 
-        _updateBuilder
+        var result = _updateBuilder
             .Set(o => o.Status, newStatus)
             .Increment(o => o.Quantity, incrementQty)
             .Remove(o => o.Notes)
             .Build();
+
+        await ExecuteUpdateAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
     }
 
     /// <summary>
     /// Update with condition expression.
     /// </summary>
-    private void BuildConditionalUpdate()
+    private async Task BuildConditionalUpdate(CancellationToken cancellationToken)
     {
         var newStatus = "Shipped";
-        _updateBuilder
+        var result = _updateBuilder
             .Set(o => o.Status, newStatus)
             .Set(o => o.ShippedAt, DateTime.UtcNow)
             .Build();
+
+        await ExecuteUpdateAsync(result.Expression, result.ExpressionAttributeNames, result.ExpressionAttributeValues, cancellationToken);
+    }
+
+    private async Task ExecuteUpdateAsync(
+        string updateExpression,
+        IReadOnlyDictionary<string, string> expressionAttributeNames,
+        IReadOnlyDictionary<string, AttributeValue> expressionAttributeValues,
+        CancellationToken cancellationToken)
+    {
+        var customerId = $"CUSTOMER#{Guid.NewGuid()}";
+        var orderId = $"ORDER#{Guid.NewGuid()}";
+
+        var request = new UpdateItemRequest
+        {
+            TableName = _tableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                ["PK"] = new AttributeValue { S = customerId },
+                ["SK"] = new AttributeValue { S = orderId }
+            },
+            UpdateExpression = updateExpression,
+            ExpressionAttributeNames = expressionAttributeNames.ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+            ExpressionAttributeValues = expressionAttributeValues.ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+            ReturnValues = ReturnValue.ALL_NEW
+        };
+
+        var response = await _dynamoDb.UpdateItemAsync(request, cancellationToken);
+
+        // Verify response received
+        if (response == null)
+        {
+            throw new InvalidOperationException("DynamoDB UpdateItem returned null response");
+        }
     }
 
     private void UpdateCacheStats()
     {
+        var stats = _sharedDependencies.GetCacheStatistics();
+        var totalHits = stats.ProjectionHits + stats.MapperHits + stats.FilterHits;
+        var totalMisses = stats.ProjectionMisses + stats.MapperMisses + stats.FilterMisses;
+
         _metricsCollector.UpdateCacheStats(
-            entries: _random.Next(100, 500),
-            hits: _random.Next(1000, 10000),
-            misses: _random.Next(10, 500)
+            entries: stats.TotalEntries,
+            hits: totalHits,
+            misses: totalMisses
         );
     }
 }
