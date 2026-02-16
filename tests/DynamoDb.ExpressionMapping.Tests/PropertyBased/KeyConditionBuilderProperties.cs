@@ -129,8 +129,12 @@ public class KeyConditionBuilderProperties
             GeneratePartitionKeyValue(),
             GenerateSortKeyValue(),
             GenerateSortKeyValue(),
-            (pkValue, skLow, skHigh) =>
+            (pkValue, skValue1, skValue2) =>
             {
+                // Ensure low <= high by sorting the values (using same comparison as SortKeyConditionBuilder)
+                var skLow = string.Compare(skValue1, skValue2, System.StringComparison.CurrentCulture) <= 0 ? skValue1 : skValue2;
+                var skHigh = string.Compare(skValue1, skValue2, System.StringComparison.CurrentCulture) <= 0 ? skValue2 : skValue1;
+
                 var builder = CreateBuilder();
                 var result = builder
                     .WithPartitionKey(e => e.PK, pkValue)

@@ -82,14 +82,8 @@ public class PropertyTestConfigTests
     }
 
     [Fact]
-    public void DefaultMaxTest_Is10000()
+    public void DefaultMaxTest_Is1000()
     {
-        Assert.Equal(10_000, PropertyTestConfig.DefaultMaxTest);
-    }
-
-    [Fact]
-    public void QuietOnSuccessMaxTest_Is1000()
-    {
-        Assert.Equal(1_000, PropertyTestConfig.QuietOnSuccessMaxTest);
+        Assert.Equal(1_000, PropertyTestConfig.DefaultMaxTest);
     }
 }
