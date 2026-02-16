@@ -94,6 +94,15 @@
 
 - [x] 2.11c Implement ADR-001: refactor `UpdateExpressionBuilder` to clone-on-use pattern
 - [x] 2.11d Add concurrency unit tests for `UpdateExpressionBuilder` thread-safety
+
+**ADR-001 IMPLEMENTATION COMPLETE (Tasks 2.11c + 2.11d)**:
+- Refactored UpdateExpressionBuilder to clone-on-use pattern (each fluent method returns new instance)
+- Added AliasGenerator.Clone() method to support cloning with current counter state  
+- Created UpdateExpressionBuilderConcurrencyTests.cs with 8 comprehensive thread-safety tests
+- Updated UpdateOperationGenerator to use Func instead of Action (captures returned instance)
+- All 35 UpdateExpression tests pass (27 existing + 8 new concurrency tests)
+- Thread-safety verified: concurrent operations fully isolated, no state leakage
+- Ready to proceed with Task 2.11 (30-minute soak test)
 - [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria
 - [x] 2.11a Fix soak test infrastructure issues:
   - [x] Add configurable delay between operations in WorkerLoop (1-10ms)
