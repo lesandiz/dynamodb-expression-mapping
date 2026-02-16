@@ -22,14 +22,15 @@ public class CacheStressWorkload : IWorkload
     public CacheStressWorkload(
         IAmazonDynamoDB dynamoDb,
         string tableName,
-        MetricsCollector metricsCollector)
+        MetricsCollector metricsCollector,
+        SharedDependencies sharedDependencies)
     {
-        var resolverFactory = new AttributeNameResolverFactory();
-        var converterRegistry = AttributeValueConverterRegistry.Default;
+        ArgumentNullException.ThrowIfNull(sharedDependencies);
+        
 
-        _projectionBuilder = new ProjectionBuilder<SoakOrder>(resolverFactory, null, null);
-        _filterBuilder = new FilterExpressionBuilder<SoakOrder>(resolverFactory, converterRegistry);
-        _updateBuilder = new UpdateExpressionBuilder<SoakOrder>(resolverFactory, converterRegistry);
+        _projectionBuilder = new ProjectionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, null, null);
+        _filterBuilder = new FilterExpressionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
+        _updateBuilder = new UpdateExpressionBuilder<SoakOrder>(sharedDependencies.ResolverFactory, sharedDependencies.ConverterRegistry);
         _metricsCollector = metricsCollector ?? throw new ArgumentNullException(nameof(metricsCollector));
 
         _faker = new Faker();
