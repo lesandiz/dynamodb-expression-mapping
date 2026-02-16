@@ -16,6 +16,9 @@ TestResults/
 *.trx
 *.coverage
 
+## Mutation Testing
+StrykerOutput/
+
 ## Scratchpad (per Agent Prompt)
 .ralph/**/scratchpad/
 
