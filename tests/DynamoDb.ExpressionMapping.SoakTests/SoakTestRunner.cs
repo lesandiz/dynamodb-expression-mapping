@@ -530,9 +530,13 @@ Stack Trace:
         }
 
         // Criterion 2: Memory delta < 20% after warm-up
-        if (memoryAnalysis.DeltaPercent > 20.0)
+        // Use post-warm-up baseline instead of process start
+        var memoryDelta = finalSnapshot.MemoryBytes - baselineSnapshot.MemoryBytes;
+        var memoryDeltaPercent = baselineSnapshot.MemoryBytes == 0 ? 0 : (memoryDelta / (double)baselineSnapshot.MemoryBytes) * 100.0;
+
+        if (memoryDeltaPercent > 20.0)
         {
-            failures.Add($"Memory growth exceeded 20%: {memoryAnalysis.DeltaPercent:F1}%");
+            failures.Add($"Memory growth exceeded 20%: {memoryDeltaPercent:F1}%");
         }
 
         // Criterion 3: Gen2 GC collections < 10 during sustained phase
