@@ -88,7 +88,7 @@
 - **RESOLUTION NEEDED**: Expression builders must either be thread-safe OR instantiated per-operation instead of shared
 - **Task 2.11 BLOCKED** until this architectural issue is resolved
 
-- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria (**BLOCKED** - thread-safety issue in expression builders)
+- [ ] 2.11 Run 30-minute soak with 16 workers, verify pass criteria (**BLOCKED - ADR-001** - awaiting human decision on thread-safety fix)
 - [x] 2.11a Fix soak test infrastructure issues:
   - [x] Add configurable delay between operations in WorkerLoop (1-10ms)
   - [x] Implement actual DynamoDB operations in all workloads (Query, Scan, GetItem, UpdateItem, PutItem)
