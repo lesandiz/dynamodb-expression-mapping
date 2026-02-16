@@ -7,15 +7,10 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 public static class PropertyTestConfig
 {
     /// <summary>
-    /// Default maximum test count for local development: 10,000 cases.
+    /// Default maximum test count: 1,000 cases.
+    /// Use FSCHECK_MAX_TEST=10000 for full validation runs.
     /// </summary>
-    public const int DefaultMaxTest = 10_000;
-
-    /// <summary>
-    /// CI-friendly maximum test count: 1,000 cases.
-    /// Balances execution speed with coverage.
-    /// </summary>
-    public const int QuietOnSuccessMaxTest = 1_000;
+    public const int DefaultMaxTest = 1_000;
 
     /// <summary>
     /// Gets the effective maximum test count based on environment configuration.

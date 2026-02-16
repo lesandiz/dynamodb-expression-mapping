@@ -59,7 +59,16 @@ dotnet build
 dotnet test
 dotnet test --filter "Category!=Integration"        # unit tests only
 dotnet test --filter "Category=Integration"          # integration tests only (requires Docker for DynamoDB Local)
+FSCHECK_MAX_TEST=100 dotnet test --filter "Category=Property"   # property tests, fast (100 iterations)
+FSCHECK_MAX_TEST=10000 dotnet test --filter "Category=Property" # property tests, full validation (10k iterations)
 ```
+
+**Property-based tests**: Default is 1,000 iterations per property. Use `FSCHECK_MAX_TEST=100` for rapid development/agent workflows. Use `FSCHECK_MAX_TEST=10000` for full validation before completing Phase 1.
+
+**Expected durations** (do not kill the process prematurely):
+- `FSCHECK_MAX_TEST=100`: ~30 seconds
+- `FSCHECK_MAX_TEST=1000` (default): ~2-3 minutes — use a 5-minute timeout
+- `FSCHECK_MAX_TEST=10000`: ~10-15 minutes — use a 20-minute timeout (Bash `"timeout": 600000`)
 
 ## Test Framework & Conventions
 

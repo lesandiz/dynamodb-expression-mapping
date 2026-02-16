@@ -41,7 +41,7 @@ Recommended sequencing based on risk-to-effort ratio:
 
 The library is considered production-ready when:
 
-- Property-based tests run 10,000+ cases per invariant with zero failures
+- Property-based tests pass at 1,000 cases per invariant (default) and validated at 10,000 via `FSCHECK_MAX_TEST=10000` before phase completion
 - Soak tests run 30+ minutes with stable memory and zero errors
 - Mutation score exceeds 80% on expression builder subsystems
 - Benchmark baselines exist for all hot paths with CI regression gates

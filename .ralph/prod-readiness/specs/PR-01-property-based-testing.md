@@ -195,13 +195,13 @@ public Property KeyConditionAlwaysContainsPartitionKeyEquality(
 // In test assembly, configure FsCheck defaults
 public class PropertyTestConfig
 {
-    public const int DefaultMaxTest = 10_000;       // 10k cases per property
-    public const int QuietOnSuccessMaxTest = 1_000; // CI-friendly count
+    public const int DefaultMaxTest = 1_000;        // default for dev and CI
 }
 ```
 
-- Local development: 10,000 cases per property
-- CI: 1,000 cases per property (balance speed vs coverage)
+- Default: 1,000 cases per property (balances speed vs coverage)
+- Rapid iteration / agent workflows: `FSCHECK_MAX_TEST=100 dotnet test --filter "Category=Property"`
+- Full validation runs: `FSCHECK_MAX_TEST=10000 dotnet test --filter "Category=Property"`
 - Configurable via environment variable `FSCHECK_MAX_TEST`
 
 ## File Structure
@@ -224,7 +224,7 @@ DynamoDb.ExpressionMapping.Tests/
 
 ## Success Criteria
 
-- All properties pass with 10,000 random inputs
+- All properties pass at default 1,000 cases; validated once at 10,000 via `FSCHECK_MAX_TEST=10000` before phase completion
 - At least 3 real bugs discovered during initial implementation (validates the approach)
 - Generators cover all three complexity tiers
 - CI pipeline runs property tests as part of unit test suite
