@@ -15,6 +15,7 @@ public sealed class MemoryMonitor : IDisposable
     private readonly Task _monitorTask;
     private readonly List<MemorySample> _samples = new();
     private readonly object _lock = new();
+    private const int MaxSamples = 500; // Bounded retention: ~41 minutes at 5-second intervals
 
     public MemoryMonitor(MetricsCollector metricsCollector, TimeSpan? sampleInterval = null)
     {
@@ -41,6 +42,12 @@ public sealed class MemoryMonitor : IDisposable
                 lock (_lock)
                 {
                     _samples.Add(new MemorySample(elapsed, memoryBytes));
+
+                    // Bounded retention: keep only last MaxSamples samples
+                    if (_samples.Count > MaxSamples)
+                    {
+                        _samples.RemoveAt(0);
+                    }
                 }
 
                 // Update metrics collector

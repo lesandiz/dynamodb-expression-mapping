@@ -117,6 +117,41 @@
   - [x] KeyConditionWorkload.cs: Fixed all 5 methods to use seeded data
   - [x] Verified BuildMixedClauses has no conflicting operations within single execution
   - [x] Ran 30-second soak test - discovered thread-safety issue (see above)
+
+**SOAK TEST FAILURES (Tasks 2.11 - Analysis)**:
+
+**5-Minute Test Results** (after memory monitor fix attempt):
+- Operations: 647,054 total, 91,664 failed (14.2% failure rate)
+- Errors: 59.6% DynamoDB, 40.4% InvalidOperation
+- Memory: 82.7MB growth (8,644% from 1.0MB) - still far exceeds 20% threshold
+- Status: FAIL (spec requires zero failures)
+
+**Root Causes Identified**:
+
+1. **Memory Growth (8,644%)**:
+   - Bounded retention on MemoryMonitor._samples did NOT fix the issue
+   - Memory growth is from GC.GetTotalMemory() reporting total managed heap
+   - Likely causes:
+     a) Excessive object allocations in high-throughput operations (1,334 ops/sec × 16 workers × 8 min)
+     b) String interning from repeated attribute names/values
+     c) AttributeValue objects not being collected fast enough
+   - Need to investigate with memory profiler or add GC.Collect() between phases
+
+2. **Operation Failures (14.2% failure rate)** - CRITICAL BLOCKER:
+   - DynamoDB errors (59.6%): Likely ValidationException from REMOVE on non-existent attributes
+     - UpdateWorkload.BuildMixedClauses() uses `.Remove(o => o.Notes)` unconditionally
+     - Only 70% of seeded items have Notes field (SoakTestRunner.cs:414)
+     - DynamoDB throws ValidationException when removing non-existent attributes
+   - InvalidOperation errors (40.4%): Unknown cause - need stack traces
+     - Possibly from null response checks or other workload validation logic
+
+**Next Steps**:
+1. Fix UpdateWorkload to use conditional REMOVE (if_exists) or avoid REMOVE entirely
+2. Add detailed error logging with stack traces to identify InvalidOperation source
+3. Investigate memory growth - consider adding explicit GC between phases or reducing allocations
+4. Re-run 5-minute test to verify fixes
+5. Once 5-minute test passes, run full 30-minute soak test
+
 - [ ] 2.12 Commit phase 2
 
 **Exit criteria**: Zero failures across 30min/16 workers. Memory delta < 20%. Cache entry count stabilises.
