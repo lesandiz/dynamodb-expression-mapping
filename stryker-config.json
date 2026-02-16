@@ -20,6 +20,6 @@
       "string"
     ],
     "concurrency": 4,
-    "solution": "DynamoDb.ExpressionMapping.sln"
+    "solution": "DynamoDb.ExpressionMapping.slnx"
   }
 }

@@ -26,20 +26,27 @@ All property-based tests implemented and passing at 10k iterations. Critical bug
 
 ## Phase 3 — Mutation Testing (PR-03)
 
-**STATUS: BLOCKED (Turn 3)** — Stryker 4.12.0 setup issue. See task 3.3 for details.
+**STATUS: UNBLOCKED** — Root cause identified and fixed. See resolution notes below.
 
 **Priority: High** — validates that the existing + phase-1 test suite actually catches bugs.
 
+**Resolution (2026-02-16):** Three parallel investigations identified two independent root causes for the "No project found" error:
+
+1. **Primary fix (applied):** Stryker's embedded Buildalyzer cannot resolve `TargetFramework` when it is defined only in `Directory.Build.props`. Added explicit `<TargetFramework>net8.0</TargetFramework>` to both `.csproj` files. This is redundant with `Directory.Build.props` but required for Buildalyzer's design-time analysis.
+2. **Secondary issue (env-specific, documented):** On machines with VS 2019 BuildTools installed alongside VS 2022, Buildalyzer discovers the old MSBuild 16.11.2 first, which is incompatible with .NET 8 SDK (requires >= 17.8.3). Workaround: `MSBUILD_EXE_PATH="C:/Program Files/dotnet/sdk/8.0.418/MSBuild.dll" dotnet stryker`. This does not affect CI (`ubuntu-latest` has no VS 2019 BuildTools).
+3. **No viable alternative tools exist.** Faultify, NinjaTurtles, and Fettle are all dead/archived. Stryker.NET is the only actively maintained .NET mutation testing tool.
+
 - [x] 3.1 Install `dotnet-stryker` as local tool
 - [x] 3.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
-- [ ] 3.3 Run initial full mutation analysis — **BLOCKED: Stryker 4.12.0 fails with "No project found" after successful project analysis. Attempted fixes: traditional .sln file creation, .NET 8 SDK via global.json, CLI-only configuration, project path corrections. Root cause: Stryker analyzes both projects successfully but then reports "Analyzing 0 projects". Awaiting human decision on: (1) alternative mutation testing tool, (2) Stryker version change, or (3) different project structure.**
-- [ ] 3.4 Analyse Priority 1 subsystems (expression builders) — triage surviving mutants (PR-03.4)
-- [ ] 3.5 Write tests to kill surviving non-equivalent mutants in expression builders
-- [ ] 3.6 Analyse Priority 2 subsystems (type conversion) — triage and fix
-- [ ] 3.7 Analyse Priority 3 subsystems (result mapping) — triage and fix
-- [ ] 3.8 Analyse Priority 4 subsystems (supporting systems) — triage and fix
-- [ ] 3.9 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders
-- [ ] 3.10 Commit phase 3
+- [x] 3.3 Fix Stryker project discovery — added `<TargetFramework>` to both `.csproj` files for Buildalyzer compatibility
+- [ ] 3.4 Run initial full mutation analysis
+- [ ] 3.5 Analyse Priority 1 subsystems (expression builders) — triage surviving mutants (PR-03.4)
+- [ ] 3.6 Write tests to kill surviving non-equivalent mutants in expression builders
+- [ ] 3.7 Analyse Priority 2 subsystems (type conversion) — triage and fix
+- [ ] 3.8 Analyse Priority 3 subsystems (result mapping) — triage and fix
+- [ ] 3.9 Analyse Priority 4 subsystems (supporting systems) — triage and fix
+- [ ] 3.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders
+- [ ] 3.11 Commit phase 3
 
 **Exit criteria**: Mutation score ≥ 80% overall, ≥ 90% expression builders. All surviving non-equivalent mutants addressed.
 

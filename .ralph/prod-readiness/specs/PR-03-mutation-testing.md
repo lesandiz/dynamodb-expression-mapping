@@ -15,6 +15,28 @@ Run mutation testing on the core library (`DynamoDb.ExpressionMapping`) using th
 - **[Stryker.NET](https://stryker-mutator.io/docs/stryker-net/introduction/)** (>= 4.x) — .NET mutation testing framework
 - Install: `dotnet tool install -g dotnet-stryker` or as a local tool
 
+## Known Issues & Workarounds
+
+### Buildalyzer `TargetFramework` Discovery (Resolved)
+
+Stryker's embedded Buildalyzer library cannot resolve `TargetFramework` when it is only defined in `Directory.Build.props` and not in the individual `.csproj` files. This causes Stryker to report "Analyzing 0 projects" / "No project found" despite successful initial analysis.
+
+**Fix:** Add `<TargetFramework>net8.0</TargetFramework>` explicitly to both `.csproj` files. This is redundant with `Directory.Build.props` but required for Buildalyzer's design-time build.
+
+### MSBuild Version Conflict (Environment-Specific)
+
+On machines with Visual Studio 2019 BuildTools installed alongside VS 2022, Buildalyzer discovers the old MSBuild 16.11.2 first. .NET 8 SDK requires MSBuild >= 17.8.3, causing silent analysis failure.
+
+**Workaround:** Set the `MSBUILD_EXE_PATH` environment variable before running Stryker:
+
+```bash
+MSBUILD_EXE_PATH="C:/Program Files/dotnet/sdk/8.0.418/MSBuild.dll" dotnet stryker
+```
+
+This does not affect CI (`ubuntu-latest` has no VS 2019 BuildTools). Stryker 4.13.0 (PR #3426, merged Feb 2026) may resolve this automatically.
+
+**Alternative:** Uninstall VS 2019 BuildTools if no longer needed.
+
 ## Configuration
 
 ### PR-03.1: Stryker Configuration File
@@ -43,7 +65,7 @@ Run mutation testing on the core library (`DynamoDb.ExpressionMapping`) using th
       "string"
     ],
     "concurrency": 4,
-    "solution": "DynamoDb.ExpressionMapping.sln"
+    "solution": "DynamoDb.ExpressionMapping.slnx"
   }
 }
 ```
@@ -117,11 +139,17 @@ Stryker.NET applies these mutators by default. Key ones for this library:
 # Full mutation run (may take 10-30 minutes depending on project size)
 dotnet stryker
 
+# If VS 2019 BuildTools is installed (see Known Issues above):
+MSBUILD_EXE_PATH="C:/Program Files/dotnet/sdk/8.0.418/MSBuild.dll" dotnet stryker
+
 # Target specific subsystem
 dotnet stryker --mutate "src/DynamoDb.ExpressionMapping/Expressions/**/*.cs"
 
 # Quick smoke run (fewer mutations)
 dotnet stryker --since:main
+
+# Exclude slow tests (property-based + integration) from initial test verification
+dotnet stryker --test-case-filter "Category!=Property&Category!=Integration"
 ```
 
 ### PR-03.4: Analysing Results
