@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-net/master/src/Stryker.Core/Stryker.Core/stryker-config.schema.json",
+  "stryker-config": {
+    "project": "DynamoDb.ExpressionMapping.csproj",
+    "test-projects": [
+      "tests/DynamoDb.ExpressionMapping.Tests/DynamoDb.ExpressionMapping.Tests.csproj"
+    ],
+    "reporters": ["html", "json", "progress"],
+    "thresholds": {
+      "high": 90,
+      "low": 80,
+      "break": 75
+    },
+    "mutate": [
+      "src/DynamoDb.ExpressionMapping/**/*.cs",
+      "!src/DynamoDb.ExpressionMapping/obj/**",
+      "!src/DynamoDb.ExpressionMapping/Attributes/**"
+    ],
+    "ignore-mutations": [
+      "string"
+    ],
+    "concurrency": 4,
+    "solution": "DynamoDb.ExpressionMapping.slnx"
+  }
+}
