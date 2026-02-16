@@ -1,0 +1,317 @@
+using System.Text.RegularExpressions;
+using DynamoDb.ExpressionMapping.Expressions;
+using DynamoDb.ExpressionMapping.Mapping;
+using DynamoDb.ExpressionMapping.Tests.Fixtures;
+using DynamoDb.ExpressionMapping.Tests.PropertyBased.Generators;
+using FsCheck;
+using FsCheck.Fluent;
+using Xunit;
+
+namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
+
+/// <summary>
+/// Property-based tests for UpdateExpressionBuilder.
+/// Verifies invariants PR-01.3: well-formed clauses and correct alias prefixes.
+/// </summary>
+public class UpdateExpressionBuilderProperties
+{
+    private readonly IAttributeNameResolverFactory _resolverFactory;
+    private readonly IAttributeValueConverterRegistry _converterRegistry;
+    private readonly Config _config;
+
+    public UpdateExpressionBuilderProperties()
+    {
+        _resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
+        _converterRegistry = AttributeValueConverterRegistry.Default;
+        _config = Config.Quick.WithMaxTest(PropertyTestConfig.MaxTest);
+    }
+
+    #region PR-01.3 Invariant 1: Update Clauses Are Well-Formed
+
+    /// <summary>
+    /// Invariant: Output contains only valid clause keywords: SET, REMOVE, ADD, DELETE.
+    /// Each clause keyword appears at most once.
+    /// Simple operations.
+    /// </summary>
+    [Fact]
+    public void UpdateClausesAreWellFormed_Simple()
+    {
+        var property = Prop.ForAll(
+            ExpressionGenerators.UpdateOperation(Complexity.Simple),
+            operations =>
+            {
+                var builder = CreateBuilder();
+                operations(builder);
+                var result = builder.Build();
+
+                return ValidateClauseWellFormedness(result);
+            });
+
+        Check.One(_config, property);
+    }
+
+    /// <summary>
+    /// Invariant for composite operations.
+    /// </summary>
+    [Fact]
+    public void UpdateClausesAreWellFormed_Composite()
+    {
+        var property = Prop.ForAll(
+            ExpressionGenerators.UpdateOperation(Complexity.Composite),
+            operations =>
+            {
+                var builder = CreateBuilder();
+                operations(builder);
+                var result = builder.Build();
+
+                return ValidateClauseWellFormedness(result);
+            });
+
+        Check.One(_config, property);
+    }
+
+    /// <summary>
+    /// Invariant for complex operations (mixed clauses).
+    /// </summary>
+    [Fact]
+    public void UpdateClausesAreWellFormed_Complex()
+    {
+        var property = Prop.ForAll(
+            ExpressionGenerators.UpdateOperation(Complexity.Complex),
+            operations =>
+            {
+                var builder = CreateBuilder();
+                operations(builder);
+                var result = builder.Build();
+
+                return ValidateClauseWellFormedness(result);
+            });
+
+        Check.One(_config, property);
+    }
+
+    private static Property ValidateClauseWellFormedness(UpdateExpressionResult result)
+    {
+        if (result.IsEmpty)
+        {
+            return Prop.Label(true, "Empty result (no operations)");
+        }
+
+        var expression = result.Expression;
+        var validKeywords = new[] { "SET", "REMOVE", "ADD", "DELETE" };
+
+        // Each valid keyword should appear at most once
+        foreach (var keyword in validKeywords)
+        {
+            var regex = new Regex($@"\b{keyword}\b", RegexOptions.IgnoreCase);
+            var matches = regex.Matches(expression);
+
+            if (matches.Count > 1)
+            {
+                return Prop.Label(
+                    false,
+                    $"Clause keyword '{keyword}' appears {matches.Count} times (should appear at most once). Expression: {expression}");
+            }
+        }
+
+        // Extract all potential clause keywords from the expression
+        var keywords = Regex.Matches(expression, @"\b[A-Z]+\b")
+            .Cast<Match>()
+            .Select(m => m.Value)
+            .Distinct()
+            .ToList();
+
+        // Verify all keywords are valid
+        foreach (var keyword in keywords)
+        {
+            if (!validKeywords.Contains(keyword))
+            {
+                return Prop.Label(
+                    false,
+                    $"Invalid clause keyword '{keyword}' found. Expression: {expression}");
+            }
+        }
+
+        // Verify basic structure: clause keywords should be at the start or after a space
+        // and followed by a space or end of string
+        var clausePattern = @"^(SET|REMOVE|ADD|DELETE)\s|(\s)(SET|REMOVE|ADD|DELETE)\s";
+        if (!Regex.IsMatch(expression, clausePattern))
+        {
+            // Check if it's a single clause at the beginning
+            if (!Regex.IsMatch(expression, @"^(SET|REMOVE|ADD|DELETE)\s"))
+            {
+                return Prop.Label(
+                    false,
+                    $"Expression does not start with a valid clause keyword. Expression: {expression}");
+            }
+        }
+
+        return Prop.Label(true, "All clauses well-formed");
+    }
+
+    #endregion
+
+    #region PR-01.3 Invariant 2: Update Aliases Always Use 'upd' Prefix
+
+    /// <summary>
+    /// Invariant: Every alias uses #upd_ / :upd_v prefix.
+    /// Simple operations.
+    /// </summary>
+    [Fact]
+    public void UpdateAliasesAlwaysUseUpdPrefix_Simple()
+    {
+        var property = Prop.ForAll(
+            ExpressionGenerators.UpdateOperation(Complexity.Simple),
+            operations =>
+            {
+                var builder = CreateBuilder();
+                operations(builder);
+                var result = builder.Build();
+
+                return ValidateAliasPrefix(result);
+            });
+
+        Check.One(_config, property);
+    }
+
+    /// <summary>
+    /// Invariant for composite operations.
+    /// </summary>
+    [Fact]
+    public void UpdateAliasesAlwaysUseUpdPrefix_Composite()
+    {
+        var property = Prop.ForAll(
+            ExpressionGenerators.UpdateOperation(Complexity.Composite),
+            operations =>
+            {
+                var builder = CreateBuilder();
+                operations(builder);
+                var result = builder.Build();
+
+                return ValidateAliasPrefix(result);
+            });
+
+        Check.One(_config, property);
+    }
+
+    /// <summary>
+    /// Invariant for complex operations (mixed clauses).
+    /// </summary>
+    [Fact]
+    public void UpdateAliasesAlwaysUseUpdPrefix_Complex()
+    {
+        var property = Prop.ForAll(
+            ExpressionGenerators.UpdateOperation(Complexity.Complex),
+            operations =>
+            {
+                var builder = CreateBuilder();
+                operations(builder);
+                var result = builder.Build();
+
+                return ValidateAliasPrefix(result);
+            });
+
+        Check.One(_config, property);
+    }
+
+    private static Property ValidateAliasPrefix(UpdateExpressionResult result)
+    {
+        if (result.IsEmpty)
+        {
+            return Prop.Label(true, "Empty result (no operations)");
+        }
+
+        // Validate attribute name aliases (should start with #upd_)
+        foreach (var alias in result.ExpressionAttributeNames.Keys)
+        {
+            if (!alias.StartsWith("#upd_"))
+            {
+                return Prop.Label(
+                    false,
+                    $"Attribute name alias '{alias}' does not start with '#upd_'. Expression: {result.Expression}");
+            }
+        }
+
+        // Validate attribute value placeholders (should start with :upd_v)
+        foreach (var placeholder in result.ExpressionAttributeValues.Keys)
+        {
+            if (!placeholder.StartsWith(":upd_v"))
+            {
+                return Prop.Label(
+                    false,
+                    $"Attribute value placeholder '{placeholder}' does not start with ':upd_v'. Expression: {result.Expression}");
+            }
+        }
+
+        // Verify all aliases in the expression match the dictionaries
+        var nameAliasPattern = new Regex(@"#upd_\d+");
+        var valuePlaceholderPattern = new Regex(@":upd_v\d+");
+
+        var nameAliasesInExpression = nameAliasPattern.Matches(result.Expression)
+            .Cast<Match>()
+            .Select(m => m.Value)
+            .Distinct()
+            .ToHashSet();
+
+        var valuePlaceholdersInExpression = valuePlaceholderPattern.Matches(result.Expression)
+            .Cast<Match>()
+            .Select(m => m.Value)
+            .Distinct()
+            .ToHashSet();
+
+        // Every alias in the expression should exist in the dictionary
+        foreach (var alias in nameAliasesInExpression)
+        {
+            if (!result.ExpressionAttributeNames.ContainsKey(alias))
+            {
+                return Prop.Label(
+                    false,
+                    $"Name alias '{alias}' found in expression but not in ExpressionAttributeNames. Expression: {result.Expression}");
+            }
+        }
+
+        foreach (var placeholder in valuePlaceholdersInExpression)
+        {
+            if (!result.ExpressionAttributeValues.ContainsKey(placeholder))
+            {
+                return Prop.Label(
+                    false,
+                    $"Value placeholder '{placeholder}' found in expression but not in ExpressionAttributeValues. Expression: {result.Expression}");
+            }
+        }
+
+        // Every dictionary entry should appear in the expression
+        foreach (var alias in result.ExpressionAttributeNames.Keys)
+        {
+            if (!nameAliasesInExpression.Contains(alias))
+            {
+                return Prop.Label(
+                    false,
+                    $"Name alias '{alias}' in ExpressionAttributeNames but not found in expression. Expression: {result.Expression}");
+            }
+        }
+
+        foreach (var placeholder in result.ExpressionAttributeValues.Keys)
+        {
+            if (!valuePlaceholdersInExpression.Contains(placeholder))
+            {
+                return Prop.Label(
+                    false,
+                    $"Value placeholder '{placeholder}' in ExpressionAttributeValues but not found in expression. Expression: {result.Expression}");
+            }
+        }
+
+        return Prop.Label(true, "All aliases use correct 'upd' prefix and are consistent");
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private UpdateExpressionBuilder<TestEntity> CreateBuilder()
+    {
+        return new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
+    }
+
+    #endregion
+}
