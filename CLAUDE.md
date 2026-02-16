@@ -136,3 +136,13 @@ curl "http://localhost:5000/api/products?category=Electronics&activeOnly=true"
 # Get customer
 curl "http://localhost:5000/api/customers/alice"
 ```
+
+### SoakTests
+
+Soak and concurrency testing harness. DynamoDB Local runs on **port 8004** (host) mapping to 8000 (container).
+
+To run:
+```bash
+cd tests/DynamoDb.ExpressionMapping.SoakTests && docker compose up -d
+# Run soak tests: dotnet run -- --duration 10 --concurrency 8
+```

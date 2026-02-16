@@ -41,7 +41,7 @@
 **Priority: High** — highest severity if thread-safety or memory issues exist.
 
 - [x] 2.1 Create `tests/DynamoDb.ExpressionMapping.SoakTests/` project with dependencies (Bogus, Spectre.Console, System.Diagnostics.Metrics)
-- [ ] 2.2 Add `docker-compose.yml` for DynamoDB Local
+- [x] 2.2 Add `docker-compose.yml` for DynamoDB Local
 - [ ] 2.3 Implement `MetricsCollector` and `MemoryMonitor` (PR-02.5, PR-02.6)
 - [ ] 2.4 Implement `SoakTestRunner` with warm-up / sustained / cool-down phases (PR-02.1)
 - [ ] 2.5 Implement workloads: `ProjectionWorkload`, `FilterWorkload`, `UpdateWorkload`, `KeyConditionWorkload` (PR-02.4)
