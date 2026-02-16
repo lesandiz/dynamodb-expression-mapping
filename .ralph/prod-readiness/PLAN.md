@@ -281,3 +281,30 @@ Test results (5-minute, 16 workers): 55,242 failures (8.1%), 5,180% memory growt
 Blocker: 3+ turns of work, fundamental issues remain. InvalidOperation source unclear. May need individual workload testing or live debugging.
 
 Files modified: SoakTestRunner.cs, UpdateWorkload.cs, KeyConditionWorkload.cs
+
+---
+
+**ESCALATION - TASK 2.11 (4 CONSECUTIVE TURNS WITHOUT RESOLUTION)**:
+
+After 4 turns of work on Task 2.11, fundamental blockers remain:
+
+**Failures**: 8.1% (55,242/680,676 ops) - spec requires ZERO
+- DynamoDB errors: 33.4% (improved from 59.8%)
+- InvalidOperation errors: 66.6% (increased from 40.2%, source unknown)
+
+**Memory Growth**: 5,180% - spec threshold <20%
+- GC.Collect() between phases ineffective
+
+**Work Completed**:
+- Turn 1: Infrastructure fixes (delays, DynamoDB ops, bounded retention, table seeding)
+- Turn 2: Fixed key generation, discovered thread-safety bug
+- Turn 3: Implemented ADR-001 (UpdateBuilder clone-on-use), added concurrency tests
+- Turn 4: Deterministic seeding (10 orders/customer), removed conflicting REMOVE operations
+
+**Decision Needed**:
+- Option A: Add detailed stack trace logging for InvalidOperation errors
+- Option B: Test individual workloads in isolation
+- Option C: Memory profiler investigation
+- Option D: Relax spec requirements (allow small % edge-case failures)
+
+**Status**: BLOCKED - awaiting human decision
