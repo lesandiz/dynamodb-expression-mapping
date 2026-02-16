@@ -22,6 +22,8 @@ public sealed class SoakTestRunner
     private readonly SharedDependencies _sharedDependencies;
     private long _operationCounter = 0;
     private long _lastErrorSummaryAt = 0;
+    private readonly string _errorLogPath;
+    private readonly object _errorLogLock = new object();
 
     public SoakTestRunner(SoakTestConfig config, IAmazonDynamoDB? dynamoDb = null)
     {
@@ -33,6 +35,7 @@ public sealed class SoakTestRunner
         _dynamoDb = dynamoDb ?? CreateDynamoDbClient();
         _tableName = "SoakTestOrders";
         _sharedDependencies = new SharedDependencies();
+        _errorLogPath = Path.Combine(Path.GetTempPath(), $"soak-test-errors-{DateTime.UtcNow:yyyyMMdd-HHmmss}.log");
     }
 
     /// <summary>
@@ -96,6 +99,8 @@ public sealed class SoakTestRunner
             // Determine pass/fail
             var result = EvaluateResults(finalSnapshot, memoryAnalysis, baselineSnapshot);
             PrintResults(result, overallStopwatch.Elapsed);
+
+            AnsiConsole.MarkupLine($"[dim]Error log: {_errorLogPath}[/]");
 
             return result;
         }
@@ -226,6 +231,7 @@ public sealed class SoakTestRunner
                 _metricsCollector.RecordFailure("InvalidOperation");
                 Debug.WriteLine($"[Worker {workerId}] Invalid operation: {invEx.Message}");
                 Debug.WriteLine($"[Worker {workerId}] Stack trace: {invEx.StackTrace}");
+                LogErrorToFile(workerId, invEx);
             }
             catch (Exception ex)
             {
@@ -244,6 +250,34 @@ public sealed class SoakTestRunner
                 {
                     LogErrorSummary(currentOps);
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Logs detailed error information to file for post-run analysis.
+    /// </summary>
+    private void LogErrorToFile(int workerId, Exception ex)
+    {
+        lock (_errorLogLock)
+        {
+            try
+            {
+                var logEntry = $@"
+================================================================================
+Timestamp: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff}
+Worker ID: {workerId}
+Exception Type: {ex.GetType().FullName}
+Message: {ex.Message}
+Stack Trace:
+{ex.StackTrace}
+================================================================================
+";
+                File.AppendAllText(_errorLogPath, logEntry);
+            }
+            catch
+            {
+                // Suppress file I/O errors to avoid impacting test execution
             }
         }
     }

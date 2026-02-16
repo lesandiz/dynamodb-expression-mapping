@@ -6,12 +6,46 @@
 
 ## Phase 1 — Property-Based Testing (PR-01)
 
+**Priority: Highest** — most likely to surface real bugs in expression builders and converters.
 
-## Phase 1 — Property-Based Testing (PR-01) ✅ COMPLETE
+- [x] 1.1 Add `FsCheck.Xunit` (>= 3.x) to test project
+- [x] 1.2 Create `PropertyBased/Generators/` folder and `ExpressionGenerators.cs` entry point
+- [x] 1.3 Implement `ProjectionSelectorGenerator` (simple, composite, complex tiers)
+- [x] 1.4 Implement `FilterPredicateGenerator` (simple, composite, complex tiers)
+- [x] 1.5 Implement `UpdateOperationGenerator` (simple, composite, complex tiers)
+- [x] 1.6 Create `PropertyTestConfig` with env-var-driven max-test counts (10k local, 1k CI)
+- [x] 1.7 Write `ProjectionBuilderProperties` — invariant PR-01.1 (alias prefix, reserved keyword aliasing)
+- [x] 1.8 Write `FilterExpressionBuilderProperties` — invariant PR-01.2 (non-empty, balanced parens, placeholder/dictionary consistency, scope isolation)
+- [x] 1.9 Write `UpdateExpressionBuilderProperties` — invariant PR-01.3 (well-formed clauses, correct alias prefixes)
+- [x] 1.10 Write `KeyConditionBuilderProperties` — invariant PR-01.6 (partition key equality present)
+- [x] 1.11 Write `ComposabilityProperties` — invariant PR-01.4 (no alias collisions after composition)
+- [x] 1.12 Write `TypeConverterProperties` — invariant PR-01.5 (round-trip, nullable semantics)
 
-All property-based tests implemented and passing at 10k iterations. Critical bug discovered and fixed: UpdateExpressionBuilder orphaned placeholders on duplicate property updates. See `archive/completed_phases.md` for full details.
+**BUG FOUND & FIXED (Task 1.13 - 10k iteration run)**:
+- UpdateExpressionBuilder created orphaned placeholders when the same property was set multiple times
+- Example: `.Set(x => x.Price, 10).Set(x => x.Price, 20)` generated `:upd_v0` and `:upd_v1` but only `:upd_v1` was used
+- Root cause: Operation dictionaries overwrite on duplicate keys, but each call increments alias counters
+- Fix applied: Added `RemoveOldValuePlaceholders()` to clean up both value placeholders and name aliases before overwriting
+- All methods updated: Set, Increment, Decrement, SetIfNotExists, AppendToList, Add, Delete
+- Verified: Property tests pass at 100 iterations
+
+- [x] 1.13 Run full suite at 10k iterations (`FSCHECK_MAX_TEST=10000`), fix any discovered bugs
+- [x] 1.14 Commit phase 1
+
+**Exit criteria**: All properties pass at 1k cases (default). Task 1.13 validates at 10k via `FSCHECK_MAX_TEST=10000`. Any bugs found are fixed and documented.
 
 ---
+
+## Phase 2 — Soak & Concurrency Testing (PR-02)
+
+**Priority: High** — highest severity if thread-safety or memory issues exist.
+
+- [x] 2.1 Create `tests/DynamoDb.ExpressionMapping.SoakTests/` project with dependencies (Bogus, Spectre.Console, System.Diagnostics.Metrics)
+- [x] 2.2 Add `docker-compose.yml` for DynamoDB Local
+- [x] 2.3 Implement `MetricsCollector` and `MemoryMonitor` (PR-02.5, PR-02.6)
+- [x] 2.4 Implement `SoakTestRunner` with warm-up / sustained / cool-down phases (PR-02.1)
+- [x] 2.5 Implement workloads: `ProjectionWorkload`, `FilterWorkload`, `UpdateWorkload`, `KeyConditionWorkload` (PR-02.4)
+- [x] 2.6 Implement `MixedWorkload` and `CacheStressWorkload` (PR-02.4)
 - [x] 2.7 Implement concurrency model — shared DI instances, configurable worker count (PR-02.2)
 - [x] 2.8 Implement CLI interface with `--duration`, `--concurrency`, `--workload` args
 - [x] 2.9 Implement Spectre.Console reporting output and exit-code logic
@@ -222,6 +256,17 @@ All property-based tests implemented and passing at 10k iterations. Critical bug
 | Phase 1 → 2 | Phase 1 fully committed before starting phase 2 |
 | Phase 2 → 3 | Phase 2 fully committed before starting phase 3 |
 | Phase 3 → 4 | Phase 3 fully committed before starting phase 4 |
+| Phase 4 → 5 | Phase 4 fully committed before starting phase 5 |
+| Phase 5 → 6 | Phase 5 fully committed before starting phase 6 |
+| Phase 6 → 7 | Phase 6 fully committed before starting phase 7 |
+
+Each phase is a hard stop. Completing one phase does **not** auto-start the next.
+
+**SOAK TEST INVESTIGATION - Task 2.11c (Current Turn)**:
+
+Root cause: Data mismatch - seeding assigns orders randomly to customers, but workloads pick random PK+SK pairs independently → most don't exist.
+
+Fixes applied:
 - Deterministic seeding: 10 orders per customer (CUST0001: ORD000000-000009, CUST0002: ORD000010-000019, etc.)
 - UpdateWorkload.cs: Deterministic key generation (customerNum = orderNum/10 + 1)  
 - KeyConditionWorkload.cs: Fixed 3 methods with deterministic keys (Equals, Comparison, Between)
@@ -258,38 +303,14 @@ After 4 turns of work on Task 2.11, fundamental blockers remain:
 
 **Decision (2026-02-16)**: Proceed with Option A then Option B.
 
-- [x] 2.11e Add detailed stack trace logging for InvalidOperation errors
+- [ ] 2.11e Add detailed stack trace logging for InvalidOperation errors
   - Capture full exception details (type, message, stack trace) in error categorization
   - Run short soak test to collect error diagnostics
   - Identify root cause of InvalidOperation errors (66.6% of failures)
-- [x] 2.11e Add detailed stack trace logging for InvalidOperation errors
-  - Capture full exception details (type, message, stack trace) in error categorization
-  - Run short soak test to collect error diagnostics
-  - Identify root cause of InvalidOperation errors (66.6% of failures)
-
-**TASK 2.11e COMPLETE - ROOT CAUSE IDENTIFIED AND FIXED**:
-
-**Root Cause**: FilterWorkload validation logic incorrectly assumed `ExpressionAttributeNames` must always be populated. When filtering on non-reserved properties (Priority, IsGift), the attribute name dictionary is empty - which is **valid**. The workload threw InvalidOperationException on valid filter results.
-
-**Fixes Applied**:
-1. Added detailed error logging to SoakTestRunner.cs (logs full exception details to temp file)
-2. Fixed FilterWorkload.BuildAndComposeFilters validation (line 122)
-3. Fixed FilterWorkload.BuildOrComposeFilters validation (line 143)
-4. Changed validation from checking `ExpressionAttributeNames.Count == 0` to checking `string.IsNullOrEmpty(Expression) || ExpressionAttributeValues.Count == 0`
-
-**Test Results (1-minute, 16 workers)**:
-- Before fix: 30,861 failures (66.6% InvalidOperation, 33.4% DynamoDB)
-- After fix: 9,559 failures (100% DynamoDB, 0% InvalidOperation)
-- **69% reduction in total failures**
-
-**Remaining Issues**:
-- 9,559 DynamoDB errors (100% of remaining failures) - requires investigation
-- Memory growth: 5,159% (still far exceeds 20% threshold)
-
 - [ ] 2.11f Test individual workloads in isolation
   - Run each workload (Projection, Filter, Update, KeyCondition, Mixed, CacheStress) solo
   - Identify which workload(s) produce failures
   - Fix identified issues per-workload
 - [ ] 2.11g Address memory growth measurement (defer until failures resolved)
 
-**Status**: UNBLOCKED - 2.11e complete, proceeding with 2.11f
+**Status**: UNBLOCKED - proceeding with 2.11e
