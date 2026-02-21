@@ -25,11 +25,12 @@ Add threshold enforcement to the existing `ci.yml` workflow:
   run: |
     dotnet test tests/DynamoDb.ExpressionMapping.Tests/ \
       --configuration Release \
-      --filter "Category!=Integration" \
       --collect:"XPlat Code Coverage" \
       --settings tests/coverlet.runsettings \
       -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
 ```
+
+**Note:** No `--filter "Category!=Integration"` is needed — integration tests live in a separate project (`DynamoDb.ExpressionMapping.IntegrationTests`, split in Phase 3a) and are not discovered when running the unit test project.
 
 ### PR-06.2: Coverlet RunSettings
 
@@ -159,7 +160,7 @@ Exclude from coverage measurement:
 ## Local Development
 
 ```bash
-# Run tests with coverage locally
+# Run unit tests with coverage locally (no Docker required — integration tests are in separate project)
 dotnet test tests/DynamoDb.ExpressionMapping.Tests/ \
   --collect:"XPlat Code Coverage" \
   --settings tests/coverlet.runsettings

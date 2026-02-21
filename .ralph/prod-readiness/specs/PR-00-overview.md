@@ -13,6 +13,8 @@ This spec suite defines the testing and validation work required to bring `Dynam
 - Coverlet-based code coverage collection (no enforced thresholds)
 - No benchmarking, mutation testing, property-based testing, or load testing infrastructure
 
+**Known issue:** Integration tests and unit tests share a single test project (`DynamoDb.ExpressionMapping.Tests`). xUnit eagerly instantiates collection fixtures — including the `DynamoDbFixture` which starts a Testcontainers Docker container — *before* applying test filters. This causes all test runs (including unit-only, Stryker mutation, and coverage) to incur a 10-30+ second Docker startup penalty or hang under resource pressure. Phase 3a addresses this by splitting integration tests into `DynamoDb.ExpressionMapping.IntegrationTests`.
+
 ## Spec Index
 
 | Spec  | Title                       | Risk Addressed                                               |
@@ -31,11 +33,12 @@ Recommended sequencing based on risk-to-effort ratio:
 
 1. **PR-01** (Property-Based Testing) — highest probability of finding real bugs
 2. **PR-02** (Soak & Concurrency) — highest severity if issues exist
-3. **PR-03** (Mutation Testing) — validates existing test suite quality
-4. **PR-05** (Snapshot Testing) — low effort, high regression protection
-5. **PR-04** (Benchmarking) — establishes performance baseline
-6. **PR-06** (Coverage Enforcement) — CI gate for ongoing quality
-7. **PR-07** (API Compatibility) — protects consumers as library evolves
+3. **Integration Test Isolation** (Phase 3a) — prerequisite: split integration tests into dedicated project to unblock efficient Stryker/coverage/unit-test runs
+4. **PR-03** (Mutation Testing) — validates existing test suite quality
+5. **PR-05** (Snapshot Testing) — low effort, high regression protection
+6. **PR-04** (Benchmarking) — establishes performance baseline
+7. **PR-06** (Coverage Enforcement) — CI gate for ongoing quality
+8. **PR-07** (API Compatibility) — protects consumers as library evolves
 
 ## Success Criteria
 

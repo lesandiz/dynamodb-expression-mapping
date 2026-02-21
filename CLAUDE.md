@@ -56,11 +56,10 @@ The library has six major subsystems, each corresponding to one or more specs:
 
 ```bash
 dotnet build
-dotnet test
-dotnet test --filter "Category!=Integration"        # unit tests only
-dotnet test --filter "Category=Integration"          # integration tests only (requires Docker for DynamoDB Local)
-FSCHECK_MAX_TEST=100 dotnet test --filter "Category=Property"   # property tests, fast (100 iterations)
-FSCHECK_MAX_TEST=10000 dotnet test --filter "Category=Property" # property tests, full validation (10k iterations)
+dotnet test tests/DynamoDb.ExpressionMapping.Tests/              # unit + property tests (no Docker required)
+dotnet test tests/DynamoDb.ExpressionMapping.IntegrationTests/   # integration tests only (requires Docker for DynamoDB Local)
+FSCHECK_MAX_TEST=100 dotnet test --filter "Category=Property"    # property tests, fast (100 iterations)
+FSCHECK_MAX_TEST=10000 dotnet test --filter "Category=Property"  # property tests, full validation (10k iterations)
 ```
 
 **Property-based tests**: Default is 1,000 iterations per property. Use `FSCHECK_MAX_TEST=100` for rapid development/agent workflows. Use `FSCHECK_MAX_TEST=10000` for full validation before completing Phase 1.
@@ -73,8 +72,9 @@ FSCHECK_MAX_TEST=10000 dotnet test --filter "Category=Property" # property tests
 ## Test Framework & Conventions
 
 - **xUnit** test framework, **FluentAssertions**, **NSubstitute**, **Bogus**, **Testcontainers.DynamoDb**
-- Test project: `DynamoDb.ExpressionMapping.Tests/`
-- Integration tests use `[Collection("DynamoDb")]` with a shared `DynamoDbFixture` (`IAsyncLifetime`) via Testcontainers — each test class creates/deletes its own table
+- Unit/property test project: `tests/DynamoDb.ExpressionMapping.Tests/` — no Docker dependency
+- Integration test project: `tests/DynamoDb.ExpressionMapping.IntegrationTests/` — uses `[Collection("DynamoDb")]` with a shared `DynamoDbFixture` (`IAsyncLifetime`) via Testcontainers; each test class creates/deletes its own table
+- Integration tests are in a separate project to prevent xUnit's eager collection fixture initialization from triggering Docker container startup during unit-only test runs (including Stryker mutation testing and coverage collection)
 - Spec 12 contains the complete test plan with every test case listed
 
 ## Dependencies
