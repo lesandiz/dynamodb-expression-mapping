@@ -4,7 +4,7 @@ using Amazon.Runtime;
 using Testcontainers.DynamoDb;
 using Xunit;
 
-namespace DynamoDb.ExpressionMapping.Tests.Integration;
+namespace DynamoDb.ExpressionMapping.IntegrationTests.Integration;
 
 /// <summary>
 /// Shared fixture that starts a DynamoDB Local container once per test collection.

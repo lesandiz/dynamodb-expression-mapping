@@ -7,7 +7,7 @@ using DynamoDb.ExpressionMapping.Tests.Fixtures;
 using FluentAssertions;
 using Xunit;
 
-namespace DynamoDb.ExpressionMapping.Tests.Integration;
+namespace DynamoDb.ExpressionMapping.IntegrationTests.Integration;
 
 /// <summary>
 /// Integration tests for KeyConditionExpressionBuilder verifying that generated expressions
