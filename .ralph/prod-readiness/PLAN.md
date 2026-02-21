@@ -24,7 +24,31 @@ All property-based tests implemented and passing at 10k iterations. Critical bug
 
 ---
 
-## Phase 3 — Mutation Testing (PR-03)
+## Phase 3a — Integration Test Project Isolation
+
+**STATUS: NOT STARTED**
+
+**Priority: High (prerequisite)** — unblocks efficient execution of Phases 3–7.
+
+**Problem (2026-02-21):** xUnit eagerly instantiates collection fixtures (including `IAsyncLifetime.InitializeAsync()`) *before* applying test filters. The `DynamoDbFixture` starts a Testcontainers Docker container in `InitializeAsync()`, so even `dotnet test --filter "Category!=Integration"` triggers a 10-30+ second Docker container startup (or hangs if Docker is slow/under resource pressure). This makes Stryker mutation runs impractical — each of the 4 concurrent Stryker workers triggers a separate container start for every mutation, multiplying the overhead across hundreds of mutants. The same issue affects unit-only test runs, coverage collection, and snapshot test execution.
+
+**Solution:** Move all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb.ExpressionMapping.IntegrationTests` project. This ensures xUnit never discovers the `DynamoDbCollection` fixture definition when running the unit test project.
+
+- [ ] 3a.1 Create `tests/DynamoDb.ExpressionMapping.IntegrationTests/DynamoDb.ExpressionMapping.IntegrationTests.csproj` with Testcontainers dependency
+- [ ] 3a.2 Move `Integration/` folder (all 7 test files + `DynamoDbFixture.cs`) from `DynamoDb.ExpressionMapping.Tests` to the new project
+- [ ] 3a.3 Remove `Testcontainers.DynamoDb` package reference from `DynamoDb.ExpressionMapping.Tests.csproj`
+- [ ] 3a.4 Add the new integration test project to the solution file
+- [ ] 3a.5 Update Stryker config: `test-projects` should only reference the unit test project
+- [ ] 3a.6 Verify unit tests run without triggering Docker (`dotnet test` on unit project completes in < 60s)
+- [ ] 3a.7 Verify integration tests still pass independently (`dotnet test` on integration project with Docker running)
+- [ ] 3a.8 Update CI workflows if they reference test project paths
+- [ ] 3a.9 Commit phase 3a
+
+**Exit criteria**: `dotnet test tests/DynamoDb.ExpressionMapping.Tests/` runs all unit + property tests without any Docker dependency. Integration tests pass in the new project when Docker is available.
+
+---
+
+## Phase 3b — Mutation Testing (PR-03)
 
 **STATUS: UNBLOCKED** — Root cause identified and fixed. See resolution notes below.
 
@@ -36,17 +60,17 @@ All property-based tests implemented and passing at 10k iterations. Critical bug
 2. **Secondary issue (env-specific, documented):** On machines with VS 2019 BuildTools installed alongside VS 2022, Buildalyzer discovers the old MSBuild 16.11.2 first, which is incompatible with .NET 8 SDK (requires >= 17.8.3). Workaround: `MSBUILD_EXE_PATH="C:/Program Files/dotnet/sdk/8.0.418/MSBuild.dll" dotnet stryker`. This does not affect CI (`ubuntu-latest` has no VS 2019 BuildTools).
 3. **No viable alternative tools exist.** Faultify, NinjaTurtles, and Fettle are all dead/archived. Stryker.NET is the only actively maintained .NET mutation testing tool.
 
-- [x] 3.1 Install `dotnet-stryker` as local tool
-- [x] 3.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
-- [x] 3.3 Fix Stryker project discovery — added `<TargetFramework>` to both `.csproj` files for Buildalyzer compatibility
-- [ ] 3.4 Run initial full mutation analysis
-- [ ] 3.5 Analyse Priority 1 subsystems (expression builders) — triage surviving mutants (PR-03.4)
-- [ ] 3.6 Write tests to kill surviving non-equivalent mutants in expression builders
-- [ ] 3.7 Analyse Priority 2 subsystems (type conversion) — triage and fix
-- [ ] 3.8 Analyse Priority 3 subsystems (result mapping) — triage and fix
-- [ ] 3.9 Analyse Priority 4 subsystems (supporting systems) — triage and fix
-- [ ] 3.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders
-- [ ] 3.11 Commit phase 3
+- [x] 3b.1 Install `dotnet-stryker` as local tool
+- [x] 3b.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
+- [x] 3b.3 Fix Stryker project discovery — added `<TargetFramework>` to both `.csproj` files for Buildalyzer compatibility
+- [ ] 3b.4 Run initial full mutation analysis (unit tests only — integration tests are in separate project per Phase 3a)
+- [ ] 3b.5 Analyse Priority 1 subsystems (expression builders) — triage surviving mutants (PR-03.4)
+- [ ] 3b.6 Write tests to kill surviving non-equivalent mutants in expression builders
+- [ ] 3b.7 Analyse Priority 2 subsystems (type conversion) — triage and fix
+- [ ] 3b.8 Analyse Priority 3 subsystems (result mapping) — triage and fix
+- [ ] 3b.9 Analyse Priority 4 subsystems (supporting systems) — triage and fix
+- [ ] 3b.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders
+- [ ] 3b.11 Commit phase 3b
 
 **Exit criteria**: Mutation score ≥ 80% overall, ≥ 90% expression builders. All surviving non-equivalent mutants addressed.
 
@@ -126,11 +150,12 @@ All property-based tests implemented and passing at 10k iterations. Critical bug
 
 ## Phase Boundaries
 
-| Boundary    | Rule                                            |
-| ----------- | ----------------------------------------------- |
-| Phase 1 → 2 | Phase 1 fully committed before starting phase 2 |
-| Phase 2 → 3 | Phase 2 fully committed before starting phase 3 |
-| Phase 3 → 4 | Phase 3 fully committed before starting phase 4 |
-| Phase 4 → 5 | Phase 4 fully committed before starting phase 5 |
-| Phase 5 → 6 | Phase 5 fully committed before starting phase 6 |
-| Phase 6 → 7 | Phase 6 fully committed before starting phase 7 |
+| Boundary     | Rule                                                     |
+| ------------ | -------------------------------------------------------- |
+| Phase 1 → 2  | Phase 1 fully committed before starting phase 2         |
+| Phase 2 → 3a | Phase 2 fully committed before starting phase 3a        |
+| Phase 3a → 3b| Phase 3a fully committed before starting phase 3b       |
+| Phase 3b → 4 | Phase 3b fully committed before starting phase 4        |
+| Phase 4 → 5  | Phase 4 fully committed before starting phase 5         |
+| Phase 5 → 6  | Phase 5 fully committed before starting phase 6         |
+| Phase 6 → 7  | Phase 6 fully committed before starting phase 7         |

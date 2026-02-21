@@ -6,9 +6,13 @@ Code coverage measures which lines execute during tests — not whether tests wo
 
 With 565 unit tests, the library has extensive coverage. Mutation testing validates whether that coverage is meaningful.
 
+## Prerequisites
+
+- **Phase 3a (Integration Test Isolation)** must be completed first. Integration tests must be in `DynamoDb.ExpressionMapping.IntegrationTests` so that Stryker only runs unit/property tests and never triggers Docker container startup via xUnit's eager collection fixture initialization.
+
 ## Scope
 
-Run mutation testing on the core library (`DynamoDb.ExpressionMapping`) using the existing test suite (`DynamoDb.ExpressionMapping.Tests`). Focus analysis on the highest-risk subsystems.
+Run mutation testing on the core library (`DynamoDb.ExpressionMapping`) using the unit test suite (`DynamoDb.ExpressionMapping.Tests`). Integration tests are excluded by project separation (not by test filter). Focus analysis on the highest-risk subsystems.
 
 ## Dependencies
 
@@ -69,6 +73,8 @@ This does not affect CI (`ubuntu-latest` has no VS 2019 BuildTools). Stryker 4.1
   }
 }
 ```
+
+**Note:** `test-projects` intentionally excludes `DynamoDb.ExpressionMapping.IntegrationTests`. Integration tests are separated into their own project (Phase 3a) so Stryker never triggers Docker container startup via xUnit's eager collection fixture initialization. No `test-case-filter` is needed — project-level isolation is cleaner and more reliable than runtime filtering.
 
 ### PR-03.2: Threshold Definitions
 
@@ -148,8 +154,8 @@ dotnet stryker --mutate "src/DynamoDb.ExpressionMapping/Expressions/**/*.cs"
 # Quick smoke run (fewer mutations)
 dotnet stryker --since:main
 
-# Exclude slow tests (property-based + integration) from initial test verification
-dotnet stryker --test-case-filter "Category!=Property&Category!=Integration"
+# Exclude slow property tests from initial test verification
+dotnet stryker --test-case-filter "Category!=Property"
 ```
 
 ### PR-03.4: Analysing Results
