@@ -341,36 +341,3 @@ public class UpdateExpressionBuilderTests
 
     #endregion
 }
-
-/// <summary>
-/// Test entity for update expression tests.
-/// </summary>
-public class UpdateTestEntity
-{
-    public string Title { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty; // Reserved keyword
-    public string Status { get; set; } = string.Empty; // Reserved keyword
-    public decimal Price { get; set; }
-    public int ViewCount { get; set; }
-    public int Score { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public List<string> Tags { get; set; } = new();
-    public HashSet<string> EnabledFeatures { get; set; } = new();
-    public string? TempFlag { get; set; }
-    public Address? Address { get; set; }
-    public TestPriority Priority { get; set; }
-
-    [DynamoDbIgnore]
-    public string InternalField { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Test enum for conversion testing.
-/// </summary>
-public enum TestPriority
-{
-    Low,
-    Medium,
-    High,
-    Critical
-}

@@ -5,6 +5,7 @@ using DynamoDb.ExpressionMapping.Attributes;
 using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Mapping;
+using DynamoDb.ExpressionMapping.Tests.Fixtures;
 using FluentAssertions;
 using Xunit;
 
