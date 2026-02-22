@@ -846,6 +846,72 @@ public class DirectResultMapperTests
 
     #endregion
 
+
+    #region Constructor Null Guards (migrated from P3MutationKillingTests)
+
+    [Fact]
+    public void DirectResultMapper_NullResolverFactory_ThrowsArgumentNullException()
+    {
+        Action act = () => new DirectResultMapper<TestEntity>(
+            null!,
+            AttributeValueConverterRegistry.Default);
+
+        act.Should().Throw<ArgumentNullException>()
+            .WithParameterName("resolverFactory");
+    }
+
+    [Fact]
+    public void DirectResultMapper_NullConverterRegistry_ThrowsArgumentNullException()
+    {
+        var resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
+
+        Action act = () => new DirectResultMapper<TestEntity>(
+            resolverFactory,
+            null!);
+
+        act.Should().Throw<ArgumentNullException>()
+            .WithParameterName("converterRegistry");
+    }
+
+    [Fact]
+    public void DirectResultMapper_NullCache_UsesNullExpressionCache()
+    {
+        var resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
+        var converterRegistry = AttributeValueConverterRegistry.Default;
+
+        var mapper = new DirectResultMapper<TestEntity>(
+            resolverFactory,
+            converterRegistry,
+            cache: null);
+
+        var attrs = new Dictionary<string, AttributeValue>
+        {
+            ["OrderId"] = new() { S = "no-cache" }
+        };
+
+        var result = mapper.Map(attrs, e => e.OrderId);
+
+        result.Should().Be("no-cache");
+    }
+
+    [Fact]
+    public void DirectResultMapper_NullFullEntityMapper_Identity_Throws()
+    {
+        var resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
+        var converterRegistry = AttributeValueConverterRegistry.Default;
+
+        var mapper = new DirectResultMapper<TestEntity>(
+            resolverFactory,
+            converterRegistry,
+            fullEntityMapper: null);
+
+        Action act = () => mapper.CreateMapper(e => e);
+
+        act.Should().Throw<UnsupportedExpressionException>();
+    }
+
+    #endregion
+
     #region Test Helper Types
 
     private record OrderRecord(string Id, string Status);
