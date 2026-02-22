@@ -389,4 +389,80 @@ public class ExpressionCacheTests
         cachedResult.Name.Should().Be("Test"); // Original value
         cachedResult.Value.Should().Be(42);
     }
+
+    #region TrackAccess hit/miss side effects
+
+    [Fact]
+    public void GetOrAdd_TracksHitCorrectly_NotReversed()
+    {
+        // Kills: negate isHit -> !isHit (would swap hit/miss counters)
+        var cache = new ExpressionCache();
+
+        cache.GetOrAdd("projection", "key1", k => "value");
+        cache.GetOrAdd("projection", "key1", k => "value");
+
+        var stats = cache.GetStatistics();
+        stats.ProjectionHits.Should().Be(1, "second access to same key should be a hit");
+        stats.ProjectionMisses.Should().Be(1, "first access to new key should be a miss");
+    }
+
+    [Fact]
+    public void GetOrAdd_TrackAccessNotRemoved_MissCountIncreases()
+    {
+        // Kills: statement removal of TrackAccess call
+        var cache = new ExpressionCache();
+
+        cache.GetOrAdd("projection", "key1", k => "value");
+        cache.GetOrAdd("projection", "key2", k => "value");
+
+        var stats = cache.GetStatistics();
+        stats.ProjectionMisses.Should().Be(2, "two different keys should produce two misses");
+    }
+
+    [Fact]
+    public void GetOrAdd_MapperCategory_TracksHitMissCorrectly()
+    {
+        var cache = new ExpressionCache();
+
+        cache.GetOrAdd("mapper", "key1", k => "value"); // miss
+        cache.GetOrAdd("mapper", "key1", k => "value"); // hit
+        cache.GetOrAdd("mapper", "key2", k => "value"); // miss
+
+        var stats = cache.GetStatistics();
+        stats.MapperHits.Should().Be(1);
+        stats.MapperMisses.Should().Be(2);
+    }
+
+    [Fact]
+    public void GetOrAdd_FilterCategory_TracksHitMissCorrectly()
+    {
+        var cache = new ExpressionCache();
+
+        cache.GetOrAdd("filter", "key1", k => "value"); // miss
+        cache.GetOrAdd("filter", "key1", k => "value"); // hit
+        cache.GetOrAdd("filter", "key1", k => "value"); // hit
+
+        var stats = cache.GetStatistics();
+        stats.FilterHits.Should().Be(2);
+        stats.FilterMisses.Should().Be(1);
+    }
+
+    [Fact]
+    public void GetOrAdd_ContainsKeyMustBeCalledBeforeGetOrAdd()
+    {
+        // Kills: swap order of ContainsKey check vs GetOrAdd, or removal of isHit variable
+        var cache = new ExpressionCache();
+
+        cache.GetOrAdd("projection", "same", k => "v"); // miss
+        cache.GetOrAdd("projection", "same", k => "v"); // hit
+        cache.GetOrAdd("projection", "same", k => "v"); // hit
+        cache.GetOrAdd("projection", "same", k => "v"); // hit
+
+        var stats = cache.GetStatistics();
+        stats.ProjectionHits.Should().Be(3);
+        stats.ProjectionMisses.Should().Be(1);
+    }
+
+    #endregion
+
 }

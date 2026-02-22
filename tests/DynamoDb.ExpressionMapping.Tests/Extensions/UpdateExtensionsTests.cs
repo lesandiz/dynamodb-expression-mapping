@@ -99,4 +99,34 @@ public class UpdateExtensionsTests
         result.ExpressionAttributeNames.Should().BeSameAs(initialNamesState);
         result.ExpressionAttributeValues.Should().BeSameAs(initialValuesState);
     }
+
+    [Fact]
+    public void WithUpdate_PreservesExistingDictionaries()
+    {
+        var request = new UpdateItemRequest
+        {
+            TableName = "Test",
+            ExpressionAttributeNames = new Dictionary<string, string>
+            {
+                ["#existing"] = "ExistingAttr"
+            },
+            ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+            {
+                [":existing"] = new AttributeValue { S = "ExistingValue" }
+            }
+        };
+
+        var updateResult = new UpdateExpressionResult(
+            "SET #upd_0 = :upd_v0",
+            new Dictionary<string, string> { ["#upd_0"] = "Status" },
+            new Dictionary<string, AttributeValue> { [":upd_v0"] = new AttributeValue { S = "Active" } });
+
+        request.WithUpdate(updateResult);
+
+        request.ExpressionAttributeNames.Should().HaveCount(2);
+        request.ExpressionAttributeNames["#existing"].Should().Be("ExistingAttr");
+        request.ExpressionAttributeValues.Should().HaveCount(2);
+        request.ExpressionAttributeValues[":existing"].S.Should().Be("ExistingValue");
+    }
+
 }

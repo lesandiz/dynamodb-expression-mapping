@@ -173,4 +173,73 @@ public class RequestMergeHelpersTests
             BindingFlags.NonPublic | BindingFlags.Static);
         method!.Invoke(null, new object[] { target, source });
     }
+
+    #region Empty source merges
+
+    [Fact]
+    public void MergeAttributeNames_EmptySource_TargetUnchanged()
+    {
+        var target = new Dictionary<string, string>
+        {
+            ["#a"] = "AttrA"
+        };
+        var source = new Dictionary<string, string>();
+
+        InvokeMergeAttributeNames(target, source);
+
+        target.Should().HaveCount(1);
+        target["#a"].Should().Be("AttrA");
+    }
+
+    [Fact]
+    public void MergeAttributeValues_EmptySource_TargetUnchanged()
+    {
+        var target = new Dictionary<string, AttributeValue>
+        {
+            [":a"] = new AttributeValue { S = "ValueA" }
+        };
+        var source = new Dictionary<string, AttributeValue>();
+
+        InvokeMergeAttributeValues(target, source);
+
+        target.Should().HaveCount(1);
+        target[":a"].S.Should().Be("ValueA");
+    }
+
+    [Fact]
+    public void MergeAttributeValues_WithNullAttributeValue_ReportsValueInException()
+    {
+        var target = new Dictionary<string, AttributeValue>
+        {
+            [":a"] = new AttributeValue { BOOL = true }
+        };
+        var source = new Dictionary<string, AttributeValue>
+        {
+            [":a"] = new AttributeValue { S = "conflict" }
+        };
+
+        var act = () => InvokeMergeAttributeValues(target, source);
+
+        act.Should().Throw<TargetInvocationException>();
+    }
+
+    [Fact]
+    public void MergeAttributeValues_WithNumberValue_ReportsNInException()
+    {
+        var target = new Dictionary<string, AttributeValue>
+        {
+            [":a"] = new AttributeValue { N = "42" }
+        };
+        var source = new Dictionary<string, AttributeValue>
+        {
+            [":a"] = new AttributeValue { S = "conflict" }
+        };
+
+        var act = () => InvokeMergeAttributeValues(target, source);
+
+        act.Should().Throw<TargetInvocationException>();
+    }
+
+    #endregion
+
 }

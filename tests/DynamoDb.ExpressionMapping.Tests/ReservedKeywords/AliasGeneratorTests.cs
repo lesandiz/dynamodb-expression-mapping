@@ -253,4 +253,61 @@ public class AliasGeneratorTests
         key.NextName().Should().Be("#key_0");
         key.NextValue().Should().Be(":key_v0");
     }
+
+    #region Clone — preserves counter state
+
+    [Fact]
+    public void Clone_PreservesNameCounter()
+    {
+        var original = new AliasGenerator("test");
+        original.NextName(); // #test_0
+        original.NextName(); // #test_1
+
+        var clone = original.Clone();
+
+        clone.NextName().Should().Be("#test_2");
+        original.NextName().Should().Be("#test_2");
+    }
+
+    [Fact]
+    public void Clone_PreservesValueCounter()
+    {
+        var original = new AliasGenerator("test");
+        original.NextValue(); // :test_v0
+        original.NextValue(); // :test_v1
+        original.NextValue(); // :test_v2
+
+        var clone = original.Clone();
+
+        clone.NextValue().Should().Be(":test_v3");
+        original.NextValue().Should().Be(":test_v3");
+    }
+
+    [Fact]
+    public void Clone_IndependentCounters()
+    {
+        var original = new AliasGenerator("test");
+        original.NextName(); // #test_0
+
+        var clone = original.Clone();
+
+        clone.NextName(); // #test_1
+        clone.NextName(); // #test_2
+        clone.NextName(); // #test_3
+
+        original.NextName().Should().Be("#test_1");
+    }
+
+    [Fact]
+    public void Clone_PreservesPrefix()
+    {
+        var original = new AliasGenerator("filt");
+        var clone = original.Clone();
+
+        clone.NextName().Should().StartWith("#filt_");
+        clone.NextValue().Should().StartWith(":filt_v");
+    }
+
+    #endregion
+
 }
