@@ -44,7 +44,7 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 
 ## Phase 3b — Mutation Testing (PR-03)
 
-**STATUS: IN PROGRESS** — P1, P2, P3 triage and test writing complete (3b.6, 3b.7, 3b.8). P4 analysis next.
+**STATUS: IN PROGRESS** — P1-P4 triage and test writing complete (3b.6-3b.9). Re-run mutation analysis next (3b.10).
 
 **Priority: High** — validates that the existing + phase-1 test suite actually catches bugs.
 
@@ -79,8 +79,8 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 Equivalent (no test): MaxAliasIndex idx>max to idx>=max (2 mutants in Condition/FilterExpressionResult L165)
 - [x] 3b.7 Analyse Priority 2 subsystems (type conversion) — 68 tests in P2MutationKillingTests.cs covering converter null/empty handling, collection constructor guards, SetConverter SS/NS/L boundaries, ArrayConverter edges, registry resolution, emitter guard, resolver fluent side effects
 - [x] 3b.8 Analyse Priority 3 subsystems (result mapping) — 109 tests in P3MutationKillingTests.cs covering AttributeValueReader (all Read methods: valid/missing/null/invalid inputs), NavigateToLeaf (1/2/3 segments, missing/non-map intermediates), CompositeMappingStrategy (nested paths, unsupported expressions), SinglePropertyMappingStrategy (shape validation, direct/nested reads), DirectResultMapper (constructor null guards, null cache fallback), IdentityMappingStrategy (with/without mapper)
-- [ ] 3b.9 Analyse Priority 4 subsystems (supporting systems) — triage and fix — **NEXT PRIORITY**
-- [ ] 3b.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders
+- [x] 3b.9 Analyse Priority 4 subsystems — 54 tests in P4MutationKillingTests.cs covering CacheStatistics hit-rate properties, ExpressionCache TrackAccess, InternalRequestExtensions ??= preservation, DynamoDbExpressionConfig Builder null coalescing, AliasGenerator Clone, RequestMergeHelpers edges, WithUpdate preservation
+- [ ] 3b.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders — **NEXT PRIORITY**
 - [ ] 3b.11 Commit phase 3b
 
 **Initial scores vs targets:**
