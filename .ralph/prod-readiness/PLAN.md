@@ -44,20 +44,21 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 
 ## Phase 3b — Mutation Testing (PR-03)
 
-**STATUS: UNBLOCKED** — Root cause identified and fixed. See resolution notes below.
+**STATUS: IN PROGRESS** — Initial analysis complete (3b.4 done). Triage and test writing next.
 
 **Priority: High** — validates that the existing + phase-1 test suite actually catches bugs.
 
-**Resolution (2026-02-16):** Three parallel investigations identified two independent root causes for the "No project found" error:
+**Resolution history:**
 
-1. **Primary fix (applied):** Stryker's embedded Buildalyzer cannot resolve `TargetFramework` when it is defined only in `Directory.Build.props`. Added explicit `<TargetFramework>net8.0</TargetFramework>` to both `.csproj` files. This is redundant with `Directory.Build.props` but required for Buildalyzer's design-time analysis.
-2. **Secondary issue (env-specific, documented):** On machines with VS 2019 BuildTools installed alongside VS 2022, Buildalyzer discovers the old MSBuild 16.11.2 first, which is incompatible with .NET 8 SDK (requires >= 17.8.3). Workaround: `MSBUILD_EXE_PATH="C:/Program Files/dotnet/sdk/8.0.418/MSBuild.dll" dotnet stryker`. This does not affect CI (`ubuntu-latest` has no VS 2019 BuildTools).
-3. **No viable alternative tools exist.** Faultify, NinjaTurtles, and Fettle are all dead/archived. Stryker.NET is the only actively maintained .NET mutation testing tool.
+1. **(2026-02-16) Buildalyzer fix:** Stryker's embedded Buildalyzer cannot resolve `TargetFramework` when it is defined only in `Directory.Build.props`. Added explicit `<TargetFramework>net8.0</TargetFramework>` to both `.csproj` files.
+2. **(2026-02-16) MSBuild version conflict (env-specific):** On machines with VS 2019 BuildTools installed alongside VS 2022, Buildalyzer discovers the old MSBuild 16.11.2 first. Workaround: `MSBUILD_EXE_PATH="C:/Program Files/dotnet/sdk/8.0.418/MSBuild.dll" dotnet stryker`. Does not affect CI.
+3. **(2026-02-22) Integration test isolation:** Stryker in solution mode ignores `test-projects` filter and discovers all test projects from the solution, causing Docker/Testcontainers to spin up for every mutation. Fix: created `DynamoDb.ExpressionMapping.Stryker.sln` excluding the integration test project. Also added `"test-case-filter": "Category!=Property"` to skip slow property tests during mutation runs.
+4. **(2026-02-22) Mutate glob path fix:** `mutate` patterns were repo-relative (`src/DynamoDb.ExpressionMapping/**/*.cs`) but Stryker matches against source-project-relative paths. Changed to `**/*.cs` with `!**/Attributes/**` exclusion.
 
 - [x] 3b.1 Install `dotnet-stryker` as local tool
 - [x] 3b.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
 - [x] 3b.3 Fix Stryker project discovery — added `<TargetFramework>` to both `.csproj` files for Buildalyzer compatibility
-- [ ] 3b.4 Run initial full mutation analysis (unit tests only — integration tests are in separate project per Phase 3a)
+- [x] 3b.4 Run initial full mutation analysis — **66.5% overall** (801 tested, 634 killed, 167 survived, 152 NoCoverage). See `mutation-analysis.md` for full breakdown.
 - [ ] 3b.5 Analyse Priority 1 subsystems (expression builders) — triage surviving mutants (PR-03.4)
 - [ ] 3b.6 Write tests to kill surviving non-equivalent mutants in expression builders
 - [ ] 3b.7 Analyse Priority 2 subsystems (type conversion) — triage and fix
@@ -65,6 +66,19 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 - [ ] 3b.9 Analyse Priority 4 subsystems (supporting systems) — triage and fix
 - [ ] 3b.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders
 - [ ] 3b.11 Commit phase 3b
+
+**Initial scores vs targets:**
+
+| Subsystem | Current | Target |
+|---|---|---|
+| Expressions | 68.4% | **90%** |
+| Mapping | 74.0% | 80% |
+| Extensions | 69.7% | 80% |
+| Caching | 55.4% | 80% |
+| ResultMapping | 38.9% | 80% |
+| Root | 85.3% | 80% ✅ |
+| Exceptions | 100% | — ✅ |
+| ReservedKeywords | 100% | — ✅ |
 
 **Exit criteria**: Mutation score ≥ 80% overall, ≥ 90% expression builders. All surviving non-equivalent mutants addressed.
 
