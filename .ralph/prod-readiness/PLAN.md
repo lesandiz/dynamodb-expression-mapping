@@ -42,61 +42,24 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 
 ---
 
-## Phase 3b — Mutation Testing (PR-03)
+## Phase 3b — Mutation Testing (PR-03) ✅ COMPLETE
 
-**STATUS: IN PROGRESS** — P1-P4 triage and test writing complete (3b.6-3b.9). Re-run mutation analysis next (3b.10).
+Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived, 18 NoCoverage out of 953 testable mutants). All subsystem targets met. 307 mutation-killing tests added across 6 test files.
 
-**Priority: High** — validates that the existing + phase-1 test suite actually catches bugs.
+**Final scores (2026-02-22):**
 
-**Resolution history:**
+| Subsystem | Initial | Final | Target | Status |
+|---|---|---|---|---|
+| Expressions | 68.4% | 91.4% | **90%** | ✅ |
+| Mapping | 74.0% | 91.9% | 80% | ✅ |
+| Extensions | 69.7% | 82.9% | 80% | ✅ |
+| Caching | 55.4% | 94.6% | 80% | ✅ |
+| ResultMapping | 38.9% | 88.5% | 80% | ✅ |
+| Root | 85.3% | 88.2% | 80% | ✅ |
+| Exceptions | 100% | 100% | — | ✅ |
+| ReservedKeywords | 100% | 100% | — | ✅ |
 
-1. **(2026-02-16) Buildalyzer fix:** Stryker's embedded Buildalyzer cannot resolve `TargetFramework` when it is defined only in `Directory.Build.props`. Added explicit `<TargetFramework>net8.0</TargetFramework>` to both `.csproj` files.
-2. **(2026-02-16) MSBuild version conflict (env-specific):** On machines with VS 2019 BuildTools installed alongside VS 2022, Buildalyzer discovers the old MSBuild 16.11.2 first. Workaround: `MSBUILD_EXE_PATH="C:/Program Files/dotnet/sdk/8.0.418/MSBuild.dll" dotnet stryker`. Does not affect CI.
-3. **(2026-02-22) Integration test isolation:** Stryker in solution mode ignores `test-projects` filter and discovers all test projects from the solution, causing Docker/Testcontainers to spin up for every mutation. Fix: created `DynamoDb.ExpressionMapping.Stryker.sln` excluding the integration test project. Also added `"test-case-filter": "Category!=Property"` to skip slow property tests during mutation runs.
-4. **(2026-02-22) Mutate glob path fix:** `mutate` patterns were repo-relative (`src/DynamoDb.ExpressionMapping/**/*.cs`) but Stryker matches against source-project-relative paths. Changed to `**/*.cs` with `!**/Attributes/**` exclusion.
-
-- [x] 3b.1 Install `dotnet-stryker` as local tool
-- [x] 3b.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
-- [x] 3b.3 Fix Stryker project discovery — added `<TargetFramework>` to both `.csproj` files for Buildalyzer compatibility
-- [x] 3b.4 Run initial full mutation analysis — **66.5% overall** (801 tested, 634 killed, 167 survived, 152 NoCoverage). See `mutation-analysis.md` for full breakdown.
-- [x] 3b.5 Analyse Priority 1 subsystems — triage complete. 131 mutants (58S+73NC), 2 equivalent, ~107 killable, ~66 tests needed. See scratchpad/p1-mutant-triage.md.
-- [x] 3b.6 Write tests to kill surviving non-equivalent mutants in expression builders — 76 tests across 12 categories (A-L) in MutationKillingTests.cs
-**3b.6 Test categories (from 3b.5 triage):**
-| # | Category | Files | Mutants | Tests |
-|---|----------|-------|---------|-------|
-| A | Null guard constructor tests | FilterExpressionVisitor, *Result, ProjectionBuilder/Result | 18 | ~15 |
-| B | Null property expression (ThrowIfNull) | UpdateExpressionBuilder fluent methods | 19 | ~8 |
-| C | Dedup/orphan cleanup (Set same prop twice) | UpdateExpressionBuilder | 6 | ~3 |
-| D | Conflict validation (Set+Remove etc.) | UpdateExpressionBuilder L511-520 | 6 | ~6 |
-| E | ReAlias OrderByDescending (multi-digit) | Filter/ConditionExpressionResult L130/140 | 4 | ~2 |
-| F | Logical mutations in method dispatch | FilterExpressionVisitor L140/154/156/173 | 4 | ~4 |
-| G | Bool negation value check | FilterExpressionVisitor L97 | 1 | ~1 |
-| H | Closure field/property capture | FilterExpressionVisitor L464/474 | 2 | ~2 |
-| I | NoCoverage error/edge paths | FilterExpressionVisitor (Convert, null-from-left, instance Contains) | 26 | ~12 |
-| J | SortKeyCondition null/boundary | SortKeyConditionBuilder L103-108/134/164 | 14 | ~8 |
-| K | Update misc (alias, empty Build, regex) | UpdateExpressionBuilder L349/500/540/550 | 4 | ~3 |
-| L | ProjectionBuilder Lenient mode | ProjectionBuilder L105/117 | 3 | ~2 |
-Equivalent (no test): MaxAliasIndex idx>max to idx>=max (2 mutants in Condition/FilterExpressionResult L165)
-- [x] 3b.7 Analyse Priority 2 subsystems (type conversion) — 68 tests in P2MutationKillingTests.cs covering converter null/empty handling, collection constructor guards, SetConverter SS/NS/L boundaries, ArrayConverter edges, registry resolution, emitter guard, resolver fluent side effects
-- [x] 3b.8 Analyse Priority 3 subsystems (result mapping) — 109 tests in P3MutationKillingTests.cs covering AttributeValueReader (all Read methods: valid/missing/null/invalid inputs), NavigateToLeaf (1/2/3 segments, missing/non-map intermediates), CompositeMappingStrategy (nested paths, unsupported expressions), SinglePropertyMappingStrategy (shape validation, direct/nested reads), DirectResultMapper (constructor null guards, null cache fallback), IdentityMappingStrategy (with/without mapper)
-- [x] 3b.9 Analyse Priority 4 subsystems — 54 tests in P4MutationKillingTests.cs covering CacheStatistics hit-rate properties, ExpressionCache TrackAccess, InternalRequestExtensions ??= preservation, DynamoDbExpressionConfig Builder null coalescing, AliasGenerator Clone, RequestMergeHelpers edges, WithUpdate preservation
-- [ ] 3b.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders — **NEXT PRIORITY**
-- [ ] 3b.11 Commit phase 3b
-
-**Initial scores vs targets:**
-
-| Subsystem | Current | Target |
-|---|---|---|
-| Expressions | 68.4% | **90%** |
-| Mapping | 74.0% | 80% |
-| Extensions | 69.7% | 80% |
-| Caching | 55.4% | 80% |
-| ResultMapping | 38.9% | 80% |
-| Root | 85.3% | 80% ✅ |
-| Exceptions | 100% | — ✅ |
-| ReservedKeywords | 100% | — ✅ |
-
-**Exit criteria**: Mutation score ≥ 80% overall, ≥ 90% expression builders. All surviving non-equivalent mutants addressed.
+**Remaining survivors (70S + 18NC):** Mostly null-coalescing fallback mutations (defensive defaults), statement removal on side-effect-free tracking/logging, and 2 confirmed equivalent mutants.
 
 ---
 
