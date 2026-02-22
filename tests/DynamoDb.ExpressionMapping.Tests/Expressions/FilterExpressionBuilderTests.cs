@@ -5,6 +5,7 @@ using DynamoDb.ExpressionMapping.Attributes;
 using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Mapping;
+using DynamoDb.ExpressionMapping.Tests.Fixtures;
 using FluentAssertions;
 using Xunit;
 
@@ -562,55 +563,4 @@ public class FilterExpressionBuilderTests
     }
 
     #endregion
-}
-
-/// <summary>
-/// Enhanced test entity with all property types needed for comprehensive filter testing.
-/// </summary>
-public class FilterTestEntity
-{
-    public string OrderId { get; set; } = string.Empty;
-    public string CustomerId { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty; // Reserved keyword
-    public decimal Total { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsPremium { get; set; }
-    public bool IsHidden { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? ExpiresOn { get; set; }
-    public Guid CorrelationId { get; set; }
-    public OrderStatus Status { get; set; } // Reserved keyword (enum)
-
-    [DynamoDbAttribute("Status")]
-    public string StatusString { get; set; } = string.Empty; // Reserved keyword (string version for testing)
-
-    public string? FallbackId { get; set; }
-    public string[] Tags { get; set; } = Array.Empty<string>();
-    public FilterAddress Address { get; set; } = new();
-
-    [DynamoDbIgnore]
-    public string IgnoredProperty { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Nested address type for filter testing.
-/// </summary>
-public class FilterAddress
-{
-    public string Street { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
-    public string PostalCode { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Enum for testing enum conversion in filters.
-/// </summary>
-public enum OrderStatus
-{
-    Pending,
-    Active,
-    Completed,
-    Expired
 }

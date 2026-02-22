@@ -4,6 +4,7 @@ using DynamoDb.ExpressionMapping.Attributes;
 using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Mapping;
+using DynamoDb.ExpressionMapping.Tests.Fixtures;
 using FluentAssertions;
 using Xunit;
 
@@ -397,40 +398,4 @@ public class KeyConditionExpressionBuilderTests
     }
 
     #endregion
-}
-
-/// <summary>
-/// Test entity for key condition expression tests.
-/// </summary>
-public class KeyConditionTestEntity
-{
-    public string PK { get; set; } = string.Empty;
-    public string SK { get; set; } = string.Empty;
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty; // Reserved keyword
-    public NestedAddress Address { get; set; } = new();
-
-    [DynamoDbIgnore]
-    public string InternalField { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Entity with remapped attributes for testing attribute name resolution.
-/// </summary>
-public class RemappedEntity
-{
-    [DynamoDbAttribute("pk")]
-    public string PartitionKey { get; set; } = string.Empty;
-
-    [DynamoDbAttribute("sk")]
-    public string SortKey { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Nested address type for testing nested paths (should fail validation).
-/// </summary>
-public class NestedAddress
-{
-    public string City { get; set; } = string.Empty;
-    public string State { get; set; } = string.Empty;
 }
