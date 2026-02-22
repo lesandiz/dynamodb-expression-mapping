@@ -68,7 +68,7 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 **Priority: High** — structural cleanup before adding more tests in later phases. Details in `test-refactoring-plan.md`.
 
 - [x] 3c.1 Centralize scattered test entities (`FilterTestEntity`, `UpdateTestEntity`, `KeyConditionTestEntity`, etc.) into `Fixtures/ExpressionTestEntities.cs`
-- [ ] 3c.2 Consolidate composability tests — abstract base class + two thin derived classes (41 methods → 22)
+- [x] 3c.2 Consolidate composability tests — abstract base class + two thin derived classes (41 methods → 21 + base). All 41 test executions preserved.
 - [ ] 3c.3 Split `P3MutationKillingTests.cs` into `AttributeValueReaderTests.cs`, `MappingStrategyTests.cs`, append to `DirectResultMapperTests.cs`; consolidate `ReadXxx` tests into `[Theory]` (109 methods → ~45)
 - [ ] 3c.4 Distribute `P4MutationKillingTests.cs` to subsystem files; consolidate `CacheStatistics` hit-rate tests into `[Theory]` (54 methods → ~30)
 - [ ] 3c.5 Consolidate `P2MutationKillingTests.cs` Regions A/B into `[Theory]`, rename to `ConverterEdgeCaseTests.cs` (18 methods → 2)
