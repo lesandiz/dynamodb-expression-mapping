@@ -14,6 +14,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 /// Verifies invariants PR-01.4: no alias collisions after composition,
 /// and composed expressions contain both operands.
 /// </summary>
+[Trait("Category", "Property")]
 public class ComposabilityProperties
 {
     private readonly IAttributeNameResolverFactory _resolverFactory;

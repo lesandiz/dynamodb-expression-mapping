@@ -16,6 +16,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 /// Property-based tests for ProjectionBuilder.
 /// Verifies invariants PR-01.1: alias prefixing, reserved keyword aliasing, and well-formedness.
 /// </summary>
+[Trait("Category", "Property")]
 public class ProjectionBuilderProperties
 {
     private readonly IAttributeNameResolverFactory _resolverFactory;

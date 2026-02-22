@@ -11,6 +11,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 /// Property-based tests for Type Converter System.
 /// Verifies invariants PR-01.5: round-trip conversion and nullable semantics.
 /// </summary>
+[Trait("Category", "Property")]
 public class TypeConverterProperties
 {
     private readonly IAttributeValueConverterRegistry _registry;

@@ -12,6 +12,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 /// Property-based tests for KeyConditionExpressionBuilder.
 /// Verifies invariant PR-01.6: partition key equality must be present in every key condition.
 /// </summary>
+[Trait("Category", "Property")]
 public class KeyConditionBuilderProperties
 {
     private readonly IAttributeNameResolverFactory _resolverFactory;

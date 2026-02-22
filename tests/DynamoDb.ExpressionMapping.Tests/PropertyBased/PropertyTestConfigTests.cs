@@ -2,6 +2,7 @@ using Xunit;
 
 namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 
+[Trait("Category", "Property")]
 public class PropertyTestConfigTests
 {
     [Fact]
@@ -82,8 +83,8 @@ public class PropertyTestConfigTests
     }
 
     [Fact]
-    public void DefaultMaxTest_Is1000()
+    public void DefaultMaxTest_Is100()
     {
-        Assert.Equal(1_000, PropertyTestConfig.DefaultMaxTest);
+        Assert.Equal(100, PropertyTestConfig.DefaultMaxTest);
     }
 }

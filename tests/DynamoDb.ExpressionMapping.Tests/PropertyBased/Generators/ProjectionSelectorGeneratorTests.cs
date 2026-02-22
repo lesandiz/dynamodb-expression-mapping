@@ -10,6 +10,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased.Generators;
 /// Smoke tests for ProjectionSelectorGenerator to verify it produces valid output.
 /// These are basic sanity checks before writing full property-based tests.
 /// </summary>
+[Trait("Category", "Property")]
 public class ProjectionSelectorGeneratorTests
 {
     [Fact]

@@ -38,7 +38,7 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 - [x] 3a.8 Updated CI workflows: `ci.yml` targets unit test project directly, `integration-tests.yml` targets new integration project
 - [x] 3a.9 Added `InternalsVisibleTo("DynamoDb.ExpressionMapping.IntegrationTests")` to `AssemblyInfo.cs` for internal API access
 
-**Additional change:** Integration test project references the unit test project to access shared fixtures (`TestEntity`, `TestIntegrationEntity`, etc.) in `DynamoDb.ExpressionMapping.Tests.Fixtures` namespace.
+**Additional change:** Integration test project references the unit test project to access shared fixtures (`TestEntity`, `TestIntegrationEntity`, etc.) in `DynamoDb.ExpressionMapping.Tests.Fixtures` namespace. The main library (`DynamoDb.ExpressionMapping`) flows in as a transitive dependency — no explicit project reference needed.
 
 ---
 
