@@ -19,6 +19,7 @@ public class DynamoDbFixture : IAsyncLifetime
     {
         _container = new DynamoDbBuilder()
             .WithImage("amazon/dynamodb-local:latest")
+            .WithReuse(true)
             .Build();
 
         await _container.StartAsync();

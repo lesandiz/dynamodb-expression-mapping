@@ -15,6 +15,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 /// Verifies invariants PR-01.2: non-empty expressions, balanced parentheses,
 /// placeholder/dictionary consistency, and scope isolation.
 /// </summary>
+[Trait("Category", "Property")]
 public class FilterExpressionBuilderProperties
 {
     private readonly IAttributeNameResolverFactory _resolverFactory;

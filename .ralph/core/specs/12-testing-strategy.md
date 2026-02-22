@@ -6,8 +6,10 @@ A comprehensive testing strategy ensures correctness of expression tree analysis
 
 ## Test Project Structure
 
+Unit/property tests and integration tests live in separate projects. The integration test project references the unit test project to access shared fixtures (`TestEntity`, `TestKeyedEntity`, etc.) — the main library flows in as a transitive dependency.
+
 ```
-DynamoDb.ExpressionMapping.Tests/
+DynamoDb.ExpressionMapping.Tests/          # Unit + property tests (no Docker)
 ├── Expressions/
 │   ├── ProjectionExpressionVisitorTests.cs
 │   ├── ProjectionBuilderTests.cs
@@ -43,21 +45,36 @@ DynamoDb.ExpressionMapping.Tests/
 │   └── ExceptionHierarchyTests.cs
 ├── Configuration/
 │   └── ConfigurationAndDiTests.cs
-├── Integration/
-│   ├── DynamoDbFixture.cs
-│   ├── ProjectionIntegrationTests.cs
-│   ├── FilterIntegrationTests.cs
-│   ├── KeyConditionIntegrationTests.cs
-│   ├── UpdateIntegrationTests.cs
-│   ├── ConditionIntegrationTests.cs
-│   ├── DirectResultMapperIntegrationTests.cs
-│   └── CombinedExpressionIntegrationTests.cs
+├── PropertyBased/                         # [Trait("Category", "Property")]
+│   ├── PropertyTestConfig.cs              # Iteration count config (default: 100, CI: 10000)
+│   ├── ProjectionBuilderProperties.cs
+│   ├── FilterExpressionBuilderProperties.cs
+│   ├── UpdateExpressionBuilderProperties.cs
+│   ├── ComposabilityProperties.cs
+│   ├── TypeConverterProperties.cs
+│   ├── KeyConditionBuilderProperties.cs
+│   └── Generators/                        # FsCheck generators for random expression trees
+│       ├── ExpressionGenerators.cs
+│       ├── ProjectionSelectorGenerator.cs
+│       ├── FilterPredicateGenerator.cs
+│       └── UpdateOperationGenerator.cs
 └── Fixtures/
     ├── TestEntity.cs
     ├── TestKeyedEntity.cs
     ├── TestEntityBuilder.cs
     ├── AwsSdkAnnotatedEntity.cs
     └── AttributeValueFixtures.cs
+
+DynamoDb.ExpressionMapping.IntegrationTests/  # Integration tests (requires Docker)
+└── Integration/
+    ├── DynamoDbFixture.cs
+    ├── ProjectionIntegrationTests.cs
+    ├── FilterIntegrationTests.cs
+    ├── KeyConditionIntegrationTests.cs
+    ├── UpdateIntegrationTests.cs
+    ├── ConditionIntegrationTests.cs
+    ├── DirectResultMapperIntegrationTests.cs
+    └── CombinedExpressionIntegrationTests.cs
 ```
 
 ## Test Framework
@@ -66,7 +83,27 @@ DynamoDb.ExpressionMapping.Tests/
 - **FluentAssertions** for assertions
 - **NSubstitute** for mocking interfaces
 - **Bogus** for test data generation
-- **Testcontainers.DynamoDb** for integration tests (manages DynamoDB Local container lifecycle automatically)
+- **FsCheck** for property-based testing
+- **Testcontainers.DynamoDb** for integration tests (manages DynamoDB Local container lifecycle automatically, `.WithReuse(true)` for fast local iteration)
+
+## Test Categories
+
+Tests are categorised via `[Trait("Category", "...")]` for filtering with `dotnet test --filter`:
+
+| Category      | Trait                                | Description                                                  |
+| ------------- | ------------------------------------ | ------------------------------------------------------------ |
+| _(none)_      | No trait                             | Unit tests — fast, no external dependencies                  |
+| `Property`    | `[Trait("Category", "Property")]`    | FsCheck property-based tests — slow per-iteration due to expression tree generation |
+| `Integration` | `[Trait("Category", "Integration")]` | Testcontainers integration tests — require Docker             |
+
+**Default property test iterations**: 100 (via `PropertyTestConfig.DefaultMaxTest`). CI sets `FSCHECK_MAX_TEST=10000` for full validation. The env var does **not** propagate via bash on Windows; the low default handles the local case.
+
+**Filtering examples**:
+```bash
+dotnet test --filter "Category!=Property"    # unit tests only (fast, ~600ms)
+dotnet test --filter "Category=Property"     # property tests only
+dotnet test --filter "Category=Integration"  # integration tests only
+```
 
 ## Unit Test Coverage
 

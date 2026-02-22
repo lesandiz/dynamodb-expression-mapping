@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DynamoDb.ExpressionMapping\DynamoDb.ExpressionMapping.csproj" />
+    <!-- Main library is a transitive dependency via the Tests project reference -->
     <ProjectReference Include="..\DynamoDb.ExpressionMapping.Tests\DynamoDb.ExpressionMapping.Tests.csproj" />
   </ItemGroup>
 

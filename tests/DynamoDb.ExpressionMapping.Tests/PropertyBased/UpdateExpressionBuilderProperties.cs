@@ -13,6 +13,7 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 /// Property-based tests for UpdateExpressionBuilder.
 /// Verifies invariants PR-01.3: well-formed clauses and correct alias prefixes.
 /// </summary>
+[Trait("Category", "Property")]
 public class UpdateExpressionBuilderProperties
 {
     private readonly IAttributeNameResolverFactory _resolverFactory;

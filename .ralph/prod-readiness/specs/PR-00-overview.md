@@ -13,7 +13,7 @@ This spec suite defines the testing and validation work required to bring `Dynam
 - Coverlet-based code coverage collection (no enforced thresholds)
 - No benchmarking, mutation testing, property-based testing, or load testing infrastructure
 
-**Known issue:** Integration tests and unit tests share a single test project (`DynamoDb.ExpressionMapping.Tests`). xUnit eagerly instantiates collection fixtures — including the `DynamoDbFixture` which starts a Testcontainers Docker container — *before* applying test filters. This causes all test runs (including unit-only, Stryker mutation, and coverage) to incur a 10-30+ second Docker startup penalty or hang under resource pressure. Phase 3a addresses this by splitting integration tests into `DynamoDb.ExpressionMapping.IntegrationTests`.
+**Resolved (Phase 3a):** Integration tests were split into a dedicated `DynamoDb.ExpressionMapping.IntegrationTests` project. The integration project references the unit test project (for shared fixtures) and receives the main library as a transitive dependency. Unit-only runs, Stryker mutation testing, and coverage collection no longer trigger Docker container startup.
 
 ## Spec Index
 

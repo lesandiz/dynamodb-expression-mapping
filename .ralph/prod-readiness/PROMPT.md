@@ -73,7 +73,12 @@ Create these files in the Base Path to signal terminal states:
 
 3. **Track Issues**: When you discover an issue, immediately update PLAN.md with your findings using a subagent. When the issue is resolved, update PLAN.md and remove the item using a subagent.
 
-4. **Commit & Push**: When all tests pass (full suite), use subagents to update PLAN.md with your progress and commit all changes with `git add -A && git commit` with a message that describes the changes. **Always co-author commits as "Ralph Agent <no-reply@ralph.local>"** using the `--trailer` flag. After the commit, do a `git push` to push changes to the remote repository.
+4. **Commit & Push**: When all tests pass, use subagents to update PLAN.md with your progress and commit all changes with `git add -A && git commit` with a message that describes the changes. **Always co-author commits as "Ralph Agent <no-reply@ralph.local>"** using the `--trailer` flag. After the commit, do a `git push` to push changes to the remote repository.
+
+   **Before committing, verify:**
+   - [ ] All affected tests have been **executed** (not just compiled) — see CLAUDE.md "Verification Strategy" for tier definitions
+   - [ ] Pre-commit verification passes: `dotnet test --filter "Category!=Property"` on affected projects, plus integration tests if integration code changed
+   - [ ] If a test category cannot run locally, document WHY and mark the item as incomplete — do NOT commit with "deferred to CI"
 
 5. **Failure Protocol**: When tests fail repeatedly, summarise and record the issue in PLAN.md. Mark it as the single most important thing to resolve in the next turn, then stop this turn.
 
