@@ -70,7 +70,7 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 - [x] 3c.1 Centralize scattered test entities (`FilterTestEntity`, `UpdateTestEntity`, `KeyConditionTestEntity`, etc.) into `Fixtures/ExpressionTestEntities.cs`
 - [x] 3c.2 Consolidate composability tests — abstract base class + two thin derived classes (41 methods → 21 + base). All 41 test executions preserved.
 - [x] 3c.3 Split P3MutationKillingTests.cs — deleted P3 file (109 tests), kept pre-existing AttributeValueReaderTests.cs (90) and MappingStrategyTests.cs (12), added 4 unique constructor null-guard tests to DirectResultMapperTests.cs. All 1004 tests pass.
-- [ ] 3c.4 Distribute `P4MutationKillingTests.cs` to subsystem files; consolidate `CacheStatistics` hit-rate tests into `[Theory]` (54 methods → ~30)
+- [x] 3c.4 Distribute P4MutationKillingTests.cs to subsystem files; consolidate CacheStatistics hit-rate tests into [Theory]. Created CacheStatisticsTests.cs (24 executions), InternalRequestExtensionsTests.cs (12). Appended to ExpressionCacheTests (5), DynamoDbExpressionConfigTests (7), AliasGeneratorTests (4), RequestMergeHelpersTests (4), UpdateExtensionsTests (1). Deleted P4 file. 1006 tests pass.
 - [ ] 3c.5 Consolidate `P2MutationKillingTests.cs` Regions A/B into `[Theory]`, rename to `ConverterEdgeCaseTests.cs` (18 methods → 2)
 - [ ] 3c.6 Verify all tests pass, total test execution count >= 1260
 

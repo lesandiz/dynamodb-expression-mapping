@@ -163,4 +163,80 @@ public class DynamoDbExpressionConfigTests
 
         config.ReservedKeywords.Should().BeSameAs(customKeywords);
     }
+
+    #region Builder null-coalescing defaults
+
+    [Fact]
+    public void Builder_DefaultBuild_UsesDefaultConverterRegistry()
+    {
+        var config = new DynamoDbExpressionConfig.Builder().Build();
+
+        config.ConverterRegistry.Should().NotBeNull();
+        config.ConverterRegistry.Should().NotBeSameAs(AttributeValueConverterRegistry.Default);
+    }
+
+    [Fact]
+    public void Builder_DefaultBuild_UsesDefaultReservedKeywords()
+    {
+        var config = new DynamoDbExpressionConfig.Builder().Build();
+
+        config.ReservedKeywords.Should().BeSameAs(ReservedKeywordRegistry.Default);
+    }
+
+    [Fact]
+    public void Builder_DefaultBuild_UsesDefaultCache()
+    {
+        var config = new DynamoDbExpressionConfig.Builder().Build();
+
+        config.Cache.Should().BeSameAs(ExpressionCache.Default);
+    }
+
+    [Fact]
+    public void Builder_DefaultBuild_UsesNullLoggerFactory()
+    {
+        var config = new DynamoDbExpressionConfig.Builder().Build();
+
+        config.LoggerFactory.Should().BeSameAs(NullLoggerFactory.Instance);
+    }
+
+    [Fact]
+    public void Builder_WithExplicitNull_ConverterRegistry_StillGetsDefault()
+    {
+        var config = new DynamoDbExpressionConfig.Builder()
+            .WithConverterRegistry(null!)
+            .Build();
+
+        config.ConverterRegistry.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Builder_WithConverter_ClonesOnlyOnce()
+    {
+        var builder = new DynamoDbExpressionConfig.Builder();
+
+        builder.WithConverter(new StringConverter());
+        builder.WithConverter(new Int32Converter());
+
+        var config = builder.Build();
+        config.ConverterRegistry.Should().NotBeNull();
+        config.ConverterRegistry.Should().NotBeSameAs(AttributeValueConverterRegistry.Default);
+    }
+
+    [Fact]
+    public void Builder_ExplicitOverrides_TakePrecedenceOverDefaults()
+    {
+        var customCache = NullExpressionCache.Instance;
+        var customKeywords = new ReservedKeywordRegistry();
+
+        var config = new DynamoDbExpressionConfig.Builder()
+            .WithCache(customCache)
+            .WithReservedKeywords(customKeywords)
+            .Build();
+
+        config.Cache.Should().BeSameAs(customCache);
+        config.ReservedKeywords.Should().BeSameAs(customKeywords);
+    }
+
+    #endregion
+
 }
