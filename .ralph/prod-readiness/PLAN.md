@@ -59,8 +59,24 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 - [x] 3b.2 Create `stryker-config.json` with thresholds (high: 90, low: 80, break: 75) and mutate/exclude paths (PR-03.1)
 - [x] 3b.3 Fix Stryker project discovery — added `<TargetFramework>` to both `.csproj` files for Buildalyzer compatibility
 - [x] 3b.4 Run initial full mutation analysis — **66.5% overall** (801 tested, 634 killed, 167 survived, 152 NoCoverage). See `mutation-analysis.md` for full breakdown.
-- [ ] 3b.5 Analyse Priority 1 subsystems (expression builders) — triage surviving mutants (PR-03.4)
-- [ ] 3b.6 Write tests to kill surviving non-equivalent mutants in expression builders
+- [x] 3b.5 Analyse Priority 1 subsystems — triage complete. 131 mutants (58S+73NC), 2 equivalent, ~107 killable, ~66 tests needed. See scratchpad/p1-mutant-triage.md.
+- [ ] 3b.6 Write tests to kill surviving non-equivalent mutants in expression builders — **NEXT PRIORITY**
+**3b.6 Test categories (from 3b.5 triage):**
+| # | Category | Files | Mutants | Tests |
+|---|----------|-------|---------|-------|
+| A | Null guard constructor tests | FilterExpressionVisitor, *Result, ProjectionBuilder/Result | 18 | ~15 |
+| B | Null property expression (ThrowIfNull) | UpdateExpressionBuilder fluent methods | 19 | ~8 |
+| C | Dedup/orphan cleanup (Set same prop twice) | UpdateExpressionBuilder | 6 | ~3 |
+| D | Conflict validation (Set+Remove etc.) | UpdateExpressionBuilder L511-520 | 6 | ~6 |
+| E | ReAlias OrderByDescending (multi-digit) | Filter/ConditionExpressionResult L130/140 | 4 | ~2 |
+| F | Logical mutations in method dispatch | FilterExpressionVisitor L140/154/156/173 | 4 | ~4 |
+| G | Bool negation value check | FilterExpressionVisitor L97 | 1 | ~1 |
+| H | Closure field/property capture | FilterExpressionVisitor L464/474 | 2 | ~2 |
+| I | NoCoverage error/edge paths | FilterExpressionVisitor (Convert, null-from-left, instance Contains) | 26 | ~12 |
+| J | SortKeyCondition null/boundary | SortKeyConditionBuilder L103-108/134/164 | 14 | ~8 |
+| K | Update misc (alias, empty Build, regex) | UpdateExpressionBuilder L349/500/540/550 | 4 | ~3 |
+| L | ProjectionBuilder Lenient mode | ProjectionBuilder L105/117 | 3 | ~2 |
+Equivalent (no test): MaxAliasIndex idx>max to idx>=max (2 mutants in Condition/FilterExpressionResult L165)
 - [ ] 3b.7 Analyse Priority 2 subsystems (type conversion) — triage and fix
 - [ ] 3b.8 Analyse Priority 3 subsystems (result mapping) — triage and fix
 - [ ] 3b.9 Analyse Priority 4 subsystems (supporting systems) — triage and fix
