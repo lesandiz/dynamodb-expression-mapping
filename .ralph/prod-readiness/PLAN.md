@@ -44,7 +44,7 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 
 ## Phase 3b — Mutation Testing (PR-03)
 
-**STATUS: IN PROGRESS** — Initial analysis complete (3b.4 done). Triage and test writing next.
+**STATUS: IN PROGRESS** — P1 triage and test writing complete (3b.6). P2/P3/P4 analysis next.
 
 **Priority: High** — validates that the existing + phase-1 test suite actually catches bugs.
 
@@ -60,7 +60,7 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 - [x] 3b.3 Fix Stryker project discovery — added `<TargetFramework>` to both `.csproj` files for Buildalyzer compatibility
 - [x] 3b.4 Run initial full mutation analysis — **66.5% overall** (801 tested, 634 killed, 167 survived, 152 NoCoverage). See `mutation-analysis.md` for full breakdown.
 - [x] 3b.5 Analyse Priority 1 subsystems — triage complete. 131 mutants (58S+73NC), 2 equivalent, ~107 killable, ~66 tests needed. See scratchpad/p1-mutant-triage.md.
-- [ ] 3b.6 Write tests to kill surviving non-equivalent mutants in expression builders — **NEXT PRIORITY**
+- [x] 3b.6 Write tests to kill surviving non-equivalent mutants in expression builders — 76 tests across 12 categories (A-L) in MutationKillingTests.cs
 **3b.6 Test categories (from 3b.5 triage):**
 | # | Category | Files | Mutants | Tests |
 |---|----------|-------|---------|-------|
@@ -77,7 +77,7 @@ Moved all integration tests and the `DynamoDbFixture` into a dedicated `DynamoDb
 | K | Update misc (alias, empty Build, regex) | UpdateExpressionBuilder L349/500/540/550 | 4 | ~3 |
 | L | ProjectionBuilder Lenient mode | ProjectionBuilder L105/117 | 3 | ~2 |
 Equivalent (no test): MaxAliasIndex idx>max to idx>=max (2 mutants in Condition/FilterExpressionResult L165)
-- [ ] 3b.7 Analyse Priority 2 subsystems (type conversion) — triage and fix
+- [ ] 3b.7 Analyse Priority 2 subsystems (type conversion) — triage and fix — **NEXT PRIORITY**
 - [ ] 3b.8 Analyse Priority 3 subsystems (result mapping) — triage and fix
 - [ ] 3b.9 Analyse Priority 4 subsystems (supporting systems) — triage and fix
 - [ ] 3b.10 Re-run full mutation analysis, verify 80%+ on all subsystems, 90%+ on expression builders
