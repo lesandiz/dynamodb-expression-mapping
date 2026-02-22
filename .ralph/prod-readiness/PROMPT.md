@@ -111,9 +111,9 @@ Create these files in the Base Path to signal terminal states:
 15. **Scratchpad**: Use `scratchpad/` directory for temporary files during your turn.
 
     > **Scratchpad rules:**
-    > - If anything is worth preserving for future turns, summarise it in PLAN.md
-    > - **Clean up all scratchpad files before ending your turn**
-    > - **NEVER commit or push scratchpad files**
+    > - Scratchpad files **may survive across turns** — you do not need to clean them up before ending your turn
+    > - When updating PLAN.md at the end of your turn, **reference any useful scratchpad files** so the next turn knows they exist and can use them
+    > - **NEVER commit or push scratchpad files** — ensure they are excluded from `git add`
 
 ---
 
