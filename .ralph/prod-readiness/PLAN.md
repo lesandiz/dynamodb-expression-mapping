@@ -63,6 +63,21 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 
 ---
 
+## Phase 3c — Test Suite Refactoring
+
+**Priority: High** — structural cleanup before adding more tests in later phases. Details in `test-refactoring-plan.md`.
+
+- [ ] 3c.1 Centralize scattered test entities (`FilterTestEntity`, `UpdateTestEntity`, `KeyConditionTestEntity`, etc.) into `Fixtures/ExpressionTestEntities.cs`
+- [ ] 3c.2 Consolidate composability tests — abstract base class + two thin derived classes (41 methods → 22)
+- [ ] 3c.3 Split `P3MutationKillingTests.cs` into `AttributeValueReaderTests.cs`, `MappingStrategyTests.cs`, append to `DirectResultMapperTests.cs`; consolidate `ReadXxx` tests into `[Theory]` (109 methods → ~45)
+- [ ] 3c.4 Distribute `P4MutationKillingTests.cs` to subsystem files; consolidate `CacheStatistics` hit-rate tests into `[Theory]` (54 methods → ~30)
+- [ ] 3c.5 Consolidate `P2MutationKillingTests.cs` Regions A/B into `[Theory]`, rename to `ConverterEdgeCaseTests.cs` (18 methods → 2)
+- [ ] 3c.6 Verify all tests pass, total test execution count >= 1260
+
+**Exit criteria**: ~123 fewer test methods with identical test execution count. All tests green. No mutation score regression.
+
+---
+
 ## Phase 4 — Contract & Snapshot Testing (PR-05)
 
 **Priority: Medium-High** — low effort, high regression protection. Done before benchmarking because output stability matters more.
@@ -142,7 +157,8 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 | Phase 1 → 2  | Phase 1 fully committed before starting phase 2         |
 | Phase 2 → 3a | Phase 2 fully committed before starting phase 3a        |
 | Phase 3a → 3b| Phase 3a fully committed before starting phase 3b       |
-| Phase 3b → 4 | Phase 3b fully committed before starting phase 4        |
+| Phase 3b → 3c| Phase 3b fully committed before starting phase 3c       |
+| Phase 3c → 4 | Phase 3c fully committed before starting phase 4        |
 | Phase 4 → 5  | Phase 4 fully committed before starting phase 5         |
 | Phase 5 → 6  | Phase 5 fully committed before starting phase 6         |
 | Phase 6 → 7  | Phase 6 fully committed before starting phase 7         |
