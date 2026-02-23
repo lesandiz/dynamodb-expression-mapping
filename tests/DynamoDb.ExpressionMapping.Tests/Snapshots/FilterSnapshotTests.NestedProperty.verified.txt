@@ -1,0 +1,8 @@
+﻿{
+  Expression: Address.City = :filt_v0,
+  ExpressionAttributeValues: {
+    :filt_v0: {
+      S: London
+    }
+  }
+}

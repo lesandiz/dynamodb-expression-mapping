@@ -1,0 +1,8 @@
+﻿{
+  Expression: StatusEnum = :filt_v0,
+  ExpressionAttributeValues: {
+    :filt_v0: {
+      S: Active
+    }
+  }
+}

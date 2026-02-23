@@ -5,7 +5,7 @@ namespace DynamoDb.ExpressionMapping.Tests.Snapshots;
 /// <summary>
 /// Entity designed for snapshot tests. Contains properties covering all
 /// snapshot test scenarios: simple, nested, deeply nested, reserved keywords,
-/// remapped attributes, and mixed combinations.
+/// remapped attributes, enum comparison, and mixed combinations.
 /// </summary>
 public class SnapshotTestEntity
 {
@@ -17,6 +17,7 @@ public class SnapshotTestEntity
     public int? OptionalScore { get; set; }
     public string[] Tags { get; set; } = Array.Empty<string>();
     public HashSet<string> Categories { get; set; } = new();
+    public SnapshotStatus StatusEnum { get; set; }             // Enum for EnumComparison snapshot
 
     [DynamoDbAttribute("customer_id")]
     public string CustomerId { get; set; } = string.Empty;    // Remapped attribute
@@ -42,4 +43,11 @@ public class SnapshotMailingAddress
 {
     public string Line1 { get; set; } = string.Empty;
     public string PostCode { get; set; } = string.Empty;
+}
+
+public enum SnapshotStatus
+{
+    Active,
+    Inactive,
+    Suspended
 }

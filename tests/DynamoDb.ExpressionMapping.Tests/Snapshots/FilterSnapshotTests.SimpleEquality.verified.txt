@@ -1,0 +1,11 @@
+﻿{
+  Expression: #filt_0 = :filt_v0,
+  ExpressionAttributeNames: {
+    #filt_0: Name
+  },
+  ExpressionAttributeValues: {
+    :filt_v0: {
+      S: Alice
+    }
+  }
+}

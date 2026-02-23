@@ -1,0 +1,15 @@
+﻿{
+  Expression: (begins_with(#filt_0, :filt_v0)) AND (contains(#filt_1, :filt_v1)),
+  ExpressionAttributeNames: {
+    #filt_0: Name,
+    #filt_1: Name
+  },
+  ExpressionAttributeValues: {
+    :filt_v0: {
+      S: A
+    },
+    :filt_v1: {
+      S: li
+    }
+  }
+}
