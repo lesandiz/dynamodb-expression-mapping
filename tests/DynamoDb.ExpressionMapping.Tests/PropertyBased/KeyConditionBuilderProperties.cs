@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Mapping;
 using DynamoDb.ExpressionMapping.Tests.Fixtures;
+using DynamoDb.ExpressionMapping.Tests.PropertyBased.Generators;
 using FsCheck;
 using FsCheck.Fluent;
 using Xunit;
@@ -421,6 +422,118 @@ public class KeyConditionBuilderProperties
     private KeyConditionExpressionBuilder<TestKeyedEntity> CreateBuilder()
     {
         return new KeyConditionExpressionBuilder<TestKeyedEntity>(_resolverFactory, _converterRegistry);
+    }
+
+    #endregion
+
+    #region Generator-Based Property Tests
+
+    /// <summary>
+    /// Generator-based: Every generated key condition contains partition key equality.
+    /// </summary>
+    [Fact]
+    public void GeneratorBased_AllOperations_AlwaysContainPartitionKeyEquality()
+    {
+        foreach (var complexity in new[] { Complexity.Simple, Complexity.Composite, Complexity.Complex })
+        {
+            var property = Prop.ForAll(
+                ExpressionGenerators.KeyConditionOperation(complexity),
+                operation =>
+                {
+                    var builder = CreateBuilder();
+                    var result = operation(builder);
+
+                    if (!PartitionKeyEqualityRegex.IsMatch(result.Expression))
+                    {
+                        return Prop.Label(
+                            false,
+                            $"[{complexity}] Partition key equality not found. Expression: {result.Expression}");
+                    }
+
+                    return Prop.Label(true, $"[{complexity}] PK equality present");
+                });
+
+            Check.One(_config, property);
+        }
+    }
+
+    /// <summary>
+    /// Generator-based: All aliases use #key_ and :key_v prefixes.
+    /// </summary>
+    [Fact]
+    public void GeneratorBased_AllOperations_AliasesUseKeyPrefix()
+    {
+        foreach (var complexity in new[] { Complexity.Simple, Complexity.Composite, Complexity.Complex })
+        {
+            var property = Prop.ForAll(
+                ExpressionGenerators.KeyConditionOperation(complexity),
+                operation =>
+                {
+                    var builder = CreateBuilder();
+                    var result = operation(builder);
+
+                    foreach (var alias in result.ExpressionAttributeNames.Keys)
+                    {
+                        if (!alias.StartsWith("#key_"))
+                        {
+                            return Prop.Label(
+                                false,
+                                $"[{complexity}] Name alias '{alias}' does not start with '#key_'. Expression: {result.Expression}");
+                        }
+                    }
+
+                    foreach (var placeholder in result.ExpressionAttributeValues.Keys)
+                    {
+                        if (!placeholder.StartsWith(":key_v"))
+                        {
+                            return Prop.Label(
+                                false,
+                                $"[{complexity}] Value placeholder '{placeholder}' does not start with ':key_v'. Expression: {result.Expression}");
+                        }
+                    }
+
+                    return Prop.Label(true, $"[{complexity}] All aliases use correct prefix");
+                });
+
+            Check.One(_config, property);
+        }
+    }
+
+    /// <summary>
+    /// Generator-based: Composite and Complex tiers always split into exactly 2 parts on AND.
+    /// </summary>
+    [Fact]
+    public void GeneratorBased_CompositeAndComplex_AlwaysContainSortKeyAfterAND()
+    {
+        foreach (var complexity in new[] { Complexity.Composite, Complexity.Complex })
+        {
+            var property = Prop.ForAll(
+                ExpressionGenerators.KeyConditionOperation(complexity),
+                operation =>
+                {
+                    var builder = CreateBuilder();
+                    var result = operation(builder);
+
+                    var parts = result.Expression.Split(new[] { " AND " }, StringSplitOptions.None);
+                    if (parts.Length != 2)
+                    {
+                        return Prop.Label(
+                            false,
+                            $"[{complexity}] Expected exactly 2 parts split on AND. Got {parts.Length}. Expression: {result.Expression}");
+                    }
+
+                    if (!SortKeyReferenceRegex.IsMatch(parts[1]))
+                    {
+                        return Prop.Label(
+                            false,
+                            $"[{complexity}] Sort key reference not found after AND. Expression: {result.Expression}");
+                    }
+
+                    return Prop.Label(true, $"[{complexity}] Sort key present after AND");
+                });
+
+            Check.One(_config, property);
+        }
     }
 
     #endregion

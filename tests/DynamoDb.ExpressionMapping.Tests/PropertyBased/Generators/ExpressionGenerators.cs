@@ -45,15 +45,14 @@ public static class ExpressionGenerators
     }
 
     /// <summary>
-    /// Generates random key condition predicates for TestKeyedEntity.
-    /// Produces: Arbitrary&lt;Expression&lt;Func&lt;TestKeyedEntity, bool&gt;&gt;&gt;
-    /// Ensures: Partition key equality present, optional sort key conditions (begins_with, between, comparison).
+    /// Generates random key condition operations for TestKeyedEntity.
+    /// Produces: Arbitrary&lt;Func&lt;KeyConditionExpressionBuilder&lt;TestKeyedEntity&gt;, KeyConditionExpressionResult&gt;&gt;
+    /// Combines: partition key equality + optional sort key conditions (=, &lt;, &lt;=, &gt;, &gt;=, BETWEEN, begins_with) via fluent builder API.
     /// </summary>
-    /// <param name="complexity">Tier: Simple (PK only), Composite (PK + SK comparison), Complex (PK + SK range/begins_with).</param>
-    public static Arbitrary<Expression<Func<TestKeyedEntity, bool>>> KeyConditionPredicate(Complexity complexity = Complexity.Simple)
+    /// <param name="complexity">Tier: Simple (PK only), Composite (PK + SK comparison), Complex (PK + BETWEEN/begins_with).</param>
+    public static Arbitrary<Func<KeyConditionExpressionBuilder<TestKeyedEntity>, KeyConditionExpressionResult>> KeyConditionOperation(Complexity complexity = Complexity.Simple)
     {
-        // TODO: Implementation for KeyConditionExpressionBuilder tests
-        throw new NotImplementedException("KeyConditionPredicateGenerator - deferred");
+        return KeyConditionOperationGenerator.Generate(complexity);
     }
 }
 
