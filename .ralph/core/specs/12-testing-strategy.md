@@ -83,7 +83,7 @@ DynamoDb.ExpressionMapping.IntegrationTests/  # Integration tests (requires Dock
 - **FluentAssertions** for assertions
 - **NSubstitute** for mocking interfaces
 - **Bogus** for test data generation
-- **FsCheck** for property-based testing
+- **FsCheck** (3.0.0-rc3) for property-based testing — see §FsCheck Generator Constraints below
 - **Testcontainers.DynamoDb** for integration tests (manages DynamoDB Local container lifecycle automatically, `.WithReuse(true)` for fast local iteration)
 
 ## Test Categories
@@ -97,6 +97,25 @@ Tests are categorised via `[Trait("Category", "...")]` for filtering with `dotne
 | `Integration` | `[Trait("Category", "Integration")]` | Testcontainers integration tests — require Docker             |
 
 **Default property test iterations**: 100 (via `PropertyTestConfig.DefaultMaxTest`). CI sets `FSCHECK_MAX_TEST=10000` for full validation. The env var does **not** propagate via bash on Windows; the low default handles the local case.
+
+### FsCheck Generator Constraints
+
+**Do NOT use `Gen.Where`** in FsCheck 3.0.0-rc3 generators, especially inside `Gen.SelectMany` chains. `Gen.Where` causes a StackOverflow in the retry/shrink mechanism that crashes the test host process. The crash manifests as `dotnet test` hanging indefinitely or reporting "Test host process crashed" after several minutes.
+
+Instead, **pre-compute valid combinations** at static initialization time and use `Gen.Elements` to select from them:
+
+```csharp
+// BAD — crashes test host in FsCheck 3.0.0-rc3:
+var gen = Gen.SelectMany(propGen, prop1 =>
+    Gen.Select(Gen.Where(propGen, prop2 => prop1 != prop2),
+               prop2 => CreatePair(prop1, prop2)));
+
+// GOOD — pre-compute valid pairs, select from them:
+private static readonly (T, T)[] UniquePairs = ComputeUniquePairs(items);
+var gen = Gen.Select(Gen.Elements(UniquePairs), pair => CreatePair(pair.Item1, pair.Item2));
+```
+
+Similarly, **do not use `Random.Shared`** inside FsCheck generators — use `Gen.Choose`, `Gen.Elements`, or other `Gen` combinators instead, so that FsCheck controls the randomness and can reproduce failures via its seed.
 
 **Filtering examples**:
 ```bash

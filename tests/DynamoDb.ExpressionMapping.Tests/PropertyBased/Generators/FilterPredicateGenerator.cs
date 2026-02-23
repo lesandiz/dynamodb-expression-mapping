@@ -66,17 +66,17 @@ public static class FilterPredicateGenerator
         );
 
         return Gen.SelectMany(propGen, prop =>
-            Gen.Select(valueGen, value => CreateStringComparison(prop, value)));
+            Gen.SelectMany(valueGen, value =>
+                Gen.Select(Gen.Elements(true, false), useEquality =>
+                    CreateStringComparison(prop, value, useEquality))));
     }
 
-    private static Expression<Func<TestEntity, bool>> CreateStringComparison(PropertyInfo property, string value)
+    private static Expression<Func<TestEntity, bool>> CreateStringComparison(PropertyInfo property, string value, bool useEquality)
     {
         var parameter = Expression.Parameter(typeof(TestEntity), "x");
         var propertyAccess = Expression.Property(parameter, property);
         var constant = Expression.Constant(value, typeof(string));
 
-        // Randomly choose == or !=
-        var useEquality = Random.Shared.Next(2) == 0;
         var comparison = useEquality
             ? Expression.Equal(propertyAccess, constant)
             : Expression.NotEqual(propertyAccess, constant);
@@ -92,17 +92,17 @@ public static class FilterPredicateGenerator
             Gen.Elements(1m, 10m, 99.99m, 100m, 1000m)
         );
 
-        return Gen.Select(valueGen, value => CreateNumericComparison(property, value));
+        return Gen.SelectMany(valueGen, value =>
+            Gen.Select(Gen.Choose(0, 5), op =>
+                CreateNumericComparison(property, value, op)));
     }
 
-    private static Expression<Func<TestEntity, bool>> CreateNumericComparison(PropertyInfo property, decimal value)
+    private static Expression<Func<TestEntity, bool>> CreateNumericComparison(PropertyInfo property, decimal value, int op)
     {
         var parameter = Expression.Parameter(typeof(TestEntity), "x");
         var propertyAccess = Expression.Property(parameter, property);
         var constant = Expression.Constant(value, typeof(decimal));
 
-        // Randomly choose comparison operator
-        var op = Random.Shared.Next(6);
         var comparison = op switch
         {
             0 => Expression.Equal(propertyAccess, constant),
@@ -144,17 +144,17 @@ public static class FilterPredicateGenerator
             Gen.Constant(new DateTime(2025, 12, 31))
         );
 
-        return Gen.Select(valueGen, value => CreateDateTimeComparison(property, value));
+        return Gen.SelectMany(valueGen, value =>
+            Gen.Select(Gen.Choose(0, 5), op =>
+                CreateDateTimeComparison(property, value, op)));
     }
 
-    private static Expression<Func<TestEntity, bool>> CreateDateTimeComparison(PropertyInfo property, DateTime value)
+    private static Expression<Func<TestEntity, bool>> CreateDateTimeComparison(PropertyInfo property, DateTime value, int op)
     {
         var parameter = Expression.Parameter(typeof(TestEntity), "x");
         var propertyAccess = Expression.Property(parameter, property);
         var constant = Expression.Constant(value, typeof(DateTime));
 
-        // Randomly choose comparison operator
-        var op = Random.Shared.Next(6);
         var comparison = op switch
         {
             0 => Expression.Equal(propertyAccess, constant),
@@ -176,7 +176,9 @@ public static class FilterPredicateGenerator
         return Gen.OneOf(
             Gen.Constant(CreateNullCheck(property, true)),
             Gen.Constant(CreateNullCheck(property, false)),
-            Gen.Select(Gen.Elements(DateTime.MinValue, DateTime.UtcNow), val => CreateNullableValueComparison(property, val))
+            Gen.SelectMany(Gen.Elements(DateTime.MinValue, DateTime.UtcNow), val =>
+                Gen.Select(Gen.Choose(0, 3), op =>
+                    CreateNullableValueComparison(property, val, op)))
         );
     }
 
@@ -193,7 +195,7 @@ public static class FilterPredicateGenerator
         return Expression.Lambda<Func<TestEntity, bool>>(comparison, parameter);
     }
 
-    private static Expression<Func<TestEntity, bool>> CreateNullableValueComparison(PropertyInfo property, DateTime value)
+    private static Expression<Func<TestEntity, bool>> CreateNullableValueComparison(PropertyInfo property, DateTime value, int op)
     {
         var parameter = Expression.Parameter(typeof(TestEntity), "x");
         var propertyAccess = Expression.Property(parameter, property);
@@ -203,7 +205,6 @@ public static class FilterPredicateGenerator
         var valueProperty = typeof(DateTime?).GetProperty("Value")!;
         var valueAccess = Expression.Property(propertyAccess, valueProperty);
 
-        var op = Random.Shared.Next(4);
         var comparison = op switch
         {
             0 => Expression.GreaterThan(valueAccess, constant),
@@ -330,16 +331,17 @@ public static class FilterPredicateGenerator
         var valueGen = Gen.Elements("", "test", "foo", "US", "Portland", "12345");
 
         return Gen.SelectMany(pathGen, path =>
-            Gen.Select(valueGen, value => CreateNestedPropertyComparison(path, value)));
+            Gen.SelectMany(valueGen, value =>
+                Gen.Select(Gen.Elements(true, false), useEquality =>
+                    CreateNestedPropertyComparison(path, value, useEquality))));
     }
 
-    private static Expression<Func<TestEntity, bool>> CreateNestedPropertyComparison(PropertyInfo[] path, string value)
+    private static Expression<Func<TestEntity, bool>> CreateNestedPropertyComparison(PropertyInfo[] path, string value, bool useEquality)
     {
         var parameter = Expression.Parameter(typeof(TestEntity), "x");
         var propertyAccess = CreateNestedPropertyAccess(parameter, path);
         var constant = Expression.Constant(value, typeof(string));
 
-        var useEquality = Random.Shared.Next(2) == 0;
         var comparison = useEquality
             ? Expression.Equal(propertyAccess, constant)
             : Expression.NotEqual(propertyAccess, constant);

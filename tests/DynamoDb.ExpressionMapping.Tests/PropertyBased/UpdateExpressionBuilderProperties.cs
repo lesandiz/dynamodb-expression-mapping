@@ -16,6 +16,19 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 [Trait("Category", "Property")]
 public class UpdateExpressionBuilderProperties
 {
+    private static readonly Dictionary<string, Regex> ClauseKeywordRegexes = new()
+    {
+        ["SET"] = new Regex(@"\bSET\b", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+        ["REMOVE"] = new Regex(@"\bREMOVE\b", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+        ["ADD"] = new Regex(@"\bADD\b", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+        ["DELETE"] = new Regex(@"\bDELETE\b", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+    };
+    private static readonly Regex UppercaseWordRegex = new(@"\b[A-Z]+\b", RegexOptions.Compiled);
+    private static readonly Regex ClausePatternRegex = new(@"^(SET|REMOVE|ADD|DELETE)\s|(\s)(SET|REMOVE|ADD|DELETE)\s", RegexOptions.Compiled);
+    private static readonly Regex ClauseStartRegex = new(@"^(SET|REMOVE|ADD|DELETE)\s", RegexOptions.Compiled);
+    private static readonly Regex UpdNameAliasRegex = new(@"#upd_\d+", RegexOptions.Compiled);
+    private static readonly Regex UpdValuePlaceholderRegex = new(@":upd_v\d+", RegexOptions.Compiled);
+
     private readonly IAttributeNameResolverFactory _resolverFactory;
     private readonly IAttributeValueConverterRegistry _converterRegistry;
     private readonly Config _config;
@@ -104,7 +117,7 @@ public class UpdateExpressionBuilderProperties
         // Each valid keyword should appear at most once
         foreach (var keyword in validKeywords)
         {
-            var regex = new Regex($@"\b{keyword}\b", RegexOptions.IgnoreCase);
+            var regex = ClauseKeywordRegexes[keyword];
             var matches = regex.Matches(expression);
 
             if (matches.Count > 1)
@@ -116,7 +129,7 @@ public class UpdateExpressionBuilderProperties
         }
 
         // Extract all potential clause keywords from the expression
-        var keywords = Regex.Matches(expression, @"\b[A-Z]+\b")
+        var keywords = UppercaseWordRegex.Matches(expression)
             .Cast<Match>()
             .Select(m => m.Value)
             .Distinct()
@@ -135,11 +148,10 @@ public class UpdateExpressionBuilderProperties
 
         // Verify basic structure: clause keywords should be at the start or after a space
         // and followed by a space or end of string
-        var clausePattern = @"^(SET|REMOVE|ADD|DELETE)\s|(\s)(SET|REMOVE|ADD|DELETE)\s";
-        if (!Regex.IsMatch(expression, clausePattern))
+        if (!ClausePatternRegex.IsMatch(expression))
         {
             // Check if it's a single clause at the beginning
-            if (!Regex.IsMatch(expression, @"^(SET|REMOVE|ADD|DELETE)\s"))
+            if (!ClauseStartRegex.IsMatch(expression))
             {
                 return Prop.Label(
                     false,
@@ -245,16 +257,13 @@ public class UpdateExpressionBuilderProperties
         }
 
         // Verify all aliases in the expression match the dictionaries
-        var nameAliasPattern = new Regex(@"#upd_\d+");
-        var valuePlaceholderPattern = new Regex(@":upd_v\d+");
-
-        var nameAliasesInExpression = nameAliasPattern.Matches(result.Expression)
+        var nameAliasesInExpression = UpdNameAliasRegex.Matches(result.Expression)
             .Cast<Match>()
             .Select(m => m.Value)
             .Distinct()
             .ToHashSet();
 
-        var valuePlaceholdersInExpression = valuePlaceholderPattern.Matches(result.Expression)
+        var valuePlaceholdersInExpression = UpdValuePlaceholderRegex.Matches(result.Expression)
             .Cast<Match>()
             .Select(m => m.Value)
             .Distinct()

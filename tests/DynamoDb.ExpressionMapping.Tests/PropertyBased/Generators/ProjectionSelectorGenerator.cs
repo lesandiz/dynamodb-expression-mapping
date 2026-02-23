@@ -11,8 +11,22 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased.Generators;
 /// FsCheck generator for projection selector expression trees.
 /// Generates Expression&lt;Func&lt;TestEntity, object&gt;&gt; across three complexity tiers.
 /// </summary>
+/// <remarks>
+/// Avoids Gen.Where to prevent test host crashes caused by FsCheck 3.0.0-rc3's
+/// retry mechanism overflowing the stack. Uses pre-computed combinations instead.
+/// </remarks>
 public static class ProjectionSelectorGenerator
 {
+    private static readonly PropertyInfo[] SimpleProperties = GetSimpleProperties();
+    private static readonly (PropertyInfo, PropertyInfo)[] UniquePairs = ComputeUniquePairs(SimpleProperties);
+    private static readonly (PropertyInfo, PropertyInfo, PropertyInfo)[] UniqueTriples = ComputeUniqueTriples(SimpleProperties);
+
+    private static readonly PropertyPath[] ComplexPaths = GetComplexPropertyPaths();
+    private static readonly PropertyPath[] NestedPaths = ComplexPaths.Where(p => p.Properties.Length > 1).ToArray();
+    private static readonly (PropertyPath, PropertyPath)[] ComplexPairs = ComputeUniquePathPairsWithNested();
+    private static readonly (PropertyPath, PropertyPath, PropertyPath)[] ComplexTriples = ComputeUniquePathTriplesWithNested();
+    private static readonly (PropertyPath, PropertyPath, PropertyPath, PropertyPath)[] ComplexQuads = ComputeUniquePathQuadsWithNested();
+
     /// <summary>
     /// Generates random projection selectors for TestEntity.
     /// </summary>
@@ -38,7 +52,7 @@ public static class ProjectionSelectorGenerator
     /// </summary>
     private static Gen<Expression<Func<TestEntity, object>>> SimpleProjectionGen()
     {
-        return Gen.Select(Gen.Elements(GetSimpleProperties()), CreateSinglePropertySelector);
+        return Gen.Select(Gen.Elements(SimpleProperties), CreateSinglePropertySelector);
     }
 
     private static PropertyInfo[] GetSimpleProperties()
@@ -83,21 +97,18 @@ public static class ProjectionSelectorGenerator
 
     /// <summary>
     /// Generates tuple projection: x => new { x.Name, x.Price }
-    /// Randomly selects 2-3 properties from simple properties.
+    /// Randomly selects 2-3 unique properties from simple properties.
     /// Uses ValueTuple for simplicity instead of anonymous types.
     /// </summary>
     private static Gen<Expression<Func<TestEntity, object>>> CompositeProjectionGen()
     {
-        var propGen = Gen.Elements(GetSimpleProperties());
+        var twoPropertyGen = Gen.Select(
+            Gen.Elements(UniquePairs),
+            pair => CreateTwoPropertySelector(pair.Item1, pair.Item2));
 
-        var twoPropertyGen = Gen.SelectMany(propGen, prop1 =>
-            Gen.Select(Gen.Where(propGen, prop2 => prop1 != prop2),
-                       prop2 => CreateTwoPropertySelector(prop1, prop2)));
-
-        var threePropertyGen = Gen.SelectMany(propGen, prop1 =>
-            Gen.SelectMany(propGen, prop2 =>
-                Gen.Select(Gen.Where(propGen, prop3 => prop1 != prop2 && prop1 != prop3 && prop2 != prop3),
-                           prop3 => CreateThreePropertySelector(prop1, prop2, prop3))));
+        var threePropertyGen = Gen.Select(
+            Gen.Elements(UniqueTriples),
+            triple => CreateThreePropertySelector(triple.Item1, triple.Item2, triple.Item3));
 
         return Gen.OneOf(twoPropertyGen, threePropertyGen);
     }
@@ -145,34 +156,24 @@ public static class ProjectionSelectorGenerator
     /// <summary>
     /// Generates complex projection with nested properties:
     /// x => new { x.Name, x.Address.City, x.Address.Country.Code }
+    /// Every generated projection includes at least one nested property path.
     /// Uses tuples to represent multiple property projections with nested access.
     /// </summary>
     private static Gen<Expression<Func<TestEntity, object>>> ComplexProjectionGen()
     {
-        var pathGen = Gen.Elements(GetComplexPropertyPaths());
+        var twoPathGen = Gen.Select(
+            Gen.Elements(ComplexPairs),
+            pair => CreateTwoPathSelector(pair.Item1, pair.Item2));
 
-        var twoPathGen = Gen.SelectMany(pathGen, path1 =>
-            Gen.Select(Gen.Where(pathGen, path2 => !path1.Equals(path2)),
-                       path2 => CreateTwoPathSelector(path1, path2)));
+        var threePathGen = Gen.Select(
+            Gen.Elements(ComplexTriples),
+            triple => CreateThreePathSelector(triple.Item1, triple.Item2, triple.Item3));
 
-        var threePathGen = Gen.SelectMany(pathGen, path1 =>
-            Gen.SelectMany(pathGen, path2 =>
-                Gen.Select(Gen.Where(pathGen, path3 => !path1.Equals(path2) && !path1.Equals(path3) && !path2.Equals(path3)),
-                           path3 => CreateThreePathSelector(path1, path2, path3))));
-
-        var fourPathGen = Gen.SelectMany(pathGen, path1 =>
-            Gen.SelectMany(pathGen, path2 =>
-                Gen.SelectMany(pathGen, path3 =>
-                    Gen.Select(Gen.Where(pathGen, path4 => AreAllUnique(path1, path2, path3, path4)),
-                               path4 => CreateFourPathSelector(path1, path2, path3, path4)))));
+        var fourPathGen = Gen.Select(
+            Gen.Elements(ComplexQuads),
+            quad => CreateFourPathSelector(quad.Item1, quad.Item2, quad.Item3, quad.Item4));
 
         return Gen.OneOf(twoPathGen, threePathGen, fourPathGen);
-    }
-
-    private static bool AreAllUnique(PropertyPath p1, PropertyPath p2, PropertyPath p3, PropertyPath p4)
-    {
-        var paths = new[] { p1, p2, p3, p4 };
-        return paths.Distinct().Count() == 4;
     }
 
     private static PropertyPath[] GetComplexPropertyPaths()
@@ -288,10 +289,83 @@ public static class ProjectionSelectorGenerator
 
     #endregion
 
+    #region Combination Helpers
+
+    private static (PropertyInfo, PropertyInfo)[] ComputeUniquePairs(PropertyInfo[] props)
+    {
+        var pairs = new List<(PropertyInfo, PropertyInfo)>();
+        for (int i = 0; i < props.Length; i++)
+            for (int j = 0; j < props.Length; j++)
+                if (i != j)
+                    pairs.Add((props[i], props[j]));
+        return pairs.ToArray();
+    }
+
+    private static (PropertyInfo, PropertyInfo, PropertyInfo)[] ComputeUniqueTriples(PropertyInfo[] props)
+    {
+        var triples = new List<(PropertyInfo, PropertyInfo, PropertyInfo)>();
+        for (int i = 0; i < props.Length; i++)
+            for (int j = 0; j < props.Length; j++)
+                for (int k = 0; k < props.Length; k++)
+                    if (i != j && i != k && j != k)
+                        triples.Add((props[i], props[j], props[k]));
+        return triples.ToArray();
+    }
+
+    /// <summary>
+    /// Computes unique path pairs where at least one path is nested (has > 1 segment).
+    /// </summary>
+    private static (PropertyPath, PropertyPath)[] ComputeUniquePathPairsWithNested()
+    {
+        var pairs = new List<(PropertyPath, PropertyPath)>();
+        for (int i = 0; i < ComplexPaths.Length; i++)
+            for (int j = 0; j < ComplexPaths.Length; j++)
+                if (i != j && (ComplexPaths[i].Properties.Length > 1 || ComplexPaths[j].Properties.Length > 1))
+                    pairs.Add((ComplexPaths[i], ComplexPaths[j]));
+        return pairs.ToArray();
+    }
+
+    /// <summary>
+    /// Computes unique path triples where at least one path is nested.
+    /// </summary>
+    private static (PropertyPath, PropertyPath, PropertyPath)[] ComputeUniquePathTriplesWithNested()
+    {
+        var triples = new List<(PropertyPath, PropertyPath, PropertyPath)>();
+        for (int i = 0; i < ComplexPaths.Length; i++)
+            for (int j = 0; j < ComplexPaths.Length; j++)
+                for (int k = 0; k < ComplexPaths.Length; k++)
+                    if (i != j && i != k && j != k &&
+                        (ComplexPaths[i].Properties.Length > 1 || ComplexPaths[j].Properties.Length > 1 || ComplexPaths[k].Properties.Length > 1))
+                        triples.Add((ComplexPaths[i], ComplexPaths[j], ComplexPaths[k]));
+        return triples.ToArray();
+    }
+
+    /// <summary>
+    /// Computes unique path quads where at least one path is nested.
+    /// Limited to a reasonable sample to avoid combinatorial explosion (11^4 = 14641).
+    /// </summary>
+    private static (PropertyPath, PropertyPath, PropertyPath, PropertyPath)[] ComputeUniquePathQuadsWithNested()
+    {
+        var quads = new List<(PropertyPath, PropertyPath, PropertyPath, PropertyPath)>();
+        // Use nested paths as the first element to guarantee nested access and limit combinations
+        for (int i = 0; i < NestedPaths.Length; i++)
+            for (int j = 0; j < ComplexPaths.Length; j++)
+                for (int k = 0; k < ComplexPaths.Length; k++)
+                    for (int l = 0; l < ComplexPaths.Length; l++)
+                    {
+                        var p = new[] { NestedPaths[i], ComplexPaths[j], ComplexPaths[k], ComplexPaths[l] };
+                        if (p.Distinct().Count() == 4)
+                            quads.Add((p[0], p[1], p[2], p[3]));
+                    }
+        return quads.ToArray();
+    }
+
+    #endregion
+
     /// <summary>
     /// Represents a property access path (e.g., Address.City.Name).
     /// </summary>
-    private class PropertyPath : IEquatable<PropertyPath>
+    internal class PropertyPath : IEquatable<PropertyPath>
     {
         public PropertyInfo[] Properties { get; }
 

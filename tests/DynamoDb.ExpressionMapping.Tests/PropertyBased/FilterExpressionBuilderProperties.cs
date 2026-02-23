@@ -18,6 +18,9 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 [Trait("Category", "Property")]
 public class FilterExpressionBuilderProperties
 {
+    private static readonly Regex FiltValuePlaceholderRegex = new(@":filt_v\d+", RegexOptions.Compiled);
+    private static readonly Regex FiltNameAliasRegex = new(@"#filt_\d+", RegexOptions.Compiled);
+
     private readonly IAttributeNameResolverFactory _resolverFactory;
     private readonly IAttributeValueConverterRegistry _converterRegistry;
     private readonly Config _config;
@@ -235,8 +238,7 @@ public class FilterExpressionBuilderProperties
     private static Property ValidateValuePlaceholders(FilterExpressionResult result)
     {
         // Extract all :filt_vN placeholders from the expression
-        var placeholderPattern = new Regex(@":filt_v\d+");
-        var placeholdersInExpression = placeholderPattern.Matches(result.Expression)
+        var placeholdersInExpression = FiltValuePlaceholderRegex.Matches(result.Expression)
             .Select(m => m.Value)
             .ToHashSet();
 
@@ -319,8 +321,7 @@ public class FilterExpressionBuilderProperties
     private static Property ValidateNameAliases(FilterExpressionResult result)
     {
         // Extract all #filt_N aliases from the expression
-        var aliasPattern = new Regex(@"#filt_\d+");
-        var aliasesInExpression = aliasPattern.Matches(result.Expression)
+        var aliasesInExpression = FiltNameAliasRegex.Matches(result.Expression)
             .Select(m => m.Value)
             .ToHashSet();
 

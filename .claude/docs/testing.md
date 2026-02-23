@@ -23,6 +23,7 @@ dotnet test --filter "Category!=Property"                         # unit tests o
 - Default 100 iterations per property (fast local feedback). CI sets `FSCHECK_MAX_TEST=10000`.
 - All property test classes tagged with `[Trait("Category", "Property")]`.
 - On Windows, `FSCHECK_MAX_TEST=100 dotnet test` does **not** propagate the env var to the .NET test host. The default of 100 in `PropertyTestConfig.cs` handles the local case.
+- **Do NOT use `Gen.Where`** in FsCheck 3.0.0-rc3 generators — it crashes the test host (StackOverflow in retry/shrink). Use pre-computed combinations with `Gen.Elements` instead. See Spec 12 §FsCheck Generator Constraints for details and examples.
 
 ## Verification Strategy
 
@@ -30,7 +31,7 @@ Tiered testing to maintain a fast feedback loop while ensuring affected code is 
 
 ### Pre-commit (must pass before every commit)
 
-Run affected projects, **excluding property tests** (they are slow even at low iteration counts due to per-iteration expression tree generation cost). Target: **under 1 minute**.
+Run affected projects, **excluding property tests** for faster feedback. Target: **under 1 minute**.
 
 ```bash
 dotnet test tests/DynamoDb.ExpressionMapping.Tests/ --filter "Category!=Property"
