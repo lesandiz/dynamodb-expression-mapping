@@ -78,22 +78,13 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 
 ---
 
-## Phase 4 — Contract & Snapshot Testing (PR-05)
+## Phase 4 — Contract & Snapshot Testing (PR-05) ✅ COMPLETE
 
-**Priority: Medium-High** — low effort, high regression protection. Done before benchmarking because output stability matters more.
+30 snapshot tests covering all expression builder types. Alias scope isolation verified. All `.verified.txt` files committed incrementally (commits `bc77178`–`03d185a`). 1036 non-property tests pass.
 
-- [x] 4.1 Add `Verify.Xunit` (28.16.0) to test project. Updated xunit to 2.9.3, xunit.runner.visualstudio to 2.8.2 (required for Verify compatibility). Also updated integration test project xunit versions to match.
-- [x] 4.2 Configured Verify's built-in serialiser with `AttributeValueJsonConverter` in `Snapshots/VerifyConfig.cs` (ModuleInitializer). Added `*.received.*` to `.gitignore`. Smoke tests (`VerifyConfigSmokeTest`) confirm projection and filter serialisation. Uses `Verifier.Verify()` from `VerifyXunit` namespace (v28.x API).
-- [x] 4.3 Write projection snapshot tests (PR-05.3 — 7 cases). Created SnapshotTestEntity with properties for all snapshot scenarios (reserved keywords, remapped customer_id, nested/deeply-nested). 7 tests: SingleProperty, MultipleProperties_AnonymousType, NestedProperty, DeeplyNestedProperty, ReservedKeywords, RemappedAttribute, MixedReservedAndRemapped. All 1015 tests pass.
-- [x] 4.4 Write filter snapshot tests (PR-05.4 — 8 cases). Added SnapshotStatus enum to SnapshotTestEntity. 8 tests: SimpleEquality, CompoundAndOr, NullCheck, StringFunctions, EnumComparison, NestedProperty, ComposedAnd, ComposedOr. All 1023 tests pass.
-- [x] 4.5 Write update snapshot tests (PR-05.5 — 5 cases). Added TagList property to SnapshotTestEntity for AppendToList. 5 tests: SingleSet, MultipleSetAndRemove, IncrementAndAppend, SetIfNotExists, AllClauseTypes. All 1028 tests pass.
-- [x] 4.6 Write key condition snapshot tests (PR-05.6 — 5 cases). Added PK/SK properties to SnapshotTestEntity. 5 tests: PartitionKeyOnly, PartitionKeyAndSortKeyEquals, PartitionKeyAndSortKeyBetween, PartitionKeyAndSortKeyBeginsWith, ReservedKeywordAttributes. All 1033 tests pass.
-- [x] 4.7 Write condition snapshot tests (PR-05.7 — 2 cases). 2 tests: ItemNotExists (attribute_not_exists), CompoundCondition (enum + numeric with #cond_ scope). All 1035 tests pass.
-- [x] 4.8 Write combined expression snapshot tests (PR-05.8). 1 test: QueryRequest_KeyCondition_Projection_Filter verifying alias scope isolation. All 1036 tests pass. 30 total snapshots.
-- [ ] 4.9 Review and commit all `.verified.txt` files
-- [ ] 4.10 Commit phase 4
-
-**Exit criteria**: ≥ 25 snapshots committed. All expression builder types covered. Alias scope isolation verified in combined snapshots.
+- [x] 4.1–4.8 All snapshot tests implemented and committed
+- [x] 4.9 All 30 `.verified.txt` files committed
+- [x] 4.10 Phase 4 fully committed and pushed
 
 ---
 
