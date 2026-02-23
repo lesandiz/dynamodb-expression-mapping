@@ -82,7 +82,7 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 
 **Priority: Medium-High** — low effort, high regression protection. Done before benchmarking because output stability matters more.
 
-- [ ] 4.1 Add `Verify.Xunit` (>= 26.x) to test project
+- [x] 4.1 Add `Verify.Xunit` (28.16.0) to test project. Updated xunit to 2.9.3, xunit.runner.visualstudio to 2.8.2 (required for Verify compatibility). Also updated integration test project xunit versions to match.
 - [ ] 4.2 Create `Snapshots/ExpressionResultSerializer.cs` or configure Verify's built-in serialiser with `AttributeValue` converter (PR-05.1, PR-05.2)
 - [ ] 4.3 Write projection snapshot tests (PR-05.3 — 7 cases)
 - [ ] 4.4 Write filter snapshot tests (PR-05.4 — 8 cases)
