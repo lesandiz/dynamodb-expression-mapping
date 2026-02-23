@@ -129,7 +129,7 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 
 ---
 
-## Phase 6 — Code Coverage Enforcement (PR-06)
+## Phase 6 — Code Coverage Enforcement (PR-06) ✅ COMPLETE
 
 **Priority: Medium-Low** — CI gate to prevent regression of all the quality work from prior phases.
 
@@ -138,7 +138,7 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 - [x] 6.3 Add ReportGenerator to CI — HTML + MarkdownSummaryGithub + Badges (PR-06.3) — install + generate + upload artifact steps added to `ci.yml`; verified locally (HTML, SummaryGithub.md, badges generated; 96.2% line / 86.7% branch)
 - [x] 6.4 Add coverage PR comment via `marocchino/sticky-pull-request-comment` (PR-06.3) — added sticky-pull-request-comment@v2 step to ci.yml, posts coverage-report/SummaryGithub.md on PRs
 - [x] 6.5 Enforce threshold: 90% line / 85% branch overall (PR-06.4, PR-06.5) — added "Enforce coverage thresholds" step to ci.yml using ReportGenerator JsonSummary + jq/bc parsing. Overall thresholds (90% line / 85% branch) fail the build. Per-subsystem targets (PR-06.5) emit warnings for visibility — currently Expressions (line 94.9%/branch 80.7%) and Extensions (branch 64.1%) are below subsystem targets. These gaps should be addressed by task 6.6 (ExcludeFromCodeCoverage exclusions) or additional test coverage.
-- [ ] 6.6 Apply `[ExcludeFromCodeCoverage]` to excluded areas per PR-06.6
+- [x] 6.6 Apply `[ExcludeFromCodeCoverage]` to excluded areas per PR-06.6 — added to 3 attribute classes, DynamoDbExpressionConfig, and 9 exception classes (11 files). All 1086 tests pass.
 - [x] 6.7 Verify local `reportgenerator` HTML workflow works — confirmed: `dotnet tool install -g dotnet-reportgenerator-globaltool` + `reportgenerator` command generates HTML/Badges/Markdown locally
 
 **Exit criteria**: CI fails if coverage drops below thresholds. PR comment shows coverage summary. HTML report available as artifact.
