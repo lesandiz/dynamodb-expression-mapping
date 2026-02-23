@@ -1,0 +1,11 @@
+﻿{
+  Expression: (Enabled = :filt_v0) OR (StatusEnum = :filt_v1),
+  ExpressionAttributeValues: {
+    :filt_v0: {
+      BOOL: true
+    },
+    :filt_v1: {
+      S: Active
+    }
+  }
+}

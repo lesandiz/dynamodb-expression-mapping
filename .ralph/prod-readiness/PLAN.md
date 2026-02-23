@@ -85,7 +85,7 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 - [x] 4.1 Add `Verify.Xunit` (28.16.0) to test project. Updated xunit to 2.9.3, xunit.runner.visualstudio to 2.8.2 (required for Verify compatibility). Also updated integration test project xunit versions to match.
 - [x] 4.2 Configured Verify's built-in serialiser with `AttributeValueJsonConverter` in `Snapshots/VerifyConfig.cs` (ModuleInitializer). Added `*.received.*` to `.gitignore`. Smoke tests (`VerifyConfigSmokeTest`) confirm projection and filter serialisation. Uses `Verifier.Verify()` from `VerifyXunit` namespace (v28.x API).
 - [x] 4.3 Write projection snapshot tests (PR-05.3 — 7 cases). Created SnapshotTestEntity with properties for all snapshot scenarios (reserved keywords, remapped customer_id, nested/deeply-nested). 7 tests: SingleProperty, MultipleProperties_AnonymousType, NestedProperty, DeeplyNestedProperty, ReservedKeywords, RemappedAttribute, MixedReservedAndRemapped. All 1015 tests pass.
-- [ ] 4.4 Write filter snapshot tests (PR-05.4 — 8 cases)
+- [x] 4.4 Write filter snapshot tests (PR-05.4 — 8 cases). Added SnapshotStatus enum to SnapshotTestEntity. 8 tests: SimpleEquality, CompoundAndOr, NullCheck, StringFunctions, EnumComparison, NestedProperty, ComposedAnd, ComposedOr. All 1023 tests pass.
 - [ ] 4.5 Write update snapshot tests (PR-05.5 — 5 cases)
 - [ ] 4.6 Write key condition snapshot tests (PR-05.6 — 5 cases)
 - [ ] 4.7 Write condition snapshot tests (PR-05.7 — 2 cases)
