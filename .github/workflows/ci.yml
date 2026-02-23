@@ -44,6 +44,83 @@ jobs:
           -reporttypes:"Html;MarkdownSummaryGithub;Badges"
           -assemblyfilters:"+DynamoDb.ExpressionMapping"
 
+      - name: Enforce coverage thresholds
+        run: |
+          reportgenerator \
+            -reports:"coverage/**/coverage.cobertura.xml" \
+            -targetdir:"coverage-check" \
+            -reporttypes:"JsonSummary" \
+            -assemblyfilters:"+DynamoDb.ExpressionMapping"
+
+          LINE_COVERAGE=$(jq '.summary.linecoverage' coverage-check/Summary.json)
+          BRANCH_COVERAGE=$(jq '.summary.branchcoverage' coverage-check/Summary.json)
+
+          echo "## Overall Coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Line: ${LINE_COVERAGE}% (threshold: 90%)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: ${BRANCH_COVERAGE}% (threshold: 85%)" >> "$GITHUB_STEP_SUMMARY"
+
+          FAILED=0
+
+          if (( $(echo "$LINE_COVERAGE < 90" | bc -l) )); then
+            echo "::error::Line coverage ${LINE_COVERAGE}% is below 90% threshold"
+            FAILED=1
+          fi
+
+          if (( $(echo "$BRANCH_COVERAGE < 85" | bc -l) )); then
+            echo "::error::Branch coverage ${BRANCH_COVERAGE}% is below 85% threshold"
+            FAILED=1
+          fi
+
+          # Per-subsystem threshold checks (PR-06.5)
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Subsystem Coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Subsystem | Line % | Line Target | Branch % | Branch Target | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----------|--------|-------------|----------|---------------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          check_subsystem() {
+            local ns_prefix="$1"
+            local label="$2"
+            local line_target="$3"
+            local branch_target="$4"
+
+            local covered_lines=$(jq "[.coverage.assemblies[0].classesinassembly[] | select(.name | startswith(\"${ns_prefix}\")) | .coveredlines] | add // 0" coverage-check/Summary.json)
+            local coverable_lines=$(jq "[.coverage.assemblies[0].classesinassembly[] | select(.name | startswith(\"${ns_prefix}\")) | .coverablelines] | add // 0" coverage-check/Summary.json)
+            local covered_branches=$(jq "[.coverage.assemblies[0].classesinassembly[] | select(.name | startswith(\"${ns_prefix}\")) | .coveredbranches] | add // 0" coverage-check/Summary.json)
+            local total_branches=$(jq "[.coverage.assemblies[0].classesinassembly[] | select(.name | startswith(\"${ns_prefix}\")) | .totalbranches] | add // 0" coverage-check/Summary.json)
+
+            local line_pct=0
+            local branch_pct=0
+            if [ "$coverable_lines" -gt 0 ]; then
+              line_pct=$(echo "scale=1; $covered_lines * 100 / $coverable_lines" | bc)
+            fi
+            if [ "$total_branches" -gt 0 ]; then
+              branch_pct=$(echo "scale=1; $covered_branches * 100 / $total_branches" | bc)
+            fi
+
+            local status="pass"
+            if (( $(echo "$line_pct < $line_target" | bc -l) )); then
+              echo "::warning::${label} line coverage ${line_pct}% is below ${line_target}% target"
+              status="warn"
+            fi
+            if [ "$total_branches" -gt 0 ] && (( $(echo "$branch_pct < $branch_target" | bc -l) )); then
+              echo "::warning::${label} branch coverage ${branch_pct}% is below ${branch_target}% target"
+              status="warn"
+            fi
+
+            echo "| ${label} | ${line_pct}% | ${line_target}% | ${branch_pct}% | ${branch_target}% | ${status} |" >> "$GITHUB_STEP_SUMMARY"
+          }
+
+          check_subsystem "DynamoDb.ExpressionMapping.Expressions." "Expressions" 95 90
+          check_subsystem "DynamoDb.ExpressionMapping.Mapping." "Mapping" 95 90
+          check_subsystem "DynamoDb.ExpressionMapping.ResultMapping." "ResultMapping" 95 90
+          check_subsystem "DynamoDb.ExpressionMapping.Extensions." "Extensions" 90 85
+          check_subsystem "DynamoDb.ExpressionMapping.ReservedKeywords." "ReservedKeywords" 95 90
+          check_subsystem "DynamoDb.ExpressionMapping.Caching." "Caching" 90 85
+
+          if [ "$FAILED" -ne 0 ]; then
+            exit 1
+          fi
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
