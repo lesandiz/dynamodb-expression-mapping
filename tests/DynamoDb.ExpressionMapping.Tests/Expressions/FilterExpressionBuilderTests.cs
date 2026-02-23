@@ -1,10 +1,12 @@
 using System;
 using System.Linq.Expressions;
+using System.Text;
 using Amazon.DynamoDBv2.Model;
 using DynamoDb.ExpressionMapping.Attributes;
 using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Mapping;
+using DynamoDb.ExpressionMapping.ReservedKeywords;
 using DynamoDb.ExpressionMapping.Tests.Fixtures;
 using FluentAssertions;
 using Xunit;
@@ -547,4 +549,98 @@ public class FilterExpressionBuilderTests
     }
 
     #endregion
+
+    #region Mutation Killing -- Error Paths and Edge Cases
+
+    [Fact]
+    public void Filter_UnsupportedBinaryExpression_Throws()
+    {
+        var genericBuilder = new FilterExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
+        var act = () => genericBuilder.BuildFilter(p => p.Score + 1 > 5);
+        act.Should().Throw<UnsupportedExpressionException>();
+    }
+
+    [Fact]
+    public void Filter_StandaloneMemberAccess_NonBool_Throws()
+    {
+        var visitor = new FilterExpressionVisitor(
+            _resolverFactory,
+            new ExpressionValueEmitter(_converterRegistry),
+            new AliasGenerator("filt"),
+            new StringBuilder(),
+            new Dictionary<string, string>(),
+            new Dictionary<string, AttributeValue>());
+
+        var param = Expression.Parameter(typeof(TestEntity), "p");
+        var member = Expression.MakeMemberAccess(param, typeof(TestEntity).GetProperty("Title")!);
+        var act = () => visitor.Visit(member);
+        act.Should().Throw<UnsupportedExpressionException>();
+    }
+
+    [Fact]
+    public void Filter_UnsupportedMethodCall_Throws()
+    {
+        var genericBuilder = new FilterExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
+        var act = () => genericBuilder.BuildFilter(p => p.Title.ToUpper() == "TEST");
+        act.Should().Throw<UnsupportedExpressionException>();
+    }
+
+    [Fact]
+    public void Filter_NonPropertyMemberAccess_Throws()
+    {
+        var visitor = new FilterExpressionVisitor(
+            _resolverFactory,
+            new ExpressionValueEmitter(_converterRegistry),
+            new AliasGenerator("filt"),
+            new StringBuilder(),
+            new Dictionary<string, string>(),
+            new Dictionary<string, AttributeValue>());
+
+        var param = Expression.Parameter(typeof(MutR2EntityWithField), "p");
+        var fieldAccess = Expression.Field(param, typeof(MutR2EntityWithField).GetField("PublicField")!);
+        var comparison = Expression.Equal(fieldAccess, Expression.Constant("test"));
+        var act = () => visitor.Visit(comparison);
+        act.Should().Throw<UnsupportedExpressionException>();
+    }
+
+    [Fact]
+    public void Filter_NonParameterRoot_Throws()
+    {
+        var visitor = new FilterExpressionVisitor(
+            _resolverFactory,
+            new ExpressionValueEmitter(_converterRegistry),
+            new AliasGenerator("filt"),
+            new StringBuilder(),
+            new Dictionary<string, string>(),
+            new Dictionary<string, AttributeValue>());
+
+        var entity = new TestEntity { Title = "test" };
+        var constant = Expression.Constant(entity);
+        var member = Expression.Property(constant, "Title");
+        var comparison = Expression.Equal(member, Expression.Constant("abc"));
+        var act = () => visitor.Visit(comparison);
+        act.Should().Throw<UnsupportedExpressionException>();
+    }
+
+    [Fact]
+    public void Filter_DirectConstant_ValueExtracted()
+    {
+        var genericBuilder = new FilterExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
+        var result = genericBuilder.BuildFilter(p => p.Price > 50m);
+        result.Expression.Should().Contain(">");
+        result.ExpressionAttributeValues.Should().ContainSingle()
+            .Which.Value.N.Should().Be("50");
+    }
+
+    #endregion
+}
+
+/// <summary>
+/// Entity with a public field (non-property member) for testing field access error paths.
+/// </summary>
+public class MutR2EntityWithField
+{
+    public string PublicField = string.Empty;
+    public string PartitionKey { get; set; } = string.Empty;
+    public string SortKey { get; set; } = string.Empty;
 }
