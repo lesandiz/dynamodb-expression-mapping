@@ -1,0 +1,304 @@
+#nullable enable
+abstract DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterBase<T>.FromAttributeValue(Amazon.DynamoDBv2.Model.AttributeValue! attributeValue) -> T
+abstract DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterBase<T>.ToAttributeValue(T value) -> Amazon.DynamoDBv2.Model.AttributeValue!
+DynamoDb.ExpressionMapping.Attributes.DynamoDbAttributeAttribute
+DynamoDb.ExpressionMapping.Attributes.DynamoDbAttributeAttribute.AttributeName.get -> string!
+DynamoDb.ExpressionMapping.Attributes.DynamoDbAttributeAttribute.DynamoDbAttributeAttribute(string! attributeName) -> void
+DynamoDb.ExpressionMapping.Attributes.DynamoDbConverterAttribute
+DynamoDb.ExpressionMapping.Attributes.DynamoDbConverterAttribute.ConverterType.get -> System.Type!
+DynamoDb.ExpressionMapping.Attributes.DynamoDbConverterAttribute.DynamoDbConverterAttribute(System.Type! converterType) -> void
+DynamoDb.ExpressionMapping.Attributes.DynamoDbIgnoreAttribute
+DynamoDb.ExpressionMapping.Attributes.DynamoDbIgnoreAttribute.DynamoDbIgnoreAttribute() -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.CacheStatistics() -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.FilterHitRate.get -> double
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.FilterHits.get -> int
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.FilterHits.init -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.FilterMisses.get -> int
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.FilterMisses.init -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.MapperHitRate.get -> double
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.MapperHits.get -> int
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.MapperHits.init -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.MapperMisses.get -> int
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.MapperMisses.init -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.OverallHitRate.get -> double
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.ProjectionHitRate.get -> double
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.ProjectionHits.get -> int
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.ProjectionHits.init -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.ProjectionMisses.get -> int
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.ProjectionMisses.init -> void
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.TotalEntries.get -> int
+DynamoDb.ExpressionMapping.Caching.CacheStatistics.TotalEntries.init -> void
+DynamoDb.ExpressionMapping.Caching.ExpressionCache
+DynamoDb.ExpressionMapping.Caching.ExpressionCache.Clear() -> void
+DynamoDb.ExpressionMapping.Caching.ExpressionCache.ExpressionCache(int? maxSize = null) -> void
+DynamoDb.ExpressionMapping.Caching.ExpressionCache.GetOrAdd<TValue>(string! cacheCategory, string! key, System.Func<string!, TValue>! factory) -> TValue
+DynamoDb.ExpressionMapping.Caching.ExpressionCache.GetStatistics() -> DynamoDb.ExpressionMapping.Caching.CacheStatistics!
+DynamoDb.ExpressionMapping.Caching.ExpressionKeyGenerator
+DynamoDb.ExpressionMapping.Caching.IExpressionCache
+DynamoDb.ExpressionMapping.Caching.IExpressionCache.GetOrAdd<TValue>(string! cacheCategory, string! key, System.Func<string!, TValue>! factory) -> TValue
+DynamoDb.ExpressionMapping.Caching.NullExpressionCache
+DynamoDb.ExpressionMapping.Caching.NullExpressionCache.GetOrAdd<TValue>(string! cacheCategory, string! key, System.Func<string!, TValue>! factory) -> TValue
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.Build() -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.Builder() -> void
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.WithCache(DynamoDb.ExpressionMapping.Caching.IExpressionCache! cache) -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.WithConverter<T>(DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>! converter) -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.WithConverterRegistry(DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry! registry) -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.WithLoggerFactory(Microsoft.Extensions.Logging.ILoggerFactory! loggerFactory) -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.WithNameResolutionMode(DynamoDb.ExpressionMapping.Mapping.NameResolutionMode mode) -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.WithNullHandling(DynamoDb.ExpressionMapping.Mapping.NullHandlingMode mode) -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder.WithReservedKeywords(DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry! keywords) -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Cache.get -> DynamoDb.ExpressionMapping.Caching.IExpressionCache!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.ConverterRegistry.get -> DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.LoggerFactory.get -> Microsoft.Extensions.Logging.ILoggerFactory!
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.NameResolutionMode.get -> DynamoDb.ExpressionMapping.Mapping.NameResolutionMode
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.NullHandlingMode.get -> DynamoDb.ExpressionMapping.Mapping.NullHandlingMode
+DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.ReservedKeywords.get -> DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry!
+DynamoDb.ExpressionMapping.DynamoDbFunctions
+DynamoDb.ExpressionMapping.Exceptions.ExpressionAttributeConflictException
+DynamoDb.ExpressionMapping.Exceptions.ExpressionAttributeConflictException.AliasKey.get -> string!
+DynamoDb.ExpressionMapping.Exceptions.ExpressionAttributeConflictException.ConflictingValue.get -> string?
+DynamoDb.ExpressionMapping.Exceptions.ExpressionAttributeConflictException.ExistingValue.get -> string!
+DynamoDb.ExpressionMapping.Exceptions.ExpressionAttributeConflictException.ExpressionAttributeConflictException(string! aliasKey, string! existingValue, string? conflictingValue = null) -> void
+DynamoDb.ExpressionMapping.Exceptions.ExpressionMappingException
+DynamoDb.ExpressionMapping.Exceptions.ExpressionMappingException.ExpressionMappingException(string! message) -> void
+DynamoDb.ExpressionMapping.Exceptions.ExpressionMappingException.ExpressionMappingException(string! message, System.Exception! innerException) -> void
+DynamoDb.ExpressionMapping.Exceptions.InvalidExpressionException
+DynamoDb.ExpressionMapping.Exceptions.InvalidExpressionException.AttributeName.get -> string?
+DynamoDb.ExpressionMapping.Exceptions.InvalidExpressionException.EntityType.get -> System.Type?
+DynamoDb.ExpressionMapping.Exceptions.InvalidExpressionException.InvalidExpressionException(string! message, string? propertyName = null, System.Type? entityType = null, string? attributeName = null) -> void
+DynamoDb.ExpressionMapping.Exceptions.InvalidExpressionException.PropertyName.get -> string?
+DynamoDb.ExpressionMapping.Exceptions.InvalidFilterException
+DynamoDb.ExpressionMapping.Exceptions.InvalidFilterException.InvalidFilterException(string! message, string? propertyName = null, System.Type? entityType = null) -> void
+DynamoDb.ExpressionMapping.Exceptions.InvalidKeyConditionException
+DynamoDb.ExpressionMapping.Exceptions.InvalidKeyConditionException.InvalidKeyConditionException(string! message, string? propertyName = null, System.Type? entityType = null) -> void
+DynamoDb.ExpressionMapping.Exceptions.InvalidProjectionException
+DynamoDb.ExpressionMapping.Exceptions.InvalidProjectionException.InvalidProjectionException(string! propertyName, System.Type! entityType) -> void
+DynamoDb.ExpressionMapping.Exceptions.InvalidUpdateException
+DynamoDb.ExpressionMapping.Exceptions.InvalidUpdateException.InvalidUpdateException(string! message, string? propertyName = null, System.Type? entityType = null) -> void
+DynamoDb.ExpressionMapping.Exceptions.MissingConverterException
+DynamoDb.ExpressionMapping.Exceptions.MissingConverterException.MissingConverterException(System.Type! targetType, string? propertyName = null) -> void
+DynamoDb.ExpressionMapping.Exceptions.MissingConverterException.PropertyName.get -> string?
+DynamoDb.ExpressionMapping.Exceptions.MissingConverterException.TargetType.get -> System.Type!
+DynamoDb.ExpressionMapping.Exceptions.UnsupportedExpressionException
+DynamoDb.ExpressionMapping.Exceptions.UnsupportedExpressionException.ExpressionText.get -> string!
+DynamoDb.ExpressionMapping.Exceptions.UnsupportedExpressionException.NodeType.get -> System.Linq.Expressions.ExpressionType
+DynamoDb.ExpressionMapping.Exceptions.UnsupportedExpressionException.UnsupportedExpressionException(System.Linq.Expressions.ExpressionType nodeType, string! expressionText) -> void
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionBuilder<TSource>.BuildCondition(System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionBuilder<TSource>.ConditionExpressionBuilder(DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory! resolverFactory, DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry! converterRegistry) -> void
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult.ConditionExpressionResult(string! expression, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! expressionAttributeNames, System.Collections.Generic.IReadOnlyDictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>! expressionAttributeValues) -> void
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult.Expression.get -> string!
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult.ExpressionAttributeNames.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult.ExpressionAttributeValues.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>!
+DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult.IsEmpty.get -> bool
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionBuilder<TSource>.BuildFilter(System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionBuilder<TSource>.FilterExpressionBuilder(DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory! resolverFactory, DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry! converterRegistry) -> void
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult.Expression.get -> string!
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult.ExpressionAttributeNames.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult.ExpressionAttributeValues.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>!
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult.FilterExpressionResult(string! expression, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! expressionAttributeNames, System.Collections.Generic.IReadOnlyDictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>! expressionAttributeValues) -> void
+DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult.IsEmpty.get -> bool
+DynamoDb.ExpressionMapping.Expressions.IConditionExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.IConditionExpressionBuilder<TSource>.BuildCondition(System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.IFilterExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.IFilterExpressionBuilder<TSource>.BuildFilter(System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.IKeyConditionExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.IKeyConditionExpressionBuilder<TSource>.WithPartitionKey<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IProjectionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.IProjectionBuilder<TSource>.BuildProjection<TResult>(System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector) -> DynamoDb.ExpressionMapping.Expressions.ProjectionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.Build() -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.WithSortKeyBeginsWith(System.Linq.Expressions.Expression<System.Func<TSource, string!>!>! property, string! prefix) -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.WithSortKeyBetween<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue low, TValue high) -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.WithSortKeyEquals<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.WithSortKeyGreaterThan<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.WithSortKeyGreaterThanOrEqual<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.WithSortKeyLessThan<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>.WithSortKeyLessThanOrEqual<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.Add<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.AppendToList<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, System.Collections.Generic.List<TValue>!>!>! property, System.Collections.Generic.List<TValue>! values) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.Build() -> DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.Decrement<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue amount) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.Delete<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, System.Collections.Generic.HashSet<TValue>!>!>! property, System.Collections.Generic.HashSet<TValue>! values) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.Increment<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue amount) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.Remove<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.Set<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>.SetIfNotExists<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionBuilder<TSource>.KeyConditionExpressionBuilder(DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory! resolverFactory, DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry! converters) -> void
+DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionBuilder<TSource>.WithPartitionKey<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.ISortKeyConditionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult
+DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult.Expression.get -> string!
+DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult.ExpressionAttributeNames.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult.ExpressionAttributeValues.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>!
+DynamoDb.ExpressionMapping.Expressions.ProjectionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.ProjectionBuilder<TSource>.BuildProjection<TResult>(System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector) -> DynamoDb.ExpressionMapping.Expressions.ProjectionResult!
+DynamoDb.ExpressionMapping.Expressions.ProjectionBuilder<TSource>.ProjectionBuilder(DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory! resolverFactory, DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry? reservedKeywords = null, DynamoDb.ExpressionMapping.Caching.IExpressionCache? cache = null, DynamoDb.ExpressionMapping.Mapping.NameResolutionMode resolutionMode = DynamoDb.ExpressionMapping.Mapping.NameResolutionMode.Strict) -> void
+DynamoDb.ExpressionMapping.Expressions.ProjectionExpressionVisitor
+DynamoDb.ExpressionMapping.Expressions.ProjectionExpressionVisitor.ProjectionExpressionVisitor() -> void
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult.ExpressionAttributeNames.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult.IsEmpty.get -> bool
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult.ProjectionExpression.get -> string!
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult.ProjectionResult(string! projectionExpression, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! expressionAttributeNames, System.Collections.Generic.IReadOnlyList<DynamoDb.ExpressionMapping.Expressions.PropertyPath!>! propertyPaths, DynamoDb.ExpressionMapping.Expressions.ProjectionShape shape, System.Collections.Generic.IReadOnlyList<string!>! resolvedAttributeNames) -> void
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult.PropertyPaths.get -> System.Collections.Generic.IReadOnlyList<DynamoDb.ExpressionMapping.Expressions.PropertyPath!>!
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult.ResolvedAttributeNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
+DynamoDb.ExpressionMapping.Expressions.ProjectionResult.Shape.get -> DynamoDb.ExpressionMapping.Expressions.ProjectionShape
+DynamoDb.ExpressionMapping.Expressions.ProjectionShape
+DynamoDb.ExpressionMapping.Expressions.ProjectionShape.Composite = 2 -> DynamoDb.ExpressionMapping.Expressions.ProjectionShape
+DynamoDb.ExpressionMapping.Expressions.ProjectionShape.Identity = 0 -> DynamoDb.ExpressionMapping.Expressions.ProjectionShape
+DynamoDb.ExpressionMapping.Expressions.ProjectionShape.SingleProperty = 1 -> DynamoDb.ExpressionMapping.Expressions.ProjectionShape
+DynamoDb.ExpressionMapping.Expressions.PropertyPath
+DynamoDb.ExpressionMapping.Expressions.PropertyPath.FullPath.get -> string!
+DynamoDb.ExpressionMapping.Expressions.PropertyPath.IsNested.get -> bool
+DynamoDb.ExpressionMapping.Expressions.PropertyPath.LeafName.get -> string!
+DynamoDb.ExpressionMapping.Expressions.PropertyPath.PropertyInfo.get -> System.Reflection.PropertyInfo!
+DynamoDb.ExpressionMapping.Expressions.PropertyPath.PropertyPath(System.Collections.Generic.IReadOnlyList<string!>! segments, System.Collections.Generic.IReadOnlyList<System.Reflection.PropertyInfo!>! segmentProperties) -> void
+DynamoDb.ExpressionMapping.Expressions.PropertyPath.SegmentProperties.get -> System.Collections.Generic.IReadOnlyList<System.Reflection.PropertyInfo!>!
+DynamoDb.ExpressionMapping.Expressions.PropertyPath.Segments.get -> System.Collections.Generic.IReadOnlyList<string!>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.Add<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.AppendToList<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, System.Collections.Generic.List<TValue>!>!>! property, System.Collections.Generic.List<TValue>! values) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.Build() -> DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.Decrement<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue amount) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.Delete<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, System.Collections.Generic.HashSet<TValue>!>!>! property, System.Collections.Generic.HashSet<TValue>! values) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.Increment<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue amount) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.Remove<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.Set<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.SetIfNotExists<TValue>(System.Linq.Expressions.Expression<System.Func<TSource, TValue>!>! property, TValue value) -> DynamoDb.ExpressionMapping.Expressions.IUpdateExpressionBuilder<TSource>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionBuilder<TSource>.UpdateExpressionBuilder(DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory! resolverFactory, DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry! converterRegistry) -> void
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult.Expression.get -> string!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult.ExpressionAttributeNames.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult.ExpressionAttributeValues.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>!
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult.IsEmpty.get -> bool
+DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult.UpdateExpressionResult(string! expression, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! names, System.Collections.Generic.IReadOnlyDictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>! values) -> void
+DynamoDb.ExpressionMapping.Extensions.CombinedExtensions
+DynamoDb.ExpressionMapping.Extensions.ConditionExtensions
+DynamoDb.ExpressionMapping.Extensions.FilterExtensions
+DynamoDb.ExpressionMapping.Extensions.KeyConditionExtensions
+DynamoDb.ExpressionMapping.Extensions.ProjectionExtensions
+DynamoDb.ExpressionMapping.Extensions.UpdateExtensions
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolver<T>
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolver<T>.AttributeNameResolver(DynamoDb.ExpressionMapping.Mapping.NameResolutionMode mode = DynamoDb.ExpressionMapping.Mapping.NameResolutionMode.Strict) -> void
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolver<T>.GetAttributeName(string! propertyName) -> string!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolver<T>.GetPropertyName(string! attributeName) -> string!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolver<T>.IsStoredAttribute(string! propertyName) -> bool
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>.AttributeNameResolverBuilder() -> void
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>.Build() -> DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver<T>!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>.Ignore<TProperty>(System.Linq.Expressions.Expression<System.Func<T, TProperty>!>! selector) -> DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>.Map<TProperty>(System.Linq.Expressions.Expression<System.Func<T, TProperty>!>! selector, string! attributeName) -> DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>.WithMode(DynamoDb.ExpressionMapping.Mapping.NameResolutionMode mode) -> DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactory
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactory.AttributeNameResolverFactory(DynamoDb.ExpressionMapping.Mapping.NameResolutionMode mode = DynamoDb.ExpressionMapping.Mapping.NameResolutionMode.Strict) -> void
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactory.GetResolver(System.Type! entityType) -> DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactory.GetResolver<T>() -> DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver<T>!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryBuilder
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryBuilder.AttributeNameResolverFactoryBuilder() -> void
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryBuilder.Build() -> DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryBuilder.Configure<T>(System.Action<DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<T>!>! configure) -> DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryBuilder!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryBuilder.WithMode(DynamoDb.ExpressionMapping.Mapping.NameResolutionMode mode) -> DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryBuilder!
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryOptions
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryOptions.AddResolver(System.Type! entityType, DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver! resolver) -> void
+DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverFactoryOptions.AttributeNameResolverFactoryOptions() -> void
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterBase<T>
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterBase<T>.AttributeValueConverterBase() -> void
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterBase<T>.TargetType.get -> System.Type!
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry.Clone() -> DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry!
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry.GetConverter(System.Type! type) -> DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter!
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry.GetConverter<T>() -> DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>!
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry.HasConverter(System.Type! type) -> bool
+DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry.Register<T>(DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>! converter) -> void
+DynamoDb.ExpressionMapping.Mapping.EnumStorageMode
+DynamoDb.ExpressionMapping.Mapping.EnumStorageMode.Number = 1 -> DynamoDb.ExpressionMapping.Mapping.EnumStorageMode
+DynamoDb.ExpressionMapping.Mapping.EnumStorageMode.String = 0 -> DynamoDb.ExpressionMapping.Mapping.EnumStorageMode
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver.GetAttributeName(string! propertyName) -> string!
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver.GetPropertyName(string! attributeName) -> string!
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver.IsStoredAttribute(string! propertyName) -> bool
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver<T>
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory.GetResolver(System.Type! entityType) -> DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver!
+DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory.GetResolver<T>() -> DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolver<T>!
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter.FromAttributeValue(Amazon.DynamoDBv2.Model.AttributeValue! attributeValue) -> object!
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter.TargetType.get -> System.Type!
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter.ToAttributeValue(object! value) -> Amazon.DynamoDBv2.Model.AttributeValue!
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>.FromAttributeValue(Amazon.DynamoDBv2.Model.AttributeValue! attributeValue) -> T
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>.ToAttributeValue(T value) -> Amazon.DynamoDBv2.Model.AttributeValue!
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry.GetConverter(System.Type! type) -> DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter!
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry.GetConverter<T>() -> DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>!
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry.HasConverter(System.Type! type) -> bool
+DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry.Register<T>(DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverter<T>! converter) -> void
+DynamoDb.ExpressionMapping.Mapping.NameResolutionMode
+DynamoDb.ExpressionMapping.Mapping.NameResolutionMode.Lenient = 1 -> DynamoDb.ExpressionMapping.Mapping.NameResolutionMode
+DynamoDb.ExpressionMapping.Mapping.NameResolutionMode.Strict = 0 -> DynamoDb.ExpressionMapping.Mapping.NameResolutionMode
+DynamoDb.ExpressionMapping.Mapping.NullHandlingMode
+DynamoDb.ExpressionMapping.Mapping.NullHandlingMode.ExplicitNull = 1 -> DynamoDb.ExpressionMapping.Mapping.NullHandlingMode
+DynamoDb.ExpressionMapping.Mapping.NullHandlingMode.OmitNull = 0 -> DynamoDb.ExpressionMapping.Mapping.NullHandlingMode
+DynamoDb.ExpressionMapping.ReservedKeywords.AliasGenerator
+DynamoDb.ExpressionMapping.ReservedKeywords.AliasGenerator.AliasGenerator(string! scope) -> void
+DynamoDb.ExpressionMapping.ReservedKeywords.AliasGenerator.Clone() -> DynamoDb.ExpressionMapping.ReservedKeywords.AliasGenerator!
+DynamoDb.ExpressionMapping.ReservedKeywords.AliasGenerator.NextName() -> string!
+DynamoDb.ExpressionMapping.ReservedKeywords.AliasGenerator.NextValue() -> string!
+DynamoDb.ExpressionMapping.ReservedKeywords.AliasGenerator.Reset() -> void
+DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry
+DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry.IsReserved(string! name) -> bool
+DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry.NeedsEscaping(string! name) -> bool
+DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry.ReservedKeywordRegistry() -> void
+DynamoDb.ExpressionMapping.ResultMapping.DirectResultMapper<TSource>
+DynamoDb.ExpressionMapping.ResultMapping.DirectResultMapper<TSource>.CreateMapper<TResult>(System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector) -> System.Func<System.Collections.Generic.Dictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>!, TResult>!
+DynamoDb.ExpressionMapping.ResultMapping.DirectResultMapper<TSource>.DirectResultMapper(DynamoDb.ExpressionMapping.Mapping.IAttributeNameResolverFactory! resolverFactory, DynamoDb.ExpressionMapping.Mapping.IAttributeValueConverterRegistry! converterRegistry, DynamoDb.ExpressionMapping.Caching.IExpressionCache? cache = null, System.Func<System.Collections.Generic.Dictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>!, object!>? fullEntityMapper = null) -> void
+DynamoDb.ExpressionMapping.ResultMapping.DirectResultMapper<TSource>.Map<TResult>(System.Collections.Generic.Dictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>! attributes, System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector) -> TResult
+DynamoDb.ExpressionMapping.ResultMapping.IDirectResultMapper<TSource>
+DynamoDb.ExpressionMapping.ResultMapping.IDirectResultMapper<TSource>.CreateMapper<TResult>(System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector) -> System.Func<System.Collections.Generic.Dictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>!, TResult>!
+DynamoDb.ExpressionMapping.ResultMapping.IDirectResultMapper<TSource>.Map<TResult>(System.Collections.Generic.Dictionary<string!, Amazon.DynamoDBv2.Model.AttributeValue!>! attributes, System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector) -> TResult
+DynamoDb.ExpressionMapping.ServiceCollectionExtensions
+override DynamoDb.ExpressionMapping.Expressions.PropertyPath.Equals(object? obj) -> bool
+override DynamoDb.ExpressionMapping.Expressions.PropertyPath.GetHashCode() -> int
+override DynamoDb.ExpressionMapping.Expressions.PropertyPath.ToString() -> string!
+static DynamoDb.ExpressionMapping.Caching.ExpressionKeyGenerator.GenerateKey<TSource, TResult>(System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! expression) -> string!
+static DynamoDb.ExpressionMapping.DynamoDbFunctions.AttributeExists<T>(T property) -> bool
+static DynamoDb.ExpressionMapping.DynamoDbFunctions.AttributeNotExists<T>(T property) -> bool
+static DynamoDb.ExpressionMapping.DynamoDbFunctions.AttributeType<T>(T property, string! dynamoDbType) -> bool
+static DynamoDb.ExpressionMapping.DynamoDbFunctions.Between<T>(T property, T low, T high) -> bool
+static DynamoDb.ExpressionMapping.DynamoDbFunctions.Size<T>(T property) -> int
+static DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult.And(DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult! left, DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult! right) -> DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult!
+static DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult.Or(DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult! left, DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult! right) -> DynamoDb.ExpressionMapping.Expressions.ConditionExpressionResult!
+static DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult.And(DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult! left, DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult! right) -> DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult!
+static DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult.Or(DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult! left, DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult! right) -> DynamoDb.ExpressionMapping.Expressions.FilterExpressionResult!
+static DynamoDb.ExpressionMapping.Expressions.ProjectionExpressionVisitor.ExtractPropertyPaths<TSource, TResult>(System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! expression) -> System.Collections.Generic.IReadOnlyList<DynamoDb.ExpressionMapping.Expressions.PropertyPath!>!
+static DynamoDb.ExpressionMapping.Expressions.ProjectionExpressionVisitor.ExtractPropertyPaths<TSource, TResult>(System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! expression, out DynamoDb.ExpressionMapping.Expressions.ProjectionShape shape) -> System.Collections.Generic.IReadOnlyList<DynamoDb.ExpressionMapping.Expressions.PropertyPath!>!
+static DynamoDb.ExpressionMapping.Expressions.ProjectionResult.Empty.get -> DynamoDb.ExpressionMapping.Expressions.ProjectionResult!
+static DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult.Empty.get -> DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult!
+static DynamoDb.ExpressionMapping.Extensions.CombinedExtensions.WithExpressions<TSource, TResult>(this Amazon.DynamoDBv2.Model.QueryRequest! request, DynamoDb.ExpressionMapping.Expressions.IProjectionBuilder<TSource>! projectionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector, DynamoDb.ExpressionMapping.Expressions.IFilterExpressionBuilder<TSource>! filterBuilder, System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> Amazon.DynamoDBv2.Model.QueryRequest!
+static DynamoDb.ExpressionMapping.Extensions.ConditionExtensions.WithCondition<TSource>(this Amazon.DynamoDBv2.Model.DeleteItemRequest! request, DynamoDb.ExpressionMapping.Expressions.IConditionExpressionBuilder<TSource>! conditionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> Amazon.DynamoDBv2.Model.DeleteItemRequest!
+static DynamoDb.ExpressionMapping.Extensions.ConditionExtensions.WithCondition<TSource>(this Amazon.DynamoDBv2.Model.PutItemRequest! request, DynamoDb.ExpressionMapping.Expressions.IConditionExpressionBuilder<TSource>! conditionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> Amazon.DynamoDBv2.Model.PutItemRequest!
+static DynamoDb.ExpressionMapping.Extensions.ConditionExtensions.WithCondition<TSource>(this Amazon.DynamoDBv2.Model.UpdateItemRequest! request, DynamoDb.ExpressionMapping.Expressions.IConditionExpressionBuilder<TSource>! conditionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> Amazon.DynamoDBv2.Model.UpdateItemRequest!
+static DynamoDb.ExpressionMapping.Extensions.FilterExtensions.WithFilter<TSource>(this Amazon.DynamoDBv2.Model.QueryRequest! request, DynamoDb.ExpressionMapping.Expressions.IFilterExpressionBuilder<TSource>! filterBuilder, System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> Amazon.DynamoDBv2.Model.QueryRequest!
+static DynamoDb.ExpressionMapping.Extensions.FilterExtensions.WithFilter<TSource>(this Amazon.DynamoDBv2.Model.ScanRequest! request, DynamoDb.ExpressionMapping.Expressions.IFilterExpressionBuilder<TSource>! filterBuilder, System.Linq.Expressions.Expression<System.Func<TSource, bool>!>! predicate) -> Amazon.DynamoDBv2.Model.ScanRequest!
+static DynamoDb.ExpressionMapping.Extensions.KeyConditionExtensions.WithKeyCondition<TSource>(this Amazon.DynamoDBv2.Model.QueryRequest! request, DynamoDb.ExpressionMapping.Expressions.IKeyConditionExpressionBuilder<TSource>! keyConditionBuilder, System.Func<DynamoDb.ExpressionMapping.Expressions.IKeyConditionExpressionBuilder<TSource>!, DynamoDb.ExpressionMapping.Expressions.KeyConditionExpressionResult!>! configure) -> Amazon.DynamoDBv2.Model.QueryRequest!
+static DynamoDb.ExpressionMapping.Extensions.ProjectionExtensions.WithProjection<TSource, TResult>(this Amazon.DynamoDBv2.Model.BatchGetItemRequest! request, string! tableName, DynamoDb.ExpressionMapping.Expressions.IProjectionBuilder<TSource>! projectionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>? selector) -> Amazon.DynamoDBv2.Model.BatchGetItemRequest!
+static DynamoDb.ExpressionMapping.Extensions.ProjectionExtensions.WithProjection<TSource, TResult>(this Amazon.DynamoDBv2.Model.GetItemRequest! request, DynamoDb.ExpressionMapping.Expressions.IProjectionBuilder<TSource>! projectionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>! selector) -> Amazon.DynamoDBv2.Model.GetItemRequest!
+static DynamoDb.ExpressionMapping.Extensions.ProjectionExtensions.WithProjection<TSource, TResult>(this Amazon.DynamoDBv2.Model.QueryRequest! request, DynamoDb.ExpressionMapping.Expressions.IProjectionBuilder<TSource>! projectionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>? selector) -> Amazon.DynamoDBv2.Model.QueryRequest!
+static DynamoDb.ExpressionMapping.Extensions.ProjectionExtensions.WithProjection<TSource, TResult>(this Amazon.DynamoDBv2.Model.ScanRequest! request, DynamoDb.ExpressionMapping.Expressions.IProjectionBuilder<TSource>! projectionBuilder, System.Linq.Expressions.Expression<System.Func<TSource, TResult>!>? selector) -> Amazon.DynamoDBv2.Model.ScanRequest!
+static DynamoDb.ExpressionMapping.Extensions.UpdateExtensions.WithUpdate(this Amazon.DynamoDBv2.Model.UpdateItemRequest! request, DynamoDb.ExpressionMapping.Expressions.UpdateExpressionResult! updateResult) -> Amazon.DynamoDBv2.Model.UpdateItemRequest!
+static DynamoDb.ExpressionMapping.ServiceCollectionExtensions.AddDynamoDbEntity<TEntity>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<DynamoDb.ExpressionMapping.Mapping.AttributeNameResolverBuilder<TEntity>!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static DynamoDb.ExpressionMapping.ServiceCollectionExtensions.AddDynamoDbExpressionMapping(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static DynamoDb.ExpressionMapping.ServiceCollectionExtensions.AddDynamoDbExpressionMapping(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Builder!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static readonly DynamoDb.ExpressionMapping.Caching.ExpressionCache.Default -> DynamoDb.ExpressionMapping.Caching.ExpressionCache!
+static readonly DynamoDb.ExpressionMapping.Caching.NullExpressionCache.Instance -> DynamoDb.ExpressionMapping.Caching.NullExpressionCache!
+static readonly DynamoDb.ExpressionMapping.DynamoDbExpressionConfig.Default -> DynamoDb.ExpressionMapping.DynamoDbExpressionConfig!
+static readonly DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry.Default -> DynamoDb.ExpressionMapping.Mapping.AttributeValueConverterRegistry!
+static readonly DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry.Default -> DynamoDb.ExpressionMapping.ReservedKeywords.ReservedKeywordRegistry!
