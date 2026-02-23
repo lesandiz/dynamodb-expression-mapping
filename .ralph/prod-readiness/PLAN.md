@@ -88,7 +88,7 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 - [x] 4.4 Write filter snapshot tests (PR-05.4 — 8 cases). Added SnapshotStatus enum to SnapshotTestEntity. 8 tests: SimpleEquality, CompoundAndOr, NullCheck, StringFunctions, EnumComparison, NestedProperty, ComposedAnd, ComposedOr. All 1023 tests pass.
 - [x] 4.5 Write update snapshot tests (PR-05.5 — 5 cases). Added TagList property to SnapshotTestEntity for AppendToList. 5 tests: SingleSet, MultipleSetAndRemove, IncrementAndAppend, SetIfNotExists, AllClauseTypes. All 1028 tests pass.
 - [x] 4.6 Write key condition snapshot tests (PR-05.6 — 5 cases). Added PK/SK properties to SnapshotTestEntity. 5 tests: PartitionKeyOnly, PartitionKeyAndSortKeyEquals, PartitionKeyAndSortKeyBetween, PartitionKeyAndSortKeyBeginsWith, ReservedKeywordAttributes. All 1033 tests pass.
-- [ ] 4.7 Write condition snapshot tests (PR-05.7 — 2 cases)
+- [x] 4.7 Write condition snapshot tests (PR-05.7 — 2 cases). 2 tests: ItemNotExists (attribute_not_exists), CompoundCondition (enum + numeric with #cond_ scope). All 1035 tests pass.
 - [ ] 4.8 Write combined expression snapshot tests (PR-05.8)
 - [ ] 4.9 Review and commit all `.verified.txt` files
 - [ ] 4.10 Commit phase 4
