@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace DynamoDb.ExpressionMapping.Exceptions;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace DynamoDb.ExpressionMapping.Exceptions;
 /// <c>ExpressionAttributeValues</c> from multiple expression results
 /// produces a key collision with different values.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class ExpressionAttributeConflictException : ExpressionMappingException
 {
     /// <summary>

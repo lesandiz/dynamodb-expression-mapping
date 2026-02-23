@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace DynamoDb.ExpressionMapping.Exceptions;
@@ -7,6 +8,7 @@ namespace DynamoDb.ExpressionMapping.Exceptions;
 /// be translated to a DynamoDB expression (e.g. method calls,
 /// arithmetic, conditional, array indexing).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class UnsupportedExpressionException : ExpressionMappingException
 {
     /// <summary>

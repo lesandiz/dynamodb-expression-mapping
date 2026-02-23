@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace DynamoDb.ExpressionMapping.Exceptions;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace DynamoDb.ExpressionMapping.Exceptions;
 /// .NET type. Thrown at mapper/builder creation time (fail fast), not during
 /// query execution.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class MissingConverterException : ExpressionMappingException
 {
     /// <summary>

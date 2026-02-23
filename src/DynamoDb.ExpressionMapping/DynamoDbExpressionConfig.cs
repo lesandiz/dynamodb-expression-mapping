@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using DynamoDb.ExpressionMapping.Caching;
 using DynamoDb.ExpressionMapping.Mapping;
 using DynamoDb.ExpressionMapping.ReservedKeywords;
@@ -10,6 +11,7 @@ namespace DynamoDb.ExpressionMapping;
 /// Global configuration for the expression mapping library.
 /// Immutable after construction (builder pattern).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class DynamoDbExpressionConfig
 {
     /// <summary>
