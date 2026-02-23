@@ -110,7 +110,7 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 - [x] 5.2 Create `Fixtures/BenchmarkEntities.cs` with representative entity types
 - [x] 5.3 Write `ProjectionBuilderBenchmarks` — cold/warm, varying property count, reserved keywords (PR-04.1)
 - [x] 5.4 Write `FilterExpressionBenchmarks` — simple through complex predicates (PR-04.2)
-- [ ] 5.5 Write `FilterCompositionBenchmarks` — And/Or, chaining (PR-04.3)
+- [x] 5.5 Write `FilterCompositionBenchmarks` — And/Or, chaining (PR-04.3)
 - [ ] 5.6 Write `UpdateExpressionBenchmarks` — single through mixed clauses (PR-04.4)
 - [ ] 5.7 Write `DirectResultMapperBenchmarks` — compilation + mapping, manual baseline comparison (PR-04.5)
 - [ ] 5.8 Write `TypeConverterBenchmarks` — per-type conversion and resolution (PR-04.6)
