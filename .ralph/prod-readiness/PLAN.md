@@ -98,6 +98,7 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 - [x] Replaced `Random.Shared.Next()` with `Gen.Choose`/`Gen.Elements` in FsCheck generators
 - [x] Cached 13 `Regex` patterns as `static readonly` with `RegexOptions.Compiled`
 - [x] **Fixed `Gen.Where` test host crash** — `ProjectionSelectorGenerator` used `Gen.Where` inside nested `Gen.SelectMany` chains, which crashes the test host in FsCheck 3.0.0-rc3 (StackOverflow in retry/shrink). Replaced with pre-computed unique combinations. Full suite (1,076 tests) now completes in ~1s with clean exit.
+- [x] **Implemented `KeyConditionOperationGenerator`** — Replaced `ExpressionGenerators.KeyConditionPredicate` stub (`NotImplementedException`) with `KeyConditionOperation` backed by `KeyConditionOperationGenerator`. Generator produces `Func<KeyConditionExpressionBuilder<TestKeyedEntity>, KeyConditionExpressionResult>` across Simple (PK only), Composite (PK + SK comparison: =, <, <=, >, >=), and Complex (PK + BETWEEN/begins_with) tiers. Added 7 generator smoke tests + 3 generator-based property tests. All generators now have full implementations — property-based testing parity achieved. Test count: 1,086.
 
 ---
 

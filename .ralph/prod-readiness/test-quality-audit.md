@@ -106,5 +106,5 @@ Added to both test projects with `<Content>` items in `.csproj` files.
 ### ~~4. Address dynamic Regex in KeyConditionBuilderProperties~~ ✓ Done
 Replaced 2 per-iteration `new Regex(...)` calls with static readonly `PartitionKeyEqualityRegex` and `SortKeyReferenceRegex` fields. All callers pass constant values ("PK"/"SK"), so the cached patterns are equivalent.
 
-### 5. Review `ExpressionGenerators.KeyConditionPredicate`
-Still throws `NotImplementedException("KeyConditionPredicateGenerator - deferred")`. The `KeyConditionBuilderProperties` tests work around this by using direct builder calls, but completing the generator would enable property-based testing parity with filter/projection/update.
+### ~~5. Implement `KeyConditionOperationGenerator`~~ ✓ Done
+Replaced `ExpressionGenerators.KeyConditionPredicate` (which threw `NotImplementedException`) with `ExpressionGenerators.KeyConditionOperation` backed by `KeyConditionOperationGenerator`. Generator produces `Func<KeyConditionExpressionBuilder<TestKeyedEntity>, KeyConditionExpressionResult>` across Simple (PK only), Composite (PK + SK comparison), and Complex (PK + BETWEEN/begins_with) tiers. Added 7 generator smoke tests and 3 generator-based property tests to `KeyConditionBuilderProperties`.

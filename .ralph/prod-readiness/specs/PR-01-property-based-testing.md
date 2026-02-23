@@ -23,13 +23,16 @@ Build `Arbitrary<T>` instances that produce valid expression trees for each buil
 public static class ExpressionGenerators
 {
     // Generates random property selectors for TestEntity
-    public static Arbitrary<Expression<Func<TestEntity, object>>> ProjectionSelectors();
+    public static Arbitrary<Expression<Func<TestEntity, object>>> ProjectionSelector(Complexity);
 
     // Generates random predicates over TestEntity properties
-    public static Arbitrary<Expression<Func<TestEntity, bool>>> FilterPredicates();
+    public static Arbitrary<Expression<Func<TestEntity, bool>>> FilterPredicate(Complexity);
 
-    // Generates random update operation sequences
-    public static Arbitrary<Action<UpdateExpressionBuilder<TestEntity>>> UpdateOperations();
+    // Generates random update operation sequences (fluent builder pattern)
+    public static Arbitrary<Func<UpdateExpressionBuilder<TestEntity>, IUpdateExpressionBuilder<TestEntity>>> UpdateOperation(Complexity);
+
+    // Generates random key condition operations (fluent builder pattern)
+    public static Arbitrary<Func<KeyConditionExpressionBuilder<TestKeyedEntity>, KeyConditionExpressionResult>> KeyConditionOperation(Complexity);
 }
 ```
 
@@ -213,7 +216,8 @@ DynamoDb.ExpressionMapping.Tests/
 │   │   ├── ExpressionGenerators.cs
 │   │   ├── ProjectionSelectorGenerator.cs
 │   │   ├── FilterPredicateGenerator.cs
-│   │   └── UpdateOperationGenerator.cs
+│   │   ├── UpdateOperationGenerator.cs
+│   │   └── KeyConditionOperationGenerator.cs
 │   ├── ProjectionBuilderProperties.cs
 │   ├── FilterExpressionBuilderProperties.cs
 │   ├── UpdateExpressionBuilderProperties.cs
@@ -226,5 +230,5 @@ DynamoDb.ExpressionMapping.Tests/
 
 - All properties pass at default 1,000 cases; validated once at 10,000 via `FSCHECK_MAX_TEST=10000` before phase completion
 - At least 3 real bugs discovered during initial implementation (validates the approach)
-- Generators cover all three complexity tiers
+- Generators cover all three complexity tiers for all four subsystems (projection, filter, update, key condition) ✅
 - CI pipeline runs property tests as part of unit test suite
