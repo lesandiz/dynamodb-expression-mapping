@@ -16,6 +16,9 @@ TestResults/
 *.trx
 *.coverage
 
+## Verify Snapshot Testing
+*.received.*
+
 ## Mutation Testing
 StrykerOutput/
 
