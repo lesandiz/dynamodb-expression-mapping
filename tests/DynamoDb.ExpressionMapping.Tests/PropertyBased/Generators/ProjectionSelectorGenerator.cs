@@ -2,8 +2,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using DynamoDb.ExpressionMapping.Tests.Fixtures;
 using FsCheck;
-using Gen = FsCheck.Fluent.Gen;
 using Arb = FsCheck.Fluent.Arb;
+using Gen = FsCheck.Fluent.Gen;
 
 namespace DynamoDb.ExpressionMapping.Tests.PropertyBased.Generators;
 

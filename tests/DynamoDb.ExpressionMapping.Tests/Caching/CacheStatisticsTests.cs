@@ -64,9 +64,12 @@ public class CacheStatisticsTests
     {
         var stats = new CacheStatistics
         {
-            ProjectionHits = 0, ProjectionMisses = 0,
-            MapperHits = 0, MapperMisses = 0,
-            FilterHits = 0, FilterMisses = 0
+            ProjectionHits = 0,
+            ProjectionMisses = 0,
+            MapperHits = 0,
+            MapperMisses = 0,
+            FilterHits = 0,
+            FilterMisses = 0
         };
 
         stats.OverallHitRate.Should().Be(0.0);
@@ -87,9 +90,12 @@ public class CacheStatisticsTests
     {
         var stats = new CacheStatistics
         {
-            ProjectionHits = projHits, ProjectionMisses = projMisses,
-            MapperHits = mapperHits, MapperMisses = mapperMisses,
-            FilterHits = filterHits, FilterMisses = filterMisses
+            ProjectionHits = projHits,
+            ProjectionMisses = projMisses,
+            MapperHits = mapperHits,
+            MapperMisses = mapperMisses,
+            FilterHits = filterHits,
+            FilterMisses = filterMisses
         };
 
         stats.OverallHitRate.Should().BeApproximately(expected, 0.001);
