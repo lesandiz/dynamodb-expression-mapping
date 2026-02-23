@@ -9,11 +9,15 @@
 - The integration test project references the unit test project for shared fixtures; the main library flows in as a transitive dependency (no explicit `ProjectReference` to `DynamoDb.ExpressionMapping.csproj` needed)
 - Spec 12 (`.ralph/core/specs/12-testing-strategy.md`) contains the complete test plan with every test case listed
 
+## Environment
+
+Docker Desktop is available in the dev environment. **Always run integration and soak tests locally** — do not assume they are CI-only or defer them. Testcontainers auto-manages the DynamoDB container for integration tests; soak tests require a manual `docker compose up`.
+
 ## Commands
 
 ```bash
 dotnet test tests/DynamoDb.ExpressionMapping.Tests/              # unit + property tests (no Docker)
-dotnet test tests/DynamoDb.ExpressionMapping.IntegrationTests/   # integration tests (requires Docker)
+dotnet test tests/DynamoDb.ExpressionMapping.IntegrationTests/   # integration tests (Testcontainers, auto-manages Docker)
 dotnet test --filter "Category=Property"                          # property tests only
 dotnet test --filter "Category!=Property"                         # unit tests only
 ```
@@ -58,9 +62,21 @@ dotnet stryker
 
 ## Soak Tests
 
-Soak and concurrency testing harness. DynamoDB Local runs on **port 8004** (host) mapping to 8000 (container).
+Soak and concurrency testing harness. DynamoDB Local runs on **port 8004** (host) mapping to 8000 (container). These tests should be run locally — they are not CI-only.
 
 ```bash
-cd tests/DynamoDb.ExpressionMapping.SoakTests && docker compose up -d
-# Run soak tests: dotnet run -- --duration 10 --concurrency 8
+# Start DynamoDB Local
+docker compose -f tests/DynamoDb.ExpressionMapping.SoakTests/docker-compose.yml up -d
+
+# Concurrency scenarios (quick — ~10s)
+dotnet run --project tests/DynamoDb.ExpressionMapping.SoakTests/ -- --concurrency-scenarios
+
+# Soak test smoke run (2 min sustained + warmup/cooldown ≈ 5 min total)
+dotnet run --project tests/DynamoDb.ExpressionMapping.SoakTests/ -- --duration 2 --concurrency 8
+
+# Full soak test (10 min sustained, as run in Phase 2)
+dotnet run --project tests/DynamoDb.ExpressionMapping.SoakTests/ -- --duration 10 --concurrency 8
+
+# Clean up
+docker compose -f tests/DynamoDb.ExpressionMapping.SoakTests/docker-compose.yml down
 ```

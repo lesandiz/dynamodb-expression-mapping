@@ -27,11 +27,21 @@ Six subsystems — see individual specs for detailed API surface and behavior:
 
 ## Build & Test
 
+Docker Desktop is available in the dev environment. Always run integration and soak tests locally — do not defer them to CI.
+
 ```bash
 dotnet build
-dotnet test tests/DynamoDb.ExpressionMapping.Tests/ --filter "Category!=Property"   # pre-commit
-dotnet test tests/DynamoDb.ExpressionMapping.Tests/                                  # pre-complete (includes property tests)
-dotnet test tests/DynamoDb.ExpressionMapping.IntegrationTests/                       # integration (requires Docker)
+dotnet test tests/DynamoDb.ExpressionMapping.Tests/ --filter "Category!=Property"   # pre-commit (fast)
+dotnet test tests/DynamoDb.ExpressionMapping.Tests/                                  # all unit + property tests
+dotnet test tests/DynamoDb.ExpressionMapping.IntegrationTests/                       # integration (Testcontainers, auto-manages Docker)
+```
+
+Soak & concurrency tests (DynamoDB Local on port 8004):
+```bash
+docker compose -f tests/DynamoDb.ExpressionMapping.SoakTests/docker-compose.yml up -d
+dotnet run --project tests/DynamoDb.ExpressionMapping.SoakTests/ -- --concurrency-scenarios   # concurrency scenarios
+dotnet run --project tests/DynamoDb.ExpressionMapping.SoakTests/ -- --duration 2              # smoke soak test
+docker compose -f tests/DynamoDb.ExpressionMapping.SoakTests/docker-compose.yml down
 ```
 
 For detailed testing guide, verification strategy, and framework conventions see `.claude/docs/testing.md`.

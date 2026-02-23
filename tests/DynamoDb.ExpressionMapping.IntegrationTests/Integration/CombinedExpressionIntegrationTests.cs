@@ -160,12 +160,13 @@ public class CombinedExpressionIntegrationTests : IAsyncLifetime
         request.ExpressionAttributeNames.Should().NotBeNull();
         request.ExpressionAttributeValues.Should().NotBeNull();
 
-        // Check that different alias prefixes exist (#key_, #proj_, #filt_, :key_v, :filt_v)
+        // Check that different alias prefixes exist (#proj_, #filt_, :key_v, :filt_v)
         var nameAliases = request.ExpressionAttributeNames!.Keys;
         var valueAliases = request.ExpressionAttributeValues!.Keys;
 
-        // At least one alias from each scope should exist
-        nameAliases.Should().Contain(k => k.StartsWith("#key_"), "key condition aliases should be present");
+        // PK and SK are not reserved words, so the key condition builder uses them unaliased.
+        // Key condition values (:key_v) should still be present in value aliases.
+        valueAliases.Should().Contain(k => k.StartsWith(":key_v"), "key condition value aliases should be present");
         nameAliases.Should().Contain(k => k.StartsWith("#proj_"), "projection aliases should be present");
         nameAliases.Should().Contain(k => k.StartsWith("#filt_"), "filter aliases should be present");
 
