@@ -8,91 +8,35 @@ using FluentAssertions;
 namespace DynamoDb.ExpressionMapping.Tests.Mapping;
 
 /// <summary>
-/// Mutation-killing tests for Priority 2 subsystems (type conversion).
-/// Targets surviving mutants identified in Phase 3b.4 mutation analysis:
-/// - Converter FromAttributeValue null-handling (|| -> && mutations)
-/// - Collection converter constructor null guards
-/// - SetConverter boundary conditions (SS/NS/L detection)
-/// - AttributeNameResolver fluent override/ignore side effects
-/// - AttributeValueConverterRegistry edge cases
-/// - ExpressionValueEmitter constructor guard
+/// Edge-case tests for type converters and related subsystems.
+/// Covers null/empty input handling, constructor guards, boundary conditions,
+/// registry resolution, and fluent resolver overrides.
+/// Originally P2MutationKillingTests — regions A/B consolidated into [Theory].
 /// </summary>
-public class P2MutationKillingTests
+public class ConverterEdgeCaseTests
 {
     #region A: Converter FromAttributeValue(null) — kills || -> && mutations
 
-    // These tests pass null (not NULL=true) to FromAttributeValue.
-    // Stryker mutates `attributeValue == null || attributeValue.NULL` to `&& `,
-    // which would NullReferenceException on null input or return wrong value.
-
-    [Fact]
-    public void BoolConverter_FromNull_ReturnsFalse()
+    public static TheoryData<IAttributeValueConverter, object?> ConverterFromNullData => new()
     {
-        var converter = new BoolConverter();
-        converter.FromAttributeValue(null!).Should().BeFalse();
-    }
+        { new BoolConverter(), false },
+        { new Int32Converter(), 0 },
+        { new Int64Converter(), 0L },
+        { new DoubleConverter(), 0.0 },
+        { new DecimalConverter(), 0m },
+        { new GuidConverter(), Guid.Empty },
+        { new DateTimeConverter(), DateTime.MinValue },
+        { new DateTimeOffsetConverter(), DateTimeOffset.MinValue },
+        { new StringConverter(), null },
+        { new ByteArrayConverter(), null },
+    };
 
-    [Fact]
-    public void Int32Converter_FromNull_ReturnsZero()
+    [Theory]
+    [MemberData(nameof(ConverterFromNullData))]
+    public void Converter_FromNull_ReturnsDefault(IAttributeValueConverter converter, object? expected)
     {
-        var converter = new Int32Converter();
-        converter.FromAttributeValue(null!).Should().Be(0);
-    }
-
-    [Fact]
-    public void Int64Converter_FromNull_ReturnsZero()
-    {
-        var converter = new Int64Converter();
-        converter.FromAttributeValue(null!).Should().Be(0L);
-    }
-
-    [Fact]
-    public void DoubleConverter_FromNull_ReturnsZero()
-    {
-        var converter = new DoubleConverter();
-        converter.FromAttributeValue(null!).Should().Be(0.0);
-    }
-
-    [Fact]
-    public void DecimalConverter_FromNull_ReturnsZero()
-    {
-        var converter = new DecimalConverter();
-        converter.FromAttributeValue(null!).Should().Be(0m);
-    }
-
-    [Fact]
-    public void GuidConverter_FromNull_ReturnsEmpty()
-    {
-        var converter = new GuidConverter();
-        converter.FromAttributeValue(null!).Should().Be(Guid.Empty);
-    }
-
-    [Fact]
-    public void DateTimeConverter_FromNull_ReturnsMinValue()
-    {
-        var converter = new DateTimeConverter();
-        converter.FromAttributeValue(null!).Should().Be(DateTime.MinValue);
-    }
-
-    [Fact]
-    public void DateTimeOffsetConverter_FromNull_ReturnsMinValue()
-    {
-        var converter = new DateTimeOffsetConverter();
-        converter.FromAttributeValue(null!).Should().Be(DateTimeOffset.MinValue);
-    }
-
-    [Fact]
-    public void StringConverter_FromNull_ReturnsNull()
-    {
-        var converter = new StringConverter();
-        converter.FromAttributeValue(null!).Should().BeNull();
-    }
-
-    [Fact]
-    public void ByteArrayConverter_FromNull_ReturnsNull()
-    {
-        var converter = new ByteArrayConverter();
-        converter.FromAttributeValue(null!).Should().BeNull();
+        var result = converter.FromAttributeValue(null!);
+        result.Should().Be(expected);
     }
 
     [Fact]
@@ -106,56 +50,23 @@ public class P2MutationKillingTests
 
     #region B: Converter FromAttributeValue with empty/missing value — kills string.IsNullOrEmpty mutations
 
-    // These converters check string.IsNullOrEmpty for S or N.
-    // Stryker may mutate the check away or negate it.
-
-    [Fact]
-    public void Int32Converter_FromEmptyN_ReturnsZero()
+    public static TheoryData<IAttributeValueConverter, AttributeValue, object?> ConverterFromEmptyData => new()
     {
-        var converter = new Int32Converter();
-        converter.FromAttributeValue(new AttributeValue { N = "" }).Should().Be(0);
-    }
+        { new Int32Converter(), new AttributeValue { N = "" }, 0 },
+        { new Int64Converter(), new AttributeValue { N = "" }, 0L },
+        { new DoubleConverter(), new AttributeValue { N = "" }, 0.0 },
+        { new DecimalConverter(), new AttributeValue { N = "" }, 0m },
+        { new DateTimeConverter(), new AttributeValue { S = "" }, DateTime.MinValue },
+        { new DateTimeOffsetConverter(), new AttributeValue { S = "" }, DateTimeOffset.MinValue },
+        { new GuidConverter(), new AttributeValue { S = "" }, Guid.Empty },
+    };
 
-    [Fact]
-    public void Int64Converter_FromEmptyN_ReturnsZero()
+    [Theory]
+    [MemberData(nameof(ConverterFromEmptyData))]
+    public void Converter_FromEmptyValue_ReturnsDefault(IAttributeValueConverter converter, AttributeValue av, object? expected)
     {
-        var converter = new Int64Converter();
-        converter.FromAttributeValue(new AttributeValue { N = "" }).Should().Be(0L);
-    }
-
-    [Fact]
-    public void DoubleConverter_FromEmptyN_ReturnsZero()
-    {
-        var converter = new DoubleConverter();
-        converter.FromAttributeValue(new AttributeValue { N = "" }).Should().Be(0.0);
-    }
-
-    [Fact]
-    public void DecimalConverter_FromEmptyN_ReturnsZero()
-    {
-        var converter = new DecimalConverter();
-        converter.FromAttributeValue(new AttributeValue { N = "" }).Should().Be(0m);
-    }
-
-    [Fact]
-    public void DateTimeConverter_FromEmptyS_ReturnsMinValue()
-    {
-        var converter = new DateTimeConverter();
-        converter.FromAttributeValue(new AttributeValue { S = "" }).Should().Be(DateTime.MinValue);
-    }
-
-    [Fact]
-    public void DateTimeOffsetConverter_FromEmptyS_ReturnsMinValue()
-    {
-        var converter = new DateTimeOffsetConverter();
-        converter.FromAttributeValue(new AttributeValue { S = "" }).Should().Be(DateTimeOffset.MinValue);
-    }
-
-    [Fact]
-    public void GuidConverter_FromEmptyS_ReturnsEmpty()
-    {
-        var converter = new GuidConverter();
-        converter.FromAttributeValue(new AttributeValue { S = "" }).Should().Be(Guid.Empty);
+        var result = converter.FromAttributeValue(av);
+        result.Should().Be(expected);
     }
 
     #endregion
