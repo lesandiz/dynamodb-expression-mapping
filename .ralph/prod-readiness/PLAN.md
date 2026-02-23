@@ -102,9 +102,16 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 
 ---
 
-## Phase 5 — Benchmarking (PR-04)
+## Phase 5 — Benchmarking (PR-04) ✅ COMPLETE
 
 **Priority: Medium** — establishes performance baselines after correctness is locked down.
+
+**Results (2026-02-23):**
+- All 9 benchmark classes run on .NET 8.0.24 (BenchmarkDotNet 0.14.0)
+- Warm path faster than cold: Projection 3x, EndToEnd 1.4x, Cache 4.3x
+- Direct result mapping 4.8x faster than hand-written (84ns vs 404ns)
+- Largest warm-path allocation: EndToEnd 9.92 KB (< 10KB threshold)
+- 9 baseline JSON files committed to `tests/DynamoDb.ExpressionMapping.Benchmarks/baselines/`
 
 - [x] 5.1 Create `tests/DynamoDb.ExpressionMapping.Benchmarks/` project with `BenchmarkDotNet` (>= 0.14.x)
 - [x] 5.2 Create `Fixtures/BenchmarkEntities.cs` with representative entity types
@@ -116,7 +123,7 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 - [x] 5.8 Write `TypeConverterBenchmarks` — per-type conversion (6 types) and resolution (4 paths: exact/nullable/enum/generic-collection) (PR-04.6)
 - [x] 5.9 Write `ExpressionCacheBenchmarks` — hit/miss at varying cache sizes, key generation overhead (PR-04.7)
 - [x] 5.10 Write `KeyConditionBenchmarks` and `EndToEndBenchmarks` (PR-04.8)
-- [ ] 5.11 Run all benchmarks, save baseline results as JSON
+- [x] 5.11 Run all benchmarks, save baseline results as JSON
 
 **Exit criteria**: All benchmarks run on .NET 8. Warm path faster than cold. Result mapping within 2x of hand-written. No warm-path build allocates > 10KB. Baseline JSON committed.
 

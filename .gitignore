@@ -22,6 +22,9 @@ TestResults/
 ## Mutation Testing
 StrykerOutput/
 
+## Benchmark Artifacts (transient; baselines stored in tests/DynamoDb.ExpressionMapping.Benchmarks/baselines/)
+BenchmarkDotNet.Artifacts/
+
 ## Scratchpad (per Agent Prompt)
 .ralph/**/scratchpad/
 
