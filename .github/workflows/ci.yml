@@ -23,11 +23,15 @@ jobs:
       - name: Format check
         run: dotnet format --verify-no-changes --no-restore
       - run: dotnet build --configuration Release --no-restore
-      - name: Test
+      - name: Test with coverage
         run: >
-          dotnet test tests/DynamoDb.ExpressionMapping.Tests/ --configuration Release --no-build
+          dotnet test tests/DynamoDb.ExpressionMapping.Tests/
+          --configuration Release
+          --no-build
           --collect:"XPlat Code Coverage"
+          --settings tests/coverlet.runsettings
           --results-directory ./coverage
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

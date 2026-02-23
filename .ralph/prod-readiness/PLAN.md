@@ -134,7 +134,7 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 **Priority: Medium-Low** — CI gate to prevent regression of all the quality work from prior phases.
 
 - [x] 6.1 Create `tests/coverlet.runsettings` with exclusions and format settings (PR-06.2) — verified: 96.25% line, 86.76% branch coverage collected correctly
-- [ ] 6.2 Update `ci.yml` to use runsettings and collect Cobertura output (PR-06.1)
+- [x] 6.2 Update `ci.yml` to use runsettings and collect Cobertura output (PR-06.1) — added `--settings tests/coverlet.runsettings` and Cobertura format param; verified locally (974 tests pass, cobertura XML generated)
 - [ ] 6.3 Add ReportGenerator to CI — HTML + MarkdownSummaryGithub + Badges (PR-06.3)
 - [ ] 6.4 Add coverage PR comment via `marocchino/sticky-pull-request-comment` (PR-06.3)
 - [ ] 6.5 Enforce threshold: 90% line / 85% branch overall (PR-06.4, PR-06.5)
