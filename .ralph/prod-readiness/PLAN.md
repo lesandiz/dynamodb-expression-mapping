@@ -135,11 +135,11 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 
 - [x] 6.1 Create `tests/coverlet.runsettings` with exclusions and format settings (PR-06.2) — verified: 96.25% line, 86.76% branch coverage collected correctly
 - [x] 6.2 Update `ci.yml` to use runsettings and collect Cobertura output (PR-06.1) — added `--settings tests/coverlet.runsettings` and Cobertura format param; verified locally (974 tests pass, cobertura XML generated)
-- [ ] 6.3 Add ReportGenerator to CI — HTML + MarkdownSummaryGithub + Badges (PR-06.3)
+- [x] 6.3 Add ReportGenerator to CI — HTML + MarkdownSummaryGithub + Badges (PR-06.3) — install + generate + upload artifact steps added to `ci.yml`; verified locally (HTML, SummaryGithub.md, badges generated; 96.2% line / 86.7% branch)
 - [ ] 6.4 Add coverage PR comment via `marocchino/sticky-pull-request-comment` (PR-06.3)
 - [ ] 6.5 Enforce threshold: 90% line / 85% branch overall (PR-06.4, PR-06.5)
 - [ ] 6.6 Apply `[ExcludeFromCodeCoverage]` to excluded areas per PR-06.6
-- [ ] 6.7 Verify local `reportgenerator` HTML workflow works
+- [x] 6.7 Verify local `reportgenerator` HTML workflow works — confirmed: `dotnet tool install -g dotnet-reportgenerator-globaltool` + `reportgenerator` command generates HTML/Badges/Markdown locally
 
 **Exit criteria**: CI fails if coverage drops below thresholds. PR comment shows coverage summary. HTML report available as artifact.
 
