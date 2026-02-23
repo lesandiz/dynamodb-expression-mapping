@@ -5,5 +5,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/DynamoDb.ExpressionMapping.Tests/DynamoDb.ExpressionMapping.Tests.csproj" />
     <Project Path="tests/DynamoDb.ExpressionMapping.IntegrationTests/DynamoDb.ExpressionMapping.IntegrationTests.csproj" />
+    <Project Path="tests/DynamoDb.ExpressionMapping.Benchmarks/DynamoDb.ExpressionMapping.Benchmarks.csproj" />
   </Folder>
 </Solution>
