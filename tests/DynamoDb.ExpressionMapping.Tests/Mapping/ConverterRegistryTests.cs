@@ -1,6 +1,5 @@
 using Amazon.DynamoDBv2.Model;
 using Bogus;
-using DynamoDb.ExpressionMapping.Attributes;
 using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.Mapping;
 using DynamoDb.ExpressionMapping.Mapping.Converters;
@@ -216,25 +215,9 @@ public class ConverterRegistryTests
 
         var act = () => registry.GetConverter(typeof(Money));
 
-        act.Should().Throw<MissingConverterException>()
-            .Which.TargetType.Should().Be(typeof(Money));
-    }
-
-    [Fact]
-    public void MissingConverterException_CarriesTargetType()
-    {
-        var registry = AttributeValueConverterRegistry.Default;
-
-        try
-        {
-            registry.GetConverter(typeof(Money));
-            Assert.Fail("Should have thrown MissingConverterException");
-        }
-        catch (MissingConverterException ex)
-        {
-            ex.TargetType.Should().Be(typeof(Money));
-            ex.Message.Should().Contain("Money");
-        }
+        var ex = act.Should().Throw<MissingConverterException>().Which;
+        ex.TargetType.Should().Be(typeof(Money));
+        ex.Message.Should().Contain("Money");
     }
 
     #endregion
@@ -433,23 +416,6 @@ public class ConverterRegistryTests
 
     #endregion
 
-    #region Per-Property Override Tests
-
-    [Fact]
-    public void DynamoDbConverterAttribute_TakesPrecedenceOverRegistry()
-    {
-        // This test verifies the resolution order - tested more thoroughly in ExpressionValueEmitterTests
-        // Here we just verify that the attribute mechanism exists
-        var property = typeof(EntityWithConverterAttribute).GetProperty(nameof(EntityWithConverterAttribute.Price));
-        var attr = property!.GetCustomAttributes(typeof(DynamoDbConverterAttribute), false).FirstOrDefault();
-
-        attr.Should().NotBeNull();
-        attr.Should().BeOfType<DynamoDbConverterAttribute>();
-        (attr as DynamoDbConverterAttribute)!.ConverterType.Should().Be(typeof(MoneyConverter));
-    }
-
-    #endregion
-
     #region Test Helper Types
 
     public enum OrderStatus
@@ -511,14 +477,6 @@ public class ConverterRegistryTests
         {
             return new List<T>();
         }
-    }
-
-    public class EntityWithConverterAttribute
-    {
-        public Guid Id { get; set; }
-
-        [DynamoDbConverter(typeof(MoneyConverter))]
-        public Money Price { get; set; } = new(0, "USD");
     }
 
     #endregion

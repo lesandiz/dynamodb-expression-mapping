@@ -145,6 +145,8 @@ public class ConditionIntegrationTests : IAsyncLifetime
             }
         }.WithCondition(_conditionBuilder, (TestIntegrationEntity e) => e.Count == 10);
 
+        updateRequest.ConditionExpression.Should().NotBeNullOrEmpty("condition should be applied to request");
+
         var updateResponse = await _client.UpdateItemAsync(updateRequest);
 
         // Assert - Update should succeed

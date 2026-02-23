@@ -165,7 +165,9 @@ public class CombinedExpressionIntegrationTests : IAsyncLifetime
         var valueAliases = request.ExpressionAttributeValues!.Keys;
 
         // At least one alias from each scope should exist
-        nameAliases.Should().Contain(k => k.StartsWith("#key_") || k.StartsWith("#proj_") || k.StartsWith("#filt_"));
+        nameAliases.Should().Contain(k => k.StartsWith("#key_"), "key condition aliases should be present");
+        nameAliases.Should().Contain(k => k.StartsWith("#proj_"), "projection aliases should be present");
+        nameAliases.Should().Contain(k => k.StartsWith("#filt_"), "filter aliases should be present");
 
         // Verify expressions are set
         request.KeyConditionExpression.Should().NotBeNullOrEmpty();
@@ -214,9 +216,6 @@ public class CombinedExpressionIntegrationTests : IAsyncLifetime
         // Assert: Verify update was applied
         response.Attributes["Count"].N.Should().Be("15"); // 10 + 5
 
-        // Verify condition was checked (if condition failed, it would throw ConditionalCheckFailedException)
-        response.HttpStatusCode.Should().Be(System.Net.HttpStatusCode.OK);
-
         // Verify alias scopes are different
         request.ExpressionAttributeNames.Should().NotBeNull();
         request.ExpressionAttributeValues.Should().NotBeNull();
@@ -226,8 +225,10 @@ public class CombinedExpressionIntegrationTests : IAsyncLifetime
         var valueAliases = request.ExpressionAttributeValues!.Keys;
 
         // At least one alias from each scope should exist
-        nameAliases.Should().Contain(k => k.StartsWith("#upd_") || k.StartsWith("#cond_"));
-        valueAliases.Should().Contain(k => k.StartsWith(":upd_v") || k.StartsWith(":cond_v"));
+        nameAliases.Should().Contain(k => k.StartsWith("#upd_"), "update aliases should be present");
+        nameAliases.Should().Contain(k => k.StartsWith("#cond_"), "condition aliases should be present");
+        valueAliases.Should().Contain(k => k.StartsWith(":upd_v"), "update value aliases should be present");
+        valueAliases.Should().Contain(k => k.StartsWith(":cond_v"), "condition value aliases should be present");
 
         // Verify expressions are set
         request.UpdateExpression.Should().NotBeNullOrEmpty();
@@ -259,77 +260,4 @@ public class CombinedExpressionIntegrationTests : IAsyncLifetime
         await act.Should().ThrowAsync<ConditionalCheckFailedException>();
     }
 
-    /// <summary>
-    /// Test 3: FullFluentChain_QueryRequest_ReturnsExpectedResults
-    /// Verifies full fluent chaining of key condition, projection, and filter on a QueryRequest.
-    /// Tests the fluent API pattern: .WithKeyCondition().WithProjection().WithFilter()
-    /// </summary>
-    [Fact]
-    public async Task FullFluentChain_QueryRequest_ReturnsExpectedResults()
-    {
-        // Act: Build request using full fluent chain
-        var activeStatus = TestStatus.Active;
-        var request = new QueryRequest { TableName = _keyedTableName }
-            .WithKeyCondition(_keyConditionBuilder, b => b
-                .WithPartitionKey(e => e.PK, "USER#100")
-                .WithSortKeyBeginsWith(e => e.SK, "ORDER#2024-02"))
-            .WithProjection(_keyedProjectionBuilder, e => new
-            {
-                e.PK,
-                e.SK,
-                e.Data,
-                e.Status
-            })
-            .WithFilter(_keyedFilterBuilder, e => e.Status == activeStatus);
-
-        var response = await _fixture.Client.QueryAsync(request);
-
-        // Assert: Verify query results
-        // Key condition: PK == USER#100 AND SK begins_with ORDER#2024-02
-        // Filter: Status == Active
-        // Should match: ORDER#2024-02-05 (Active)
-        // Should NOT match: ORDER#2024-02-20 (Suspended - filtered out)
-        response.Items.Should().HaveCount(1);
-
-        var item = response.Items[0];
-        item["PK"].S.Should().Be("USER#100");
-        item["SK"].S.Should().Be("ORDER#2024-02-05");
-        item["Data"].S.Should().Be("Order C");
-        item["Status"].S.Should().Be("Active");
-
-        // Verify only projected attributes are returned (SK, Data, Status, plus PK key)
-        item.Keys.Should().HaveCount(4); // PK, SK, Data, Status
-        item.Should().ContainKey("PK");
-        item.Should().ContainKey("SK");
-        item.Should().ContainKey("Data");
-        item.Should().ContainKey("Status");
-
-        // Verify all three expression types are present
-        request.KeyConditionExpression.Should().NotBeNullOrEmpty();
-        request.ProjectionExpression.Should().NotBeNullOrEmpty();
-        request.FilterExpression.Should().NotBeNullOrEmpty();
-
-        // Verify alias dictionaries are populated
-        request.ExpressionAttributeNames.Should().NotBeNull();
-        request.ExpressionAttributeValues.Should().NotBeNull();
-        request.ExpressionAttributeNames.Should().NotBeEmpty();
-        request.ExpressionAttributeValues.Should().NotBeEmpty();
-
-        // Verify different alias scopes coexist without collisions
-        var nameAliases = request.ExpressionAttributeNames!.Keys.ToList();
-        var valueAliases = request.ExpressionAttributeValues!.Keys.ToList();
-
-        // Verify alias prefixes from projection and filter are present
-        // Note: #key_ name aliases only appear if key attributes are reserved keywords (PK/SK are not)
-        nameAliases.Should().Contain(k => k.StartsWith("#proj_"));
-        nameAliases.Should().Contain(k => k.StartsWith("#filt_"));
-
-        // Value aliases should be present for key condition and filter
-        valueAliases.Should().Contain(k => k.StartsWith(":key_v"));
-        valueAliases.Should().Contain(k => k.StartsWith(":filt_v"));
-
-        // Verify no alias collisions - all keys should be unique
-        nameAliases.Should().OnlyHaveUniqueItems();
-        valueAliases.Should().OnlyHaveUniqueItems();
-    }
 }

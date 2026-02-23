@@ -231,20 +231,6 @@ public class AttributeNameMappingTests
         }
 
         [Fact]
-        public void Caching_SameType_ReturnsCachedMetadata()
-        {
-            var resolver1 = new AttributeNameResolver<TestEntityWithAttributes>();
-            var resolver2 = new AttributeNameResolver<TestEntityWithAttributes>();
-
-            var result1 = resolver1.GetAttributeName("CustomerId");
-            var result2 = resolver2.GetAttributeName("CustomerId");
-
-            result1.Should().Be("customer_id");
-            result2.Should().Be("customer_id");
-            // Both should use the same cached metadata (verified by consistent behavior)
-        }
-
-        [Fact]
         public void MultipleProperties_WithDifferentAnnotations_ResolveCorrectly()
         {
             var resolver = new AttributeNameResolver<TestEntityWithAttributes>();

@@ -220,7 +220,9 @@ public class RequestMergeHelpersTests
 
         var act = () => InvokeMergeAttributeValues(target, source);
 
-        act.Should().Throw<TargetInvocationException>();
+        act.Should().Throw<TargetInvocationException>()
+            .And.InnerException.Should().BeOfType<ExpressionAttributeConflictException>()
+            .Which.AliasKey.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -237,7 +239,9 @@ public class RequestMergeHelpersTests
 
         var act = () => InvokeMergeAttributeValues(target, source);
 
-        act.Should().Throw<TargetInvocationException>();
+        act.Should().Throw<TargetInvocationException>()
+            .And.InnerException.Should().BeOfType<ExpressionAttributeConflictException>()
+            .Which.AliasKey.Should().NotBeNullOrEmpty();
     }
 
     #endregion

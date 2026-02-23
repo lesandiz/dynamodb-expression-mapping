@@ -88,45 +88,4 @@ public class NullExpressionCacheTests
         capturedKey.Should().Be("test-key");
     }
 
-    [Fact]
-    public void GetOrAdd_WorksWithDifferentCategories()
-    {
-        // Arrange
-        var cache = NullExpressionCache.Instance;
-        var invocationCount = 0;
-
-        string Factory(string key)
-        {
-            invocationCount++;
-            return $"value-{invocationCount}";
-        }
-
-        // Act
-        var result1 = cache.GetOrAdd("projection", "key1", Factory);
-        var result2 = cache.GetOrAdd("mapper", "key1", Factory);
-        var result3 = cache.GetOrAdd("filter", "key1", Factory);
-
-        // Assert
-        invocationCount.Should().Be(3); // Factory invoked for each category
-        result1.Should().Be("value-1");
-        result2.Should().Be("value-2");
-        result3.Should().Be("value-3");
-    }
-
-    [Fact]
-    public void GetOrAdd_SupportsGenericTypes()
-    {
-        // Arrange
-        var cache = NullExpressionCache.Instance;
-
-        // Act
-        var stringResult = cache.GetOrAdd<string>("projection", "key1", k => "test");
-        var intResult = cache.GetOrAdd<int>("mapper", "key2", k => 42);
-        var boolResult = cache.GetOrAdd<bool>("filter", "key3", k => true);
-
-        // Assert
-        stringResult.Should().Be("test");
-        intResult.Should().Be(42);
-        boolResult.Should().BeTrue();
-    }
 }

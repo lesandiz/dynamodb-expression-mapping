@@ -36,10 +36,6 @@ public class FilterPredicateGeneratorTests
 
             // Should not throw
             executeAction.Should().NotThrow();
-
-            // Result should be a boolean
-            var result = compiled(testEntity);
-            (result is true || result is false).Should().BeTrue();
         }
     }
 
@@ -74,10 +70,6 @@ public class FilterPredicateGeneratorTests
 
             // Should not throw
             executeAction.Should().NotThrow();
-
-            // Result should be a boolean
-            var result = compiled(testEntity);
-            (result is true || result is false).Should().BeTrue();
         }
     }
 
@@ -104,10 +96,6 @@ public class FilterPredicateGeneratorTests
 
             // Should not throw
             executeAction.Should().NotThrow();
-
-            // Result should be a boolean
-            var result = compiled(testEntity);
-            (result is true || result is false).Should().BeTrue();
         }
     }
 

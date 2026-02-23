@@ -198,19 +198,21 @@ public class MutationKillingTests
     [Fact]
     public void ProjectionBuilder_NullReservedKeywords_UsesDefault()
     {
-        // Should not throw - uses default registry
+        // Should not throw - uses default registry; "Name" is a reserved keyword so aliases are produced
         var builder = new ProjectionBuilder<TestEntity>(_resolverFactory, reservedKeywords: null);
-        var result = builder.BuildProjection(p => p.OrderId);
+        var result = builder.BuildProjection(p => p.Name);
         result.Should().NotBeNull();
+        result.ExpressionAttributeNames.Should().NotBeEmpty();
     }
 
     [Fact]
     public void ProjectionBuilder_NullCache_UsesDefault()
     {
-        // Should not throw - uses default cache
+        // Should not throw - uses default cache; "Name" is a reserved keyword so aliases are produced
         var builder = new ProjectionBuilder<TestEntity>(_resolverFactory, cache: null);
-        var result = builder.BuildProjection(p => p.OrderId);
+        var result = builder.BuildProjection(p => p.Name);
         result.Should().NotBeNull();
+        result.ExpressionAttributeNames.Should().NotBeEmpty();
     }
 
     // ProjectionResult constructor null coalescing (L50-54)
@@ -760,6 +762,7 @@ public class MutationKillingTests
 
         result.Should().NotBeNull();
         result.Expression.Should().NotBeEmpty();
+        result.Expression.Should().Contain("=");
     }
 
     [Fact]
