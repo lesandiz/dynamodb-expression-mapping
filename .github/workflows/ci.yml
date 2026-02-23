@@ -33,8 +33,19 @@ jobs:
           --results-directory ./coverage
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
 
-      - name: Upload coverage
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: >
+          reportgenerator
+          -reports:"coverage/**/coverage.cobertura.xml"
+          -targetdir:"coverage-report"
+          -reporttypes:"Html;MarkdownSummaryGithub;Badges"
+          -assemblyfilters:"+DynamoDb.ExpressionMapping"
+
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/**/coverage.cobertura.xml
+          path: coverage-report/
