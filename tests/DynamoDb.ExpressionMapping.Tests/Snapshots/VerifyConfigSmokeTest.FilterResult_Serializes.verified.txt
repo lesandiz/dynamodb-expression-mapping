@@ -1,0 +1,8 @@
+﻿{
+  Expression: OrderId = :filt_v0,
+  ExpressionAttributeValues: {
+    :filt_v0: {
+      S: 12345
+    }
+  }
+}

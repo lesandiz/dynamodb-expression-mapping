@@ -1,0 +1,7 @@
+﻿{
+  ExpressionAttributeNames: {
+    #proj_0: Name
+  },
+  ProjectionExpression: OrderId, #proj_0,
+  Shape: Composite
+}
