@@ -226,7 +226,7 @@ public class AliasGeneratorTests
     [Fact]
     public void PredefinedScopes_ShouldFollowSpecification()
     {
-        // This test documents the official scopes from Spec 08 §3
+        // This test documents the official scopes from Spec 08 Â§3
 
         // Projection scope (no value aliases needed for projections)
         var proj = new AliasGenerator("proj");
@@ -254,7 +254,7 @@ public class AliasGeneratorTests
         key.NextValue().Should().Be(":key_v0");
     }
 
-    #region Clone � preserves counter state
+    #region Clone — preserves counter state
 
     [Fact]
     public void Clone_PreservesNameCounter()

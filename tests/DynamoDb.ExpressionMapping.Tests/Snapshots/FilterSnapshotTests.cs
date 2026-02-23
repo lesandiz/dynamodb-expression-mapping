@@ -1,7 +1,7 @@
+using System.Linq.Expressions;
 using DynamoDb.ExpressionMapping.Expressions;
 using DynamoDb.ExpressionMapping.Mapping;
 using DynamoDb.ExpressionMapping.ReservedKeywords;
-using System.Linq.Expressions;
 using VerifyXunit;
 
 namespace DynamoDb.ExpressionMapping.Tests.Snapshots;
