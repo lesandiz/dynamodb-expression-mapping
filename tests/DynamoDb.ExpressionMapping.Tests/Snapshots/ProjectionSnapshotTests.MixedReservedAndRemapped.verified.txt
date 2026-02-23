@@ -1,0 +1,7 @@
+﻿{
+  ExpressionAttributeNames: {
+    #proj_0: Name
+  },
+  ProjectionExpression: #proj_0, customer_id, Address.City,
+  Shape: Composite
+}

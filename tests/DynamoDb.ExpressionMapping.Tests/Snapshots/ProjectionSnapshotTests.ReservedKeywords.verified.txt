@@ -1,0 +1,8 @@
+﻿{
+  ExpressionAttributeNames: {
+    #proj_0: Name,
+    #proj_1: Status
+  },
+  ProjectionExpression: #proj_0, #proj_1,
+  Shape: Composite
+}

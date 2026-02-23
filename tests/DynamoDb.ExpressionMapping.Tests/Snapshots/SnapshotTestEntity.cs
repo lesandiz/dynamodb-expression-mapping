@@ -1,0 +1,45 @@
+using DynamoDb.ExpressionMapping.Attributes;
+
+namespace DynamoDb.ExpressionMapping.Tests.Snapshots;
+
+/// <summary>
+/// Entity designed for snapshot tests. Contains properties covering all
+/// snapshot test scenarios: simple, nested, deeply nested, reserved keywords,
+/// remapped attributes, and mixed combinations.
+/// </summary>
+public class SnapshotTestEntity
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;          // Reserved keyword
+    public string Status { get; set; } = string.Empty;        // Reserved keyword
+    public int Count { get; set; }
+    public bool Enabled { get; set; }
+    public int? OptionalScore { get; set; }
+    public string[] Tags { get; set; } = Array.Empty<string>();
+    public HashSet<string> Categories { get; set; } = new();
+
+    [DynamoDbAttribute("customer_id")]
+    public string CustomerId { get; set; } = string.Empty;    // Remapped attribute
+
+    public SnapshotAddress Address { get; set; } = new();
+    public SnapshotContact Contact { get; set; } = new();
+}
+
+public class SnapshotAddress
+{
+    public string Street { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string PostalCode { get; set; } = string.Empty;
+}
+
+public class SnapshotContact
+{
+    public string Email { get; set; } = string.Empty;
+    public SnapshotMailingAddress MailingAddress { get; set; } = new();
+}
+
+public class SnapshotMailingAddress
+{
+    public string Line1 { get; set; } = string.Empty;
+    public string PostCode { get; set; } = string.Empty;
+}

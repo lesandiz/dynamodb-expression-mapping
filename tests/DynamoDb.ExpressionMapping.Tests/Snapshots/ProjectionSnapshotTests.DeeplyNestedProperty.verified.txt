@@ -1,0 +1,4 @@
+﻿{
+  ProjectionExpression: Contact.MailingAddress.PostCode,
+  Shape: SingleProperty
+}
