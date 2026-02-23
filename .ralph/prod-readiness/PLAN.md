@@ -114,7 +114,7 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 - [x] 5.6 Write `UpdateExpressionBenchmarks` — single through mixed clauses (PR-04.4)
 - [x] 5.7 Write `DirectResultMapperBenchmarks` — compilation + mapping, manual baseline comparison (PR-04.5)
 - [x] 5.8 Write `TypeConverterBenchmarks` — per-type conversion (6 types) and resolution (4 paths: exact/nullable/enum/generic-collection) (PR-04.6)
-- [ ] 5.9 Write `ExpressionCacheBenchmarks` — hit/miss at varying cache sizes (PR-04.7)
+- [x] 5.9 Write `ExpressionCacheBenchmarks` — hit/miss at varying cache sizes, key generation overhead (PR-04.7)
 - [ ] 5.10 Write `KeyConditionBenchmarks` and `EndToEndBenchmarks` (PR-04.8)
 - [ ] 5.11 Run all benchmarks, save baseline results as JSON
 
