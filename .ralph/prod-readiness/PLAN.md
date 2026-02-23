@@ -106,8 +106,8 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 
 **Priority: Medium** — establishes performance baselines after correctness is locked down.
 
-- [ ] 5.1 Create `tests/DynamoDb.ExpressionMapping.Benchmarks/` project with `BenchmarkDotNet` (>= 0.14.x)
-- [ ] 5.2 Create `Fixtures/BenchmarkEntities.cs` with representative entity types
+- [x] 5.1 Create `tests/DynamoDb.ExpressionMapping.Benchmarks/` project with `BenchmarkDotNet` (>= 0.14.x)
+- [x] 5.2 Create `Fixtures/BenchmarkEntities.cs` with representative entity types
 - [ ] 5.3 Write `ProjectionBuilderBenchmarks` — cold/warm, varying property count, reserved keywords (PR-04.1)
 - [ ] 5.4 Write `FilterExpressionBenchmarks` — simple through complex predicates (PR-04.2)
 - [ ] 5.5 Write `FilterCompositionBenchmarks` — And/Or, chaining (PR-04.3)
