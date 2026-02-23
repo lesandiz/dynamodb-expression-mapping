@@ -1,0 +1,24 @@
+﻿{
+  ExpressionAttributeNames: {
+    #filt_0: Count,
+    #proj_0: Name,
+    #proj_1: Count
+  },
+  ExpressionAttributeValues: {
+    :filt_v0: {
+      S: Active
+    },
+    :filt_v1: {
+      N: 0
+    },
+    :key_v0: {
+      S: USER#123
+    },
+    :key_v1: {
+      S: ORDER#
+    }
+  },
+  FilterExpression: (StatusEnum = :filt_v0) AND (#filt_0 > :filt_v1),
+  KeyConditionExpression: PK = :key_v0 AND begins_with(SK, :key_v1),
+  ProjectionExpression: Id, #proj_0, #proj_1
+}
