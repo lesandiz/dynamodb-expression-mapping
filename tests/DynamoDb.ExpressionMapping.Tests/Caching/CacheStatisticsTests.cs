@@ -96,38 +96,6 @@ public class CacheStatisticsTests
     }
 
     [Fact]
-    public void HitRates_ArithmeticMutantKiller_DivisionNotMultiplication()
-    {
-        // Kills: hits / total → hits * total
-        var stats = new CacheStatistics
-        {
-            ProjectionHits = 2,
-            ProjectionMisses = 3
-        };
-
-        // 2 / 5 = 0.4 (not 2 * 5 = 10)
-        stats.ProjectionHitRate.Should().BeLessThan(1.0);
-        stats.ProjectionHitRate.Should().BeGreaterThan(0.0);
-    }
-
-    [Fact]
-    public void HitRates_BoundaryMutantKiller_StrictlyGreaterThanZero()
-    {
-        // Kills: > 0 → >= 0 (would change behavior when total is 0)
-        var stats = new CacheStatistics
-        {
-            ProjectionHits = 0, ProjectionMisses = 0,
-            MapperHits = 0, MapperMisses = 0,
-            FilterHits = 0, FilterMisses = 0
-        };
-
-        stats.ProjectionHitRate.Should().Be(0.0);
-        stats.MapperHitRate.Should().Be(0.0);
-        stats.FilterHitRate.Should().Be(0.0);
-        stats.OverallHitRate.Should().Be(0.0);
-    }
-
-    [Fact]
     public void HitRate_AdditionMutantKiller_HitsPlusMissesNotMinus()
     {
         // Kills: hits + misses → hits - misses

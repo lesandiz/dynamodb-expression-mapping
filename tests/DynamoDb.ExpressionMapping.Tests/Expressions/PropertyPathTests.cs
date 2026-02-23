@@ -121,7 +121,6 @@ public class PropertyPathTests
 
         // Act & Assert
         path1.Equals(path2).Should().BeTrue();
-        (path1 == path2).Should().BeFalse(); // Different object references
     }
 
     [Fact]

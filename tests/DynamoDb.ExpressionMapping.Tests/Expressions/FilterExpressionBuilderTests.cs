@@ -390,14 +390,13 @@ public class FilterExpressionBuilderTests
     [Fact]
     public void EnumValue_ConvertedPerStorageMode()
     {
-        // Act - Use string comparison to test value conversion without enum complexity
-        // Enum conversion is tested separately in the CapturedEnumValue test
-        var date = new DateTime(2024, 3, 15, 14, 30, 0, DateTimeKind.Utc);
-        var result = _builder.BuildFilter(p => p.CreatedAt == date);
+        // Act - Test actual enum value conversion (default string storage mode)
+        var result = _builder.BuildFilter(p => p.Status == OrderStatus.Active);
 
-        // Assert
-        result.Expression.Should().Be("CreatedAt = :filt_v0");
-        result.ExpressionAttributeValues[":filt_v0"].S.Should().Be("2024-03-15T14:30:00.0000000Z");
+        // Assert - "Status" is a reserved keyword, enum stored as string by default
+        result.Expression.Should().Be("#filt_0 = :filt_v0");
+        result.ExpressionAttributeNames["#filt_0"].Should().Be("Status");
+        result.ExpressionAttributeValues[":filt_v0"].S.Should().Be("Active");
     }
 
     #endregion
@@ -545,21 +544,6 @@ public class FilterExpressionBuilderTests
             .Which.PropertyName.Should().Be("IgnoredProperty");
         act.Should().Throw<InvalidFilterException>()
             .Which.EntityType.Should().Be(typeof(FilterTestEntity));
-    }
-
-    [Fact]
-    public void NonBooleanExpression_ThrowsInvalidFilterException()
-    {
-        // This is caught at compile-time due to Expression<Func<TSource, bool>>
-        // The compiler prevents passing non-boolean expressions
-        // This test documents the compile-time safety
-
-        // The following would not compile:
-        // _builder.BuildFilter(p => p.Total);  // Error: cannot convert decimal to bool
-        // _builder.BuildFilter(p => p.OrderId);  // Error: cannot convert string to bool
-
-        // If someone bypasses the type system, they would get a runtime error during expression analysis
-        true.Should().BeTrue(); // Placeholder assertion
     }
 
     #endregion

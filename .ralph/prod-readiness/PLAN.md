@@ -103,7 +103,6 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 - [ ] 5.9 Write `ExpressionCacheBenchmarks` — hit/miss at varying cache sizes (PR-04.7)
 - [ ] 5.10 Write `KeyConditionBenchmarks` and `EndToEndBenchmarks` (PR-04.8)
 - [ ] 5.11 Run all benchmarks, save baseline results as JSON
-- [ ] 5.12 Commit phase 5
 
 **Exit criteria**: All benchmarks run on .NET 8. Warm path faster than cold. Result mapping within 2x of hand-written. No warm-path build allocates > 10KB. Baseline JSON committed.
 
@@ -120,7 +119,6 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 - [ ] 6.5 Enforce threshold: 90% line / 85% branch overall (PR-06.4, PR-06.5)
 - [ ] 6.6 Apply `[ExcludeFromCodeCoverage]` to excluded areas per PR-06.6
 - [ ] 6.7 Verify local `reportgenerator` HTML workflow works
-- [ ] 6.8 Commit phase 6
 
 **Exit criteria**: CI fails if coverage drops below thresholds. PR comment shows coverage summary. HTML report available as artifact.
 
@@ -135,7 +133,6 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 - [ ] 7.3 Configure RS0016/RS0017/RS0025/RS0026 as errors in CI (PR-07.1)
 - [ ] 7.4 Add API diff PR comment step to `ci.yml` (PR-07.4)
 - [ ] 7.5 Add `dotnet-inspect diff --breaking` step to `publish.yml` release pipeline (PR-07.3)
-- [ ] 7.6 Commit phase 7
 
 **Exit criteria**: `PublicAPI.Shipped.txt` captures complete API surface. CI fails on undeclared API changes. Release pipeline blocks breaking changes on non-major bumps.
 

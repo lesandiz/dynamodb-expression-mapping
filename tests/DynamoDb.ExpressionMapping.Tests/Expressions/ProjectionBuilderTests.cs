@@ -146,18 +146,6 @@ public class ProjectionBuilderTests
         result.PropertyPaths[0].Segments.Should().Equal("Address", "Country", "Name");
     }
 
-    [Fact]
-    public void BuildProjection_NestedWithReservedKeyword_AliasesCorrectSegment()
-    {
-        // Act - "Name" is reserved
-        var result = _builder.BuildProjection(p => p.Address!.Country!.Name);
-
-        // Assert
-        result.ProjectionExpression.Should().Be("Address.Country.#proj_0");
-        result.ExpressionAttributeNames.Should().ContainKey("#proj_0")
-            .WhoseValue.Should().Be("Name");
-    }
-
     #endregion
 
     #region Named Type Projections

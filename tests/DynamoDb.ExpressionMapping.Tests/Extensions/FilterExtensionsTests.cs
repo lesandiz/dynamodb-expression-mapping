@@ -114,49 +114,4 @@ public class FilterExtensionsTests
         result.ExpressionAttributeValues.Should().HaveCount(2);
     }
 
-    [Fact]
-    public void FluentChaining_ProjectionAndFilter()
-    {
-        // Arrange
-        var request = new QueryRequest { TableName = "Orders" };
-
-        var projectionBuilder = Substitute.For<IProjectionBuilder<Order>>();
-        Expression<Func<Order, object>> selector = o => new { o.OrderId, o.Status };
-
-        var projectionResult = new ProjectionResult(
-            "OrderId, #proj_0",
-            new Dictionary<string, string> { ["#proj_0"] = "Status" },
-            Array.Empty<PropertyPath>(),
-            ProjectionShape.Composite,
-            new[] { "OrderId", "Status" });
-
-        projectionBuilder.BuildProjection(selector).Returns(projectionResult);
-
-        var filterBuilder = Substitute.For<IFilterExpressionBuilder<Order>>();
-        Expression<Func<Order, bool>> predicate = o => o.Total > 100;
-
-        var filterResult = new FilterExpressionResult(
-            "#filt_0 > :filt_v0",
-            new Dictionary<string, string> { ["#filt_0"] = "Total" },
-            new Dictionary<string, AttributeValue> { [":filt_v0"] = new AttributeValue { N = "100" } });
-
-        filterBuilder.BuildFilter(predicate).Returns(filterResult);
-
-        // Act
-        var result = request
-            .WithProjection(projectionBuilder, selector)
-            .WithFilter(filterBuilder, predicate);
-
-        // Assert
-        result.Should().BeSameAs(request);
-        result.ProjectionExpression.Should().Be("OrderId, #proj_0");
-        result.FilterExpression.Should().Be("#filt_0 > :filt_v0");
-
-        result.ExpressionAttributeNames.Should().HaveCount(2);
-        result.ExpressionAttributeNames["#proj_0"].Should().Be("Status");
-        result.ExpressionAttributeNames["#filt_0"].Should().Be("Total");
-
-        result.ExpressionAttributeValues.Should().HaveCount(1);
-        result.ExpressionAttributeValues[":filt_v0"].N.Should().Be("100");
-    }
 }

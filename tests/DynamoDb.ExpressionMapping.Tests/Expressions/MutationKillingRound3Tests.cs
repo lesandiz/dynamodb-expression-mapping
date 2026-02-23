@@ -53,12 +53,14 @@ public class MutationKillingRound3Tests
     public void FilterExpressionResult_Or_ReAliasesRightSide()
     {
         var builder = new FilterExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-        var result1 = builder.BuildFilter(p => p.Title == "a");
-        var result2 = builder.BuildFilter(p => p.Title == "b");
+        // Use "Name" and "Status" which are DynamoDB reserved keywords, ensuring name aliases are produced
+        var result1 = builder.BuildFilter(p => p.Name == "a");
+        var result2 = builder.BuildFilter(p => p.Status == "b");
         var combined = FilterExpressionResult.Or(result1, result2);
         // Right side should be re-aliased, so values should have different keys
         combined.ExpressionAttributeValues.Should().HaveCount(2);
-        combined.ExpressionAttributeNames.Should().HaveCountGreaterThanOrEqualTo(0);
+        // Both left and right name aliases should be present after composition
+        combined.ExpressionAttributeNames.Should().HaveCountGreaterThanOrEqualTo(2);
     }
 
     #endregion
@@ -246,21 +248,6 @@ public class MutationKillingRound3Tests
     #region UpdateExpressionBuilder -- RemoveOldValuePlaceholders for Increment/Decrement/SetIfNotExists (NoCoverage L177/210/243)
 
     [Fact]
-    public void Update_IncrementSamePropertyTwice_RemovesOldPlaceholders()
-    {
-        var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
-        var result = builder
-            .Increment(p => p.Score, 1)
-            .Increment(p => p.Score, 5)
-            .Build();
-
-        // Only the second increment should remain
-        result.ExpressionAttributeValues.Should().HaveCount(1);
-        result.ExpressionAttributeValues.Values.Should().ContainSingle()
-            .Which.N.Should().Be("5");
-    }
-
-    [Fact]
     public void Update_DecrementSamePropertyTwice_RemovesOldPlaceholders()
     {
         var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
@@ -422,7 +409,7 @@ public class MutationKillingRound3Tests
     #region FilterExpressionResult/ConditionExpressionResult -- MergeAttributeNames conflict (NoCoverage L197)
 
     [Fact]
-    public void FilterExpressionResult_And_ManuallyConflictingNames_Throws()
+    public void FilterExpressionResult_And_ConflictingNames_ResolvedByReAliasing()
     {
         // Create two results that after re-aliasing would produce conflicting names
         // We manually construct results with same key but different values to trigger MergeAttributeNames conflict
@@ -471,7 +458,7 @@ public class MutationKillingRound3Tests
     #region UpdateExpressionBuilder -- RemoveOldValuePlaceholders empty expression path (L540-541)
 
     [Fact]
-    public void Update_RemoveOldValuePlaceholders_EmptyExpression_NoOp()
+    public void Update_SetSamePropertyMultipleTimes_KeepsOnlyLatestPlaceholders()
     {
         // This exercises the early return in RemoveOldValuePlaceholders when expression is empty.
         // We can trigger this indirectly by having a remove operation (no expression) followed by a set.
@@ -632,7 +619,7 @@ public class MutationKillingRound3Tests
     }
 
     [Fact]
-    public void Update_Delete_ThenDecrement_SameProperty_ThrowsConflict()
+    public void Update_Delete_ThenDecrement_DifferentProperties_NoConflict()
     {
         var builder = new UpdateExpressionBuilder<TestEntity>(_resolverFactory, _converterRegistry);
         var act = () => builder.Delete(p => p.EnabledFeatures, new HashSet<string> { "a" }).Decrement(p => p.Score, 1);

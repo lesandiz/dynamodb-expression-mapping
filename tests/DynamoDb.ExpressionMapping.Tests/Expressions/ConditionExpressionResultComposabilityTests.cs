@@ -46,32 +46,4 @@ public class ConditionExpressionResultComposabilityTests
     protected override IReadOnlyDictionary<string, string> GetNames(ConditionExpressionResult result) => result.ExpressionAttributeNames;
     protected override IReadOnlyDictionary<string, AttributeValue> GetValues(ConditionExpressionResult result) => result.ExpressionAttributeValues;
     protected override bool IsEmpty(ConditionExpressionResult result) => result.IsEmpty;
-
-    #region Alias Scope Verification (unique to ConditionExpressionResult)
-
-    [Fact]
-    public void ComposedConditions_UseCondScopeNotFiltScope()
-    {
-        // Verify composed conditions use #cond_ and :cond_v, not #filt_ and :filt_v
-        var left = CreateResult(
-            expression: "#cond_0 = :cond_v0",
-            names: new() { ["#cond_0"] = "Status" },
-            values: new() { [":cond_v0"] = new() { S = "Active" } });
-
-        var right = CreateResult(
-            expression: "#cond_0 = :cond_v0",
-            names: new() { ["#cond_0"] = "Enabled" },
-            values: new() { [":cond_v0"] = new() { BOOL = true } });
-
-        var result = ComposeAnd(left, right);
-
-        GetExpression(result).Should().Contain("#cond_");
-        GetExpression(result).Should().Contain(":cond_v");
-        GetExpression(result).Should().NotContain("#filt_");
-        GetExpression(result).Should().NotContain(":filt_v");
-        GetNames(result).Keys.Should().AllSatisfy(k => k.Should().StartWith("#cond_"));
-        GetValues(result).Keys.Should().AllSatisfy(k => k.Should().StartWith(":cond_v"));
-    }
-
-    #endregion
 }

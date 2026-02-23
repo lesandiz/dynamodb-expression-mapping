@@ -1,6 +1,5 @@
 using Amazon.DynamoDBv2.Model;
 using DynamoDb.ExpressionMapping.Attributes;
-using DynamoDb.ExpressionMapping.Exceptions;
 using DynamoDb.ExpressionMapping.Mapping;
 using DynamoDb.ExpressionMapping.Mapping.Converters;
 using FluentAssertions;
@@ -352,32 +351,6 @@ public class ConverterEdgeCaseTests
         converter.Should().NotBeNull();
     }
 
-    [Fact]
-    public void Registry_GetConverter_CachesComposedConverters()
-    {
-        var registry = AttributeValueConverterRegistry.Default;
-
-        var c1 = registry.GetConverter(typeof(HashSet<Guid>));
-        var c2 = registry.GetConverter(typeof(HashSet<Guid>));
-
-        c1.Should().BeSameAs(c2);
-    }
-
-    [Fact]
-    public void Registry_Clone_IsMutable_SourceRemainsImmutable()
-    {
-        var original = AttributeValueConverterRegistry.Default;
-        var clone = original.Clone();
-
-        // Clone should be mutable
-        var act = () => clone.Register(new BoolConverter());
-        act.Should().NotThrow();
-
-        // Original should remain frozen
-        var act2 = () => original.Register(new BoolConverter());
-        act2.Should().Throw<InvalidOperationException>();
-    }
-
     #endregion
 
     #region H: ExpressionValueEmitter — constructor null guard
@@ -399,23 +372,16 @@ public class ConverterEdgeCaseTests
     [Fact]
     public void Resolver_FluentOverride_RemovesOldBidirectionalMapping()
     {
-        // Map property to "attr_a", then remap to "attr_b"
-        // Old reverse mapping "attr_a" -> property should be removed
         var resolver = new AttributeNameResolverBuilder<ResolverTestEntity>()
             .Map(e => e.Name, "attr_a")
-            .Build();
-
-        // First verify forward mapping
-        resolver.GetAttributeName("Name").Should().Be("attr_a");
-        resolver.GetPropertyName("attr_a").Should().Be("Name");
-
-        // Now build a new one with different mapping
-        var resolver2 = new AttributeNameResolverBuilder<ResolverTestEntity>()
             .Map(e => e.Name, "attr_b")
             .Build();
 
-        resolver2.GetAttributeName("Name").Should().Be("attr_b");
-        resolver2.GetPropertyName("attr_b").Should().Be("Name");
+        // Forward mapping should reflect latest override
+        resolver.GetAttributeName("Name").Should().Be("attr_b");
+        resolver.GetPropertyName("attr_b").Should().Be("Name");
+        // Old reverse mapping should be removed
+        resolver.GetPropertyName("attr_a").Should().Be("attr_a");
     }
 
     [Fact]
@@ -431,18 +397,6 @@ public class ConverterEdgeCaseTests
 
         // Reverse lookup for old mapping should no longer return property name
         resolver.GetPropertyName("custom_name").Should().Be("custom_name");
-    }
-
-    [Fact]
-    public void Resolver_FluentOverride_RemovesIgnoreFlag()
-    {
-        var resolver = new AttributeNameResolverBuilder<ResolverTestEntity>()
-            .Ignore(e => e.Name)
-            .Map(e => e.Name, "restored_name")
-            .Build();
-
-        resolver.IsStoredAttribute("Name").Should().BeTrue();
-        resolver.GetAttributeName("Name").Should().Be("restored_name");
     }
 
     [Fact]

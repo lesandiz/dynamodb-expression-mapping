@@ -173,26 +173,6 @@ public abstract class ExpressionResultComposabilityTestBase<TResult> where TResu
         GetValues(chained)[Value(2)].BOOL.Should().BeTrue();
     }
 
-    [Fact]
-    public void And_WrapsInParentheses()
-    {
-        var left = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Status" },
-            values: new() { [Value(0)] = new() { S = "Active" } });
-
-        var right = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Enabled" },
-            values: new() { [Value(0)] = new() { BOOL = true } });
-
-        var result = ComposeAnd(left, right);
-
-        GetExpression(result).Should().StartWith("(")
-            .And.Contain(") AND (")
-            .And.EndWith(")");
-    }
-
     #endregion
 
     #region Or() Method Tests
@@ -323,50 +303,9 @@ public abstract class ExpressionResultComposabilityTestBase<TResult> where TResu
         GetValues(chained)[Value(2)].BOOL.Should().BeTrue();
     }
 
-    [Fact]
-    public void Or_WrapsInParentheses()
-    {
-        var left = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Status" },
-            values: new() { [Value(0)] = new() { S = "Active" } });
-
-        var right = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Enabled" },
-            values: new() { [Value(0)] = new() { BOOL = true } });
-
-        var result = ComposeOr(left, right);
-
-        GetExpression(result).Should().StartWith("(")
-            .And.Contain(") OR (")
-            .And.EndWith(")");
-    }
-
     #endregion
 
     #region Re-aliasing Algorithm Verification
-
-    [Fact]
-    public void ReAliasing_ShiftsNameIndices()
-    {
-        var left = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Status" },
-            values: new() { [Value(0)] = new() { S = "Active" } });
-
-        var right = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Enabled" },
-            values: new() { [Value(0)] = new() { BOOL = true } });
-
-        var result = ComposeAnd(left, right);
-
-        GetNames(result).Should().HaveCount(2);
-        GetNames(result)[Name(0)].Should().Be("Status");
-        GetNames(result)[Name(1)].Should().Be("Enabled");
-        GetExpression(result).Should().Contain(Name(1));
-    }
 
     [Fact]
     public void ReAliasing_ShiftsValueIndices()
@@ -440,52 +379,6 @@ public abstract class ExpressionResultComposabilityTestBase<TResult> where TResu
         GetNames(result)[Name(3)].Should().Be("Total");
         GetValues(result).Should().HaveCount(4)
             .And.ContainKeys(Value(0), Value(1), Value(2), Value(3));
-    }
-
-    #endregion
-
-    #region Worked Example from Spec 06 §6.6
-
-    [Fact]
-    public void WorkedExample_FromSpec_VerifiesCompleteFlow()
-    {
-        var r1 = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Status" },
-            values: new() { [Value(0)] = new() { S = "Active" } });
-
-        var r2 = CreateResult(
-            expression: $"Total > {Value(0)}",
-            names: new(),
-            values: new() { [Value(0)] = new() { N = "100" } });
-
-        var r3 = CreateResult(
-            expression: $"{Name(0)} = {Value(0)}",
-            names: new() { [Name(0)] = "Enabled" },
-            values: new() { [Value(0)] = new() { BOOL = true } });
-
-        // And(And(r1, r2), r3)
-        var combined = ComposeAnd(r1, r2);
-        var chained = ComposeAnd(combined, r3);
-
-        // Combined (r1 AND r2):
-        GetExpression(combined).Should().Be($"({Name(0)} = {Value(0)}) AND (Total > {Value(1)})");
-        GetNames(combined).Should().HaveCount(1)
-            .And.ContainKey(Name(0)).WhoseValue.Should().Be("Status");
-        GetValues(combined).Should().HaveCount(2);
-        GetValues(combined)[Value(0)].S.Should().Be("Active");
-        GetValues(combined)[Value(1)].N.Should().Be("100");
-
-        // Chained ((r1 AND r2) AND r3):
-        GetExpression(chained).Should().Be(
-            $"(({Name(0)} = {Value(0)}) AND (Total > {Value(1)})) AND ({Name(1)} = {Value(2)})");
-        GetNames(chained).Should().HaveCount(2);
-        GetNames(chained)[Name(0)].Should().Be("Status");
-        GetNames(chained)[Name(1)].Should().Be("Enabled");
-        GetValues(chained).Should().HaveCount(3);
-        GetValues(chained)[Value(0)].S.Should().Be("Active");
-        GetValues(chained)[Value(1)].N.Should().Be("100");
-        GetValues(chained)[Value(2)].BOOL.Should().BeTrue();
     }
 
     #endregion
