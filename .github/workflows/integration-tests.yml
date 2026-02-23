@@ -18,8 +18,8 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - run: dotnet restore
-      - run: dotnet build --configuration Release --no-restore
+      - run: dotnet restore tests/DynamoDb.ExpressionMapping.IntegrationTests/
+      - run: dotnet build tests/DynamoDb.ExpressionMapping.IntegrationTests/ --configuration Release --no-restore
       - name: Integration tests
         run: >
           dotnet test tests/DynamoDb.ExpressionMapping.IntegrationTests/ --configuration Release --no-build
