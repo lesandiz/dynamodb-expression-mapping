@@ -145,15 +145,15 @@ Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d7
 
 ---
 
-## Phase 7 — API Compatibility Tracking (PR-07)
+## Phase 7 — API Compatibility Tracking (PR-07) ✅ COMPLETE
 
 **Priority: Lowest** — protects consumers as library evolves; depends on stable API from all prior phases.
 
-- [ ] 7.1 Add `Microsoft.CodeAnalysis.PublicApiAnalyzers` (3.3.4) to library project (PR-07.1)
-- [ ] 7.2 Generate initial `PublicAPI.Shipped.txt` and empty `PublicAPI.Unshipped.txt` for v0.1.x surface (PR-07.2)
-- [ ] 7.3 Configure RS0016/RS0017/RS0025/RS0026 as errors in CI (PR-07.1)
-- [ ] 7.4 Add API diff PR comment step to `ci.yml` (PR-07.4)
-- [ ] 7.5 Add `dotnet-inspect diff --breaking` step to `publish.yml` release pipeline (PR-07.3)
+- [x] 7.1 Add `Microsoft.CodeAnalysis.PublicApiAnalyzers` (3.3.4) to library project (PR-07.1) — added package reference with PrivateAssets=all
+- [x] 7.2 Generate initial `PublicAPI.Shipped.txt` and empty `PublicAPI.Unshipped.txt` for v0.1.x surface (PR-07.2) — 303 API declarations captured via `dotnet format analyzers --diagnostics RS0016`
+- [x] 7.3 Configure RS0016/RS0017/RS0025/RS0026 as errors in CI (PR-07.1) — added to `WarningsAsErrors` in csproj with `Condition="'$(CI)' == 'true'"`
+- [x] 7.4 Add API diff PR comment step to `ci.yml` (PR-07.4) — added `git diff` on PublicAPI files + `marocchino/sticky-pull-request-comment` with `header: api-changes`
+- [x] 7.5 Add `dotnet-inspect diff --breaking` step to `publish.yml` release pipeline (PR-07.3) — installs dotnet-inspect, compares against previous NuGet version, blocks non-major bumps with breaking changes
 
 **Exit criteria**: `PublicAPI.Shipped.txt` captures complete API surface. CI fails on undeclared API changes. Release pipeline blocks breaking changes on non-major bumps.
 

@@ -23,7 +23,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Restore
         run: dotnet restore
@@ -36,6 +38,47 @@ jobs:
 
       - name: Pack
         run: dotnet pack ${{ env.PROJECT_PATH }} --configuration Release --no-build --output ./nupkg
+
+      - name: API compatibility check
+        run: |
+          dotnet tool install -g dotnet-inspect
+
+          # Get the previous released version (skip if first release)
+          PREV_VERSION=$(dotnet-inspect DynamoDb.ExpressionMapping --versions --json 2>/dev/null | jq -r '.[0]' 2>/dev/null || echo "")
+
+          if [ -z "$PREV_VERSION" ] || [ "$PREV_VERSION" = "null" ]; then
+            echo "No previous version found on NuGet — skipping API diff (first release)"
+            exit 0
+          fi
+
+          echo "Comparing against previous version: $PREV_VERSION"
+
+          # Extract current version from the tag
+          CURRENT_VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+
+          # Compare current build against previous release
+          dotnet-inspect diff "DynamoDb.ExpressionMapping@${PREV_VERSION}..${CURRENT_VERSION}" \
+            --source ./nupkg \
+            --breaking \
+            --stat || true
+
+          # Check for breaking changes
+          BREAKING_COUNT=$(dotnet-inspect diff "DynamoDb.ExpressionMapping@${PREV_VERSION}..${CURRENT_VERSION}" \
+            --source ./nupkg \
+            --breaking --json 2>/dev/null | jq '.breakingChanges | length' 2>/dev/null || echo "0")
+
+          if [ "$BREAKING_COUNT" -gt 0 ]; then
+            echo "::warning::$BREAKING_COUNT breaking changes detected"
+
+            # Check if this is a major version bump
+            CURRENT_MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+            PREV_MAJOR=$(echo "$PREV_VERSION" | cut -d. -f1)
+
+            if [ "$CURRENT_MAJOR" = "$PREV_MAJOR" ]; then
+              echo "::error::Breaking changes on non-major version bump. Bump major version or remove breaking changes."
+              exit 1
+            fi
+          fi
 
       - name: Push to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
