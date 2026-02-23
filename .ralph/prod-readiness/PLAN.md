@@ -88,6 +88,19 @@ Mutation score improved from 66.5% to **90.8% overall** (865 killed, 70 survived
 
 ---
 
+## Test Quality Audit ✅ COMPLETE
+
+Full audit of all test projects (~55 files). 45 quality issues fixed (commit `d71e978`), performance fixes applied (pending commit). See `test-quality-audit.md` for full details.
+
+- [x] Deleted 23 redundant duplicate tests (-1,016 lines across 20 files)
+- [x] Fixed 12 misleading names / missing key assertions
+- [x] Removed or strengthened 10 trivially true / weak assertions
+- [x] Replaced `Random.Shared.Next()` with `Gen.Choose`/`Gen.Elements` in FsCheck generators
+- [x] Cached 13 `Regex` patterns as `static readonly` with `RegexOptions.Compiled`
+- [x] **Fixed `Gen.Where` test host crash** — `ProjectionSelectorGenerator` used `Gen.Where` inside nested `Gen.SelectMany` chains, which crashes the test host in FsCheck 3.0.0-rc3 (StackOverflow in retry/shrink). Replaced with pre-computed unique combinations. Full suite (1,076 tests) now completes in ~1s with clean exit.
+
+---
+
 ## Phase 5 — Benchmarking (PR-04)
 
 **Priority: Medium** — establishes performance baselines after correctness is locked down.

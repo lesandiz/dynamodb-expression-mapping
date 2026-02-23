@@ -15,6 +15,10 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 [Trait("Category", "Property")]
 public class KeyConditionBuilderProperties
 {
+    private static readonly Regex KeyValuePlaceholderRegex = new(@":key_v\d+", RegexOptions.Compiled);
+    private static readonly Regex EqualityOperatorRegex = new(@"\s=\s", RegexOptions.Compiled);
+    private static readonly Regex BetweenKeywordRegex = new(@"\bBETWEEN\b", RegexOptions.Compiled);
+
     private readonly IAttributeNameResolverFactory _resolverFactory;
     private readonly IAttributeValueConverterRegistry _converterRegistry;
     private readonly Config _config;
@@ -213,8 +217,7 @@ public class KeyConditionBuilderProperties
                 }
 
                 // Verify expression contains the placeholders
-                var placeholderPattern = new Regex(@":key_v\d+");
-                var placeholdersInExpression = placeholderPattern.Matches(result.Expression)
+                var placeholdersInExpression = KeyValuePlaceholderRegex.Matches(result.Expression)
                     .Select(m => m.Value)
                     .Distinct()
                     .ToHashSet();
@@ -272,8 +275,8 @@ public class KeyConditionBuilderProperties
         }
 
         // Ensure exactly one equality operator for the partition key
-        var equalityCount = Regex.Matches(result.Expression, @"\s=\s").Count;
-        var betweenMatch = Regex.IsMatch(result.Expression, @"\bBETWEEN\b");
+        var equalityCount = EqualityOperatorRegex.Matches(result.Expression).Count;
+        var betweenMatch = BetweenKeywordRegex.IsMatch(result.Expression);
 
         // Partition key always uses =, sort key may use =, <, >, <=, >=, BETWEEN, or begins_with
         // So we should have at least 1 equality (partition key)

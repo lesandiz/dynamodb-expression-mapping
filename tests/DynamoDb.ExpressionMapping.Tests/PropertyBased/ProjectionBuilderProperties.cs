@@ -19,6 +19,9 @@ namespace DynamoDb.ExpressionMapping.Tests.PropertyBased;
 [Trait("Category", "Property")]
 public class ProjectionBuilderProperties
 {
+    private static readonly Regex AliasReferenceRegex = new(@"^#[a-zA-Z0-9_]+$", RegexOptions.Compiled);
+    private static readonly Regex AttributeNameRegex = new(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+
     private readonly IAttributeNameResolverFactory _resolverFactory;
     private readonly ReservedKeywordRegistry _reservedKeywords;
     private readonly Config _config;
@@ -241,10 +244,10 @@ public class ProjectionBuilderProperties
 
         // Alias reference: starts with #, followed by alphanumeric/underscore
         if (segment.StartsWith('#'))
-            return Regex.IsMatch(segment, @"^#[a-zA-Z0-9_]+$");
+            return AliasReferenceRegex.IsMatch(segment);
 
         // Attribute name: alphanumeric, underscore, hyphen
-        return Regex.IsMatch(segment, @"^[a-zA-Z0-9_-]+$");
+        return AttributeNameRegex.IsMatch(segment);
     }
 
     #endregion
