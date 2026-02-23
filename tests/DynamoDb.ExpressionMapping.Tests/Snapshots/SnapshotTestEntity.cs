@@ -10,6 +10,8 @@ namespace DynamoDb.ExpressionMapping.Tests.Snapshots;
 public class SnapshotTestEntity
 {
     public string Id { get; set; } = string.Empty;
+    public string PK { get; set; } = string.Empty;            // Partition key (not reserved)
+    public string SK { get; set; } = string.Empty;            // Sort key (not reserved)
     public string Name { get; set; } = string.Empty;          // Reserved keyword
     public string Status { get; set; } = string.Empty;        // Reserved keyword
     public int Count { get; set; }
