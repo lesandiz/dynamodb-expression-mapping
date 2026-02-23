@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace DynamoDb.ExpressionMapping.Exceptions;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace DynamoDb.ExpressionMapping.Exceptions;
 /// expression input (e.g. ignored properties, non-boolean filters,
 /// conflicting update clauses). Catch this type at builder boundaries.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public abstract class InvalidExpressionException : ExpressionMappingException
 {
     /// <summary>
