@@ -1,0 +1,4 @@
+﻿{
+  ProjectionExpression: customer_id,
+  Shape: SingleProperty
+}

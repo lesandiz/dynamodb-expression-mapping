@@ -1,0 +1,4 @@
+﻿{
+  ProjectionExpression: Id, Address.City,
+  Shape: Composite
+}

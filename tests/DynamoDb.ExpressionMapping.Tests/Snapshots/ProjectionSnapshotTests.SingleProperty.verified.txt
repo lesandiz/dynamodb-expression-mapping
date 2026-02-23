@@ -1,0 +1,4 @@
+﻿{
+  ProjectionExpression: Id,
+  Shape: SingleProperty
+}
