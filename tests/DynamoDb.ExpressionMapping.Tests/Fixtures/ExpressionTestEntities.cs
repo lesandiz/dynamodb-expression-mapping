@@ -121,3 +121,12 @@ public class NestedAddress
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Entity with a List property for testing list-related update operations.
+/// </summary>
+public class MutR2EntityWithList
+{
+    public string Id { get; set; } = string.Empty;
+    public List<string> Items { get; set; } = new();
+}

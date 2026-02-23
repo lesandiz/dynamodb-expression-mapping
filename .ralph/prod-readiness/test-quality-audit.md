@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-23
 **Branch:** `ralph/prod-readiness`
-**Commits:** `d71e978`, pending (Regex/Random.Shared fixes)
+**Commits:** `d71e978`, `a0e6d2e` (Regex/Random.Shared/Gen.Where fixes)
 
 ## Summary
 
@@ -49,11 +49,11 @@ Full audit of all test projects (~55 test files) identified 45 test quality issu
 - `Mapping/ConverterEdgeCaseTests.cs` -- fixed broken override test, deleted 3 dups
 - `Mapping/ConverterRegistryTests.cs` -- folded dup, deleted misleading test
 - `Mapping/AttributeNameMappingTests.cs` -- deleted trivially true caching test
-- `Expressions/FilterExpressionBuilderTests.cs` -- fixed enum test, deleted trivially true test
+- `Expressions/FilterExpressionBuilderTests.cs` -- fixed enum test, deleted trivially true test, absorbed 6 Round2 tests + `MutR2EntityWithField`
 - `Expressions/ProjectionBuilderTests.cs` -- deleted dup
 - `Expressions/PropertyPathTests.cs` -- removed trivially true assertion
 - `Expressions/MutationKillingTests.cs` -- strengthened 3 weak assertions
-- `Expressions/MutationKillingRound2Tests.cs` -- deleted 15 redundant tests
+- `Expressions/MutationKillingRound2Tests.cs` -- deleted 15 redundant tests, then **deleted file** (6 survivors moved to `FilterExpressionBuilderTests.cs`)
 - `Expressions/MutationKillingRound3Tests.cs` -- renamed 3 tests, fixed 1 assertion, deleted 1 dup
 - `Expressions/ExpressionResultComposabilityTestBase.cs` -- deleted 4 redundant tests
 - `Expressions/ConditionExpressionResultComposabilityTests.cs` -- deleted trivially true test
@@ -67,14 +67,19 @@ Full audit of all test projects (~55 test files) identified 45 test quality issu
 - `PropertyBased/Generators/FilterPredicateGeneratorTests.cs` -- removed trivially true assertions
 - `PropertyBased/FilterExpressionBuilderProperties.cs` -- cached Regex patterns
 - `PropertyBased/UpdateExpressionBuilderProperties.cs` -- cached Regex patterns
-- `PropertyBased/KeyConditionBuilderProperties.cs` -- cached Regex patterns
+- `PropertyBased/KeyConditionBuilderProperties.cs` -- cached Regex patterns, replaced 2 remaining dynamic Regex with static `PartitionKeyEqualityRegex`/`SortKeyReferenceRegex`
 - `PropertyBased/ProjectionBuilderProperties.cs` -- cached Regex patterns
 - `PropertyBased/Generators/ProjectionSelectorGenerator.cs` -- eliminated `Gen.Where` (test host crash fix)
+- `Fixtures/ExpressionTestEntities.cs` -- added `MutR2EntityWithList` (moved from Round2 file)
+- `xunit.runner.json` -- **new** (test runner configuration)
+- `DynamoDb.ExpressionMapping.Tests.csproj` -- added `<Content>` item for `xunit.runner.json`
 
 ### Integration Tests (`DynamoDb.ExpressionMapping.IntegrationTests`)
 
 - `Integration/CombinedExpressionIntegrationTests.cs` -- deleted dup, fixed OR assertions, removed trivially true HTTP 200
 - `Integration/ConditionIntegrationTests.cs` -- added condition-applied assertion
+- `xunit.runner.json` -- **new** (test runner configuration)
+- `DynamoDb.ExpressionMapping.IntegrationTests.csproj` -- added `<Content>` item for `xunit.runner.json`
 
 ## Issues NOT Addressed (intentional)
 
@@ -89,24 +94,17 @@ These were identified but intentionally left as-is:
 
 ## Recommended Next Steps
 
-### 1. Commit pending fixes
-The Regex caching, Random.Shared, and Gen.Where fixes are complete but not yet committed.
+### ~~1. Commit pending fixes~~ ✓ Done
+Committed as `a0e6d2e`.
 
-### 2. Add `xunit.runner.json` for test output configuration
-No runner config exists. Adding one would improve developer experience:
-```json
-{
-  "diagnosticMessages": false,
-  "parallelizeTestCollections": true,
-  "methodDisplay": "method"
-}
-```
+### ~~2. Add `xunit.runner.json` for test output configuration~~ ✓ Done
+Added to both test projects with `<Content>` items in `.csproj` files.
 
-### 3. Consolidate remaining MutationKilling round files
-`MutationKillingRound2Tests.cs` lost 15 of its tests in this audit. Review remaining tests and consider folding survivors into subsystem-specific test files (continuing the pattern from Phase 3c).
+### ~~3. Consolidate remaining MutationKilling round files~~ ✓ Done
+`MutationKillingRound2Tests.cs` deleted. 6 surviving tests moved to `FilterExpressionBuilderTests.cs`. `MutR2EntityWithField` moved alongside tests; `MutR2EntityWithList` moved to shared `ExpressionTestEntities.cs`; unused entities (`MutR2EntityWithEnum`, `MutR2Status`, `ValueHolder`) deleted.
 
-### 4. Address dynamic Regex in KeyConditionBuilderProperties
-`ValidatePartitionKeyEquality` and `ValidateSortKeyCondition` still create `new Regex(...)` per iteration with interpolated values. These could be refactored to use string operations or pre-built pattern templates if performance matters.
+### ~~4. Address dynamic Regex in KeyConditionBuilderProperties~~ ✓ Done
+Replaced 2 per-iteration `new Regex(...)` calls with static readonly `PartitionKeyEqualityRegex` and `SortKeyReferenceRegex` fields. All callers pass constant values ("PK"/"SK"), so the cached patterns are equivalent.
 
 ### 5. Review `ExpressionGenerators.KeyConditionPredicate`
 Still throws `NotImplementedException("KeyConditionPredicateGenerator - deferred")`. The `KeyConditionBuilderProperties` tests work around this by using direct builder calls, but completing the generator would enable property-based testing parity with filter/projection/update.

@@ -18,6 +18,8 @@ public class KeyConditionBuilderProperties
     private static readonly Regex KeyValuePlaceholderRegex = new(@":key_v\d+", RegexOptions.Compiled);
     private static readonly Regex EqualityOperatorRegex = new(@"\s=\s", RegexOptions.Compiled);
     private static readonly Regex BetweenKeywordRegex = new(@"\bBETWEEN\b", RegexOptions.Compiled);
+    private static readonly Regex PartitionKeyEqualityRegex = new(@"(PK|#key_\d+)\s*=\s*:key_v\d+", RegexOptions.Compiled);
+    private static readonly Regex SortKeyReferenceRegex = new(@"(SK|#key_\d+)", RegexOptions.Compiled);
 
     private readonly IAttributeNameResolverFactory _resolverFactory;
     private readonly IAttributeValueConverterRegistry _converterRegistry;
@@ -246,9 +248,7 @@ public class KeyConditionBuilderProperties
     {
         // Check that expression contains partition key equality pattern
         // Pattern: <attributeName or alias> = :key_v0
-        var pkPattern = new Regex($@"({Regex.Escape(expectedAttributeName)}|#key_\d+)\s*=\s*:key_v\d+");
-
-        if (!pkPattern.IsMatch(result.Expression))
+        if (!PartitionKeyEqualityRegex.IsMatch(result.Expression))
         {
             return Prop.Label(
                 false,
@@ -303,8 +303,7 @@ public class KeyConditionBuilderProperties
         }
 
         // Verify sort key appears in the expression (either directly or via alias)
-        var sortKeyPattern = new Regex($@"({Regex.Escape(expectedSortKeyName)}|#key_\d+)");
-        var matches = sortKeyPattern.Matches(result.Expression);
+        var matches = SortKeyReferenceRegex.Matches(result.Expression);
 
         // We expect at least 2 matches for partition key only, or more if sort key is present
         // Actually, if sort key is present, we expect to see it in the second part after AND
@@ -317,7 +316,7 @@ public class KeyConditionBuilderProperties
         }
 
         // The second part should contain the sort key
-        if (!sortKeyPattern.IsMatch(parts[1]))
+        if (!SortKeyReferenceRegex.IsMatch(parts[1]))
         {
             return Prop.Label(
                 false,

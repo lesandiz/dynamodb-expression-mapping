@@ -27,4 +27,8 @@
     <ProjectReference Include="..\DynamoDb.ExpressionMapping.Tests\DynamoDb.ExpressionMapping.Tests.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
