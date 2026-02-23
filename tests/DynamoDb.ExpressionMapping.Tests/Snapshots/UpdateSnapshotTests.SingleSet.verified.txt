@@ -1,0 +1,11 @@
+﻿{
+  Expression: SET #upd_0 = :upd_v0,
+  ExpressionAttributeNames: {
+    #upd_0: Name
+  },
+  ExpressionAttributeValues: {
+    :upd_v0: {
+      S: Bob
+    }
+  }
+}

@@ -1,0 +1,18 @@
+﻿{
+  Expression: SET #upd_0 = #upd_0 + :upd_v0, TagList = list_append(TagList, :upd_v1),
+  ExpressionAttributeNames: {
+    #upd_0: Count
+  },
+  ExpressionAttributeValues: {
+    :upd_v0: {
+      N: 1
+    },
+    :upd_v1: {
+      L: [
+        {
+          S: new
+        }
+      ]
+    }
+  }
+}
