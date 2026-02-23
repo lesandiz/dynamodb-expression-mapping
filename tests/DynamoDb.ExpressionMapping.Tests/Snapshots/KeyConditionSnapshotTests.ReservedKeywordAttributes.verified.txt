@@ -1,0 +1,15 @@
+﻿{
+  Expression: #key_0 = :key_v0 AND #key_1 = :key_v1,
+  ExpressionAttributeNames: {
+    #key_0: Name,
+    #key_1: Status
+  },
+  ExpressionAttributeValues: {
+    :key_v0: {
+      S: Alice
+    },
+    :key_v1: {
+      S: Active
+    }
+  }
+}

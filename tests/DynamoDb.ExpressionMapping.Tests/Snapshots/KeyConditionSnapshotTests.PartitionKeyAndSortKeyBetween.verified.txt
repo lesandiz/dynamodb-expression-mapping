@@ -1,0 +1,14 @@
+﻿{
+  Expression: PK = :key_v0 AND SK BETWEEN :key_v1 AND :key_v2,
+  ExpressionAttributeValues: {
+    :key_v0: {
+      S: USER#123
+    },
+    :key_v1: {
+      S: ORDER#100
+    },
+    :key_v2: {
+      S: ORDER#999
+    }
+  }
+}

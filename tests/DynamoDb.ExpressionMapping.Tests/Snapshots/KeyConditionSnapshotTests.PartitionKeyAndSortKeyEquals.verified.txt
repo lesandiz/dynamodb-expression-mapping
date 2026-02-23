@@ -1,0 +1,11 @@
+﻿{
+  Expression: PK = :key_v0 AND SK = :key_v1,
+  ExpressionAttributeValues: {
+    :key_v0: {
+      S: USER#123
+    },
+    :key_v1: {
+      S: ORDER#456
+    }
+  }
+}

@@ -1,0 +1,8 @@
+﻿{
+  Expression: PK = :key_v0,
+  ExpressionAttributeValues: {
+    :key_v0: {
+      S: USER#123
+    }
+  }
+}
