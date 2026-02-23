@@ -1,0 +1,15 @@
+﻿{
+  Expression: SET #upd_0 = :upd_v0, #upd_1 = :upd_v1 REMOVE OptionalScore,
+  ExpressionAttributeNames: {
+    #upd_0: Name,
+    #upd_1: Count
+  },
+  ExpressionAttributeValues: {
+    :upd_v0: {
+      S: Bob
+    },
+    :upd_v1: {
+      N: 42
+    }
+  }
+}

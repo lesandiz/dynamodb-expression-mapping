@@ -1,0 +1,20 @@
+﻿{
+  Expression: SET #upd_0 = :upd_v0 REMOVE OptionalScore ADD #upd_1 :upd_v1 DELETE Categories :upd_v2,
+  ExpressionAttributeNames: {
+    #upd_0: Name,
+    #upd_1: Count
+  },
+  ExpressionAttributeValues: {
+    :upd_v0: {
+      S: Updated
+    },
+    :upd_v1: {
+      N: 1
+    },
+    :upd_v2: {
+      SS: [
+        old
+      ]
+    }
+  }
+}

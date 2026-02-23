@@ -16,6 +16,7 @@ public class SnapshotTestEntity
     public bool Enabled { get; set; }
     public int? OptionalScore { get; set; }
     public string[] Tags { get; set; } = Array.Empty<string>();
+    public List<string> TagList { get; set; } = new();
     public HashSet<string> Categories { get; set; } = new();
     public SnapshotStatus StatusEnum { get; set; }             // Enum for EnumComparison snapshot
 
