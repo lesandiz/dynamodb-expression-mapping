@@ -1,0 +1,14 @@
+﻿{
+  Expression: (StatusEnum = :cond_v0) AND (#cond_0 > :cond_v1),
+  ExpressionAttributeNames: {
+    #cond_0: Count
+  },
+  ExpressionAttributeValues: {
+    :cond_v0: {
+      S: Active
+    },
+    :cond_v1: {
+      N: 0
+    }
+  }
+}
