@@ -15,6 +15,7 @@ A type-safe .NET library that converts C# LINQ expression trees into AWS DynamoD
 - **Expression Caching** — Compiled expressions cached for performance
 - **Fluent AWS SDK Integration** — Extension methods for all major request types
 - **Pluggable Type Converters** — Extensible `AttributeValue` conversion system
+- **Thread-Safe** — All builders are safe for concurrent use and singleton/DI registration
 - **Minimal Dependencies** — Works alongside AWS SDK, not as a replacement
 
 ## Installation
@@ -437,24 +438,26 @@ var result = builder.BuildProjection(o => new { o.OrderId, o.Name, o.Status });
 - **Zero Allocations** — Hot path optimized to minimize allocations
 - **Direct Mapping** — Avoid full entity hydration for partial projections
 - **Compiled Delegates** — Result mappers run at native speed after initial compilation
+- **Benchmarks** — BenchmarkDotNet baselines available in `tests/DynamoDb.ExpressionMapping.Benchmarks/`
 
 ## Testing
 
 ```bash
-# All tests (requires Docker for DynamoDB Local)
-dotnet test
+# Unit & property-based tests (no Docker required)
+dotnet test tests/DynamoDb.ExpressionMapping.Tests/
 
-# Unit tests only (no Docker required)
-dotnet test --filter "Category!=Integration"
-
-# Integration tests only
-dotnet test --filter "Category=Integration"
+# Integration tests (uses Testcontainers — requires Docker)
+dotnet test tests/DynamoDb.ExpressionMapping.IntegrationTests/
 ```
 
-**Test Coverage:**
-- 565 unit tests
-- 68 integration tests (using Testcontainers.DynamoDb)
-- 100% specification coverage
+Soak & concurrency tests run against DynamoDB Local:
+
+```bash
+docker compose -f tests/DynamoDb.ExpressionMapping.SoakTests/docker-compose.yml up -d
+dotnet run --project tests/DynamoDb.ExpressionMapping.SoakTests/ -- --concurrency-scenarios
+dotnet run --project tests/DynamoDb.ExpressionMapping.SoakTests/ -- --duration 2
+docker compose -f tests/DynamoDb.ExpressionMapping.SoakTests/docker-compose.yml down
+```
 
 ## Building
 
