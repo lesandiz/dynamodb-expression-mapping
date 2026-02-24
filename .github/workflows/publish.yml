@@ -41,7 +41,8 @@ jobs:
 
       - name: API compatibility check
         run: |
-          dotnet tool install -g dotnet-inspect
+          # Install from /tmp to avoid global.json pinning SDK to 8.0 (dotnet-inspect requires .NET 10)
+          pushd /tmp && dotnet tool install -g dotnet-inspect && popd
 
           # Get the previous released version (skip if first release)
           PREV_VERSION=$(dotnet-inspect DynamoDb.ExpressionMapping --versions --json 2>/dev/null | jq -r '.[0]' 2>/dev/null || echo "")
