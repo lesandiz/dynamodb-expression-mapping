@@ -5,7 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-02-15
+## [0.1.2] - 2026-02-24
+
+### Added
+
+#### Property-Based Testing
+- **FsCheck Integration** — 100-iteration property-based tests across all expression builders, type converters, and composability
+- **KeyConditionOperationGenerator** — Custom FsCheck generator for property-based testing parity on key conditions
+
+#### Soak & Concurrency Testing
+- **Soak Test Suite** — 15-minute soak test validated 2.3M operations with 0 failures at 2,100+ ops/sec
+- **Concurrency Scenarios** — 5 concurrency scenarios validating thread safety across shared builder instances
+
+#### Mutation Testing
+- **Stryker.NET Integration** — Mutation testing achieving 90.8% overall score (91.4% on expression builders) with 307 mutation-killing tests
+
+#### Snapshot Testing
+- **Verify Integration** — 30 snapshot tests locking all expression output formats with alias scope isolation
+
+#### Benchmarks
+- **BenchmarkDotNet Suite** — 9 benchmark classes covering projection, filter, filter composition, update, direct result mapper, type converter, expression cache, key condition, and end-to-end scenarios
+- **Baseline Snapshots** — Committed baseline JSON results (warm paths 1.4x–4.8x faster than cold)
+
+#### Code Coverage Enforcement
+- **Coverlet + ReportGenerator** — 95.37% line / 85.81% branch coverage with CI threshold enforcement (90% line / 85% branch)
+- **CI Coverage Reporting** — Automated coverage PR comments via ReportGenerator
+
+#### API Compatibility Tracking
+- **PublicApiAnalyzers** — `PublicAPI.Shipped.txt` tracking 303 public API declarations with breaking-change detection in release pipeline
+
+### Changed
+
+#### Test Infrastructure
+- **Isolated Integration Tests** — Separated integration tests into dedicated project (`DynamoDb.ExpressionMapping.IntegrationTests`) to prevent Docker startup during unit-only runs
+- **Test Suite Refactoring** — ~123 fewer test methods with identical execution count through consolidation
+- **Test Quality Audit** — Fixed 45 issues, deleted 23 redundant tests, fixed `Gen.Where` crash, cached dynamic Regex instances
+
+### Fixed
+- Fixed incorrect integration test assertion for key condition aliases
+- Fixed CI workflow to target integration test project explicitly for build
+- Added `pull-requests: write` permission for CI PR comments
+
+## [0.1.1] - 2026-02-15
 
 ### Added
 
@@ -69,4 +110,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Microsoft.Extensions.Options` (>= 8.0.0)
 - `MinVer` (>= 6.0.0) — build-time only
 
-[0.1.0]: https://github.com/lesandiz/dynamodb-expression-mapping/releases/tag/v0.1.0
+[0.1.2]: https://github.com/lesandiz/dynamodb-expression-mapping/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/lesandiz/dynamodb-expression-mapping/releases/tag/v0.1.1
