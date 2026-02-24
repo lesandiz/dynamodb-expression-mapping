@@ -68,6 +68,8 @@ public sealed class SoakTestRunner
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+            // Sync memory reading immediately so baseline isn't stale from MemoryMonitor's 5s interval
+            _metricsCollector.UpdateMemoryUsage(GC.GetTotalMemory(forceFullCollection: false));
             // Capture baseline memory after warm-up
             var baselineSnapshot = _metricsCollector.GetSnapshot();
 
@@ -91,6 +93,12 @@ public sealed class SoakTestRunner
             );
 
             overallStopwatch.Stop();
+
+            // Force GC before final snapshot for symmetric comparison with baseline
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            _metricsCollector.UpdateMemoryUsage(GC.GetTotalMemory(forceFullCollection: false));
 
             // Collect final metrics
             var finalSnapshot = _metricsCollector.GetSnapshot();
@@ -315,8 +323,8 @@ Stack Trace:
     {
         AnsiConsole.MarkupLine("[dim]Initializing DynamoDB table...[/]");
 
-        // 1. Create table if it doesn't exist
-        await CreateTableIfNotExistsAsync(cancellationToken);
+        // 1. Drop and recreate table for a clean state
+        await RecreateTableAsync(cancellationToken);
 
         // 2. Seed with test data
         await SeedTestDataAsync(cancellationToken);
@@ -326,43 +334,51 @@ Stack Trace:
     }
 
     /// <summary>
-    /// Creates the SoakTestOrders table if it doesn't exist.
+    /// Drops and recreates the SoakTestOrders table for a clean starting state.
     /// </summary>
-    private async Task CreateTableIfNotExistsAsync(CancellationToken cancellationToken)
+    private async Task RecreateTableAsync(CancellationToken cancellationToken)
     {
+        // Drop existing table if present
         try
         {
-            await _dynamoDb.CreateTableAsync(new CreateTableRequest
+            await _dynamoDb.DeleteTableAsync(_tableName, cancellationToken);
+            // Wait for deletion to complete
+            while (true)
             {
-                TableName = _tableName,
-                KeySchema = new List<KeySchemaElement>
+                try
                 {
-                    new KeySchemaElement { AttributeName = "PK", KeyType = KeyType.HASH },
-                    new KeySchemaElement { AttributeName = "SK", KeyType = KeyType.RANGE }
-                },
-                AttributeDefinitions = new List<AttributeDefinition>
+                    await _dynamoDb.DescribeTableAsync(_tableName, cancellationToken);
+                    await Task.Delay(500, cancellationToken);
+                }
+                catch (ResourceNotFoundException)
                 {
-                    new AttributeDefinition { AttributeName = "PK", AttributeType = ScalarAttributeType.S },
-                    new AttributeDefinition { AttributeName = "SK", AttributeType = ScalarAttributeType.S }
-                },
-                BillingMode = BillingMode.PAY_PER_REQUEST
-            }, cancellationToken);
-
-            // Wait for table to become active
-            await WaitForTableActiveAsync(cancellationToken);
+                    break; // Table is gone
+                }
+            }
         }
-        catch (ResourceInUseException)
+        catch (ResourceNotFoundException)
         {
-            // Table already exists - clear it
-            await ClearExistingDataAsync(cancellationToken);
+            // Table doesn't exist — nothing to drop
         }
-    }
 
-    /// <summary>
-    /// Waits for table to become active.
-    /// </summary>
-    private async Task WaitForTableActiveAsync(CancellationToken cancellationToken)
-    {
+        // Create fresh table
+        await _dynamoDb.CreateTableAsync(new CreateTableRequest
+        {
+            TableName = _tableName,
+            KeySchema = new List<KeySchemaElement>
+            {
+                new KeySchemaElement { AttributeName = "PK", KeyType = KeyType.HASH },
+                new KeySchemaElement { AttributeName = "SK", KeyType = KeyType.RANGE }
+            },
+            AttributeDefinitions = new List<AttributeDefinition>
+            {
+                new AttributeDefinition { AttributeName = "PK", AttributeType = ScalarAttributeType.S },
+                new AttributeDefinition { AttributeName = "SK", AttributeType = ScalarAttributeType.S }
+            },
+            BillingMode = BillingMode.PAY_PER_REQUEST
+        }, cancellationToken);
+
+        // Wait for table to become active
         while (true)
         {
             var response = await _dynamoDb.DescribeTableAsync(_tableName, cancellationToken);
@@ -370,45 +386,6 @@ Stack Trace:
                 break;
 
             await Task.Delay(500, cancellationToken);
-        }
-    }
-
-    /// <summary>
-    /// Clears existing data from the table.
-    /// </summary>
-    private async Task ClearExistingDataAsync(CancellationToken cancellationToken)
-    {
-        var scanResponse = await _dynamoDb.ScanAsync(new ScanRequest
-        {
-            TableName = _tableName,
-            ProjectionExpression = "PK, SK"
-        }, cancellationToken);
-
-        if (scanResponse.Items.Count > 0)
-        {
-            // Delete in batches of 25
-            foreach (var batch in scanResponse.Items.Chunk(25))
-            {
-                var writeRequests = batch.Select(item => new WriteRequest
-                {
-                    DeleteRequest = new DeleteRequest
-                    {
-                        Key = new Dictionary<string, AttributeValue>
-                        {
-                            ["PK"] = item["PK"],
-                            ["SK"] = item["SK"]
-                        }
-                    }
-                }).ToList();
-
-                await _dynamoDb.BatchWriteItemAsync(new BatchWriteItemRequest
-                {
-                    RequestItems = new Dictionary<string, List<WriteRequest>>
-                    {
-                        [_tableName] = writeRequests
-                    }
-                }, cancellationToken);
-            }
         }
     }
 
