@@ -13,6 +13,7 @@ permissions:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  FSCHECK_MAX_TEST: 1000
 
 jobs:
   build-and-test:
