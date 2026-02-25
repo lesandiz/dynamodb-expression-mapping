@@ -387,12 +387,42 @@ catch (ConditionalCheckFailedException)
 }
 ```
 
-### Scenario 7: Direct Result Mapping (Anonymous Type)
+### Scenario 7: Projection with Method Calls
+
+Demonstrates method calls in selector expressions. The builder extracts the underlying properties — the methods themselves run client-side during result mapping.
+
+```csharp
+Console.WriteLine("\n=== Scenario 7: Projection with Method Calls ===");
+
+// Enum.Parse, chained string methods, and plain property — all in one selector
+var methodCallRequest = new GetItemRequest
+{
+    TableName = "Orders",
+    Key = new Dictionary<string, AttributeValue>
+    {
+        ["PK"] = new AttributeValue { S = "CUSTOMER#alice" },
+        ["SK"] = new AttributeValue { S = "ORDER#002" }
+    }
+}
+.WithProjection(projectionBuilder,
+    o => new { UpperName = o.Name.Trim().ToUpper(), o.Status, o.Quantity });
+
+var methodCallResponse = await client.GetItemAsync(methodCallRequest);
+
+// DynamoDB returns raw attributes — method calls run during mapping
+Console.WriteLine($"  Name (raw): {methodCallResponse.Item["Name"].S}");
+Console.WriteLine($"  Status: {methodCallResponse.Item["Status"].S}");
+Console.WriteLine($"  Quantity: {methodCallResponse.Item["Quantity"].N}");
+```
+
+**Key point**: `o.Name.Trim().ToUpper()` in the selector doesn't affect what DynamoDB returns — the builder extracts `Name` for the projection. The `Trim().ToUpper()` transformation runs client-side when the compiled selector is invoked on the result.
+
+### Scenario 9: Direct Result Mapping (Anonymous Type)
 
 Demonstrates `IDirectResultMapper<TSource>.CreateMapper()` with an anonymous type projection. The mapper compiles once and runs at native speed.
 
 ```csharp
-Console.WriteLine("\n=== Scenario 7: Result Mapping (Anonymous) ===");
+Console.WriteLine("\n=== Scenario 9: Result Mapping (Anonymous) ===");
 
 var anonymousMapper = resultMapper.CreateMapper(o => new
 {
@@ -420,12 +450,12 @@ Console.WriteLine($"  Status: {result.Status}");
 Console.WriteLine($"  Quantity: {result.Quantity}");
 ```
 
-### Scenario 8: Direct Result Mapping (Named DTO with Nested Path)
+### Scenario 10: Direct Result Mapping (Named DTO with Nested Path)
 
 Demonstrates `CreateMapper()` with a named DTO (`OrderSummary`) including a nested property path (`o.ShippingAddress.City`).
 
 ```csharp
-Console.WriteLine("\n=== Scenario 8: Result Mapping (Named DTO) ===");
+Console.WriteLine("\n=== Scenario 10: Result Mapping (Named DTO) ===");
 
 var dtoMapper = resultMapper.CreateMapper(o => new OrderSummary
 {
@@ -488,12 +518,17 @@ foreach (var item in aliceResponse.Items)
   Deleted Bob's cancelled notebook order.
   Delete skipped — Bob's keyboard is not cancelled.
 
-=== Scenario 7: Result Mapping (Anonymous) ===
+=== Scenario 7: Projection with Method Calls ===
+  Name (raw): Alice's Book
+  Status: Delivered
+  Quantity: 3
+
+=== Scenario 9: Result Mapping (Anonymous) ===
   Name: Alice's Book
   Status: Delivered
   Quantity: 3
 
-=== Scenario 8: Result Mapping (Named DTO) ===
+=== Scenario 10: Result Mapping (Named DTO) ===
   Alice's orders as OrderSummary DTOs:
     - ORDER#001: Alice's Laptop [Delivered] (Seattle)
     - ORDER#002: Alice's Book [Delivered] (Seattle)
@@ -563,5 +598,6 @@ The simplest possible demo of DynamoDb.ExpressionMapping — all code in a singl
 | Result mapping (anonymous) | `CreateMapper(o => new { o.Name, o.Status })` |
 | Result mapping (named DTO) | `CreateMapper(o => new OrderSummary { ... })` |
 | Nested property path | `o.ShippingAddress.City` in result mapper |
+| Method calls in projection | `o.Name.Trim().ToUpper()` — builder extracts property, method runs client-side |
 | Extension methods | `.WithProjection()`, `.WithFilter()`, `.WithKeyCondition()`, `.WithUpdate()`, `.WithCondition()` |
 | ConditionalCheckFailed | Try/catch pattern for conditional delete |

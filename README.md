@@ -103,7 +103,20 @@ var result = builder.BuildProjection(o => o.Address.City);
 var result = builder.BuildProjection(o => new { o.OrderId, o.Status });
 // Result: "OrderId, #proj_0"
 // ExpressionAttributeNames: { "#proj_0": "Status" }
+
+// Method calls in selectors (transparent traversal)
+// The builder extracts the underlying properties — methods run during result mapping
+var result = builder.BuildProjection(o => new
+{
+    StatusEnum = Enum.Parse<OrderStatus>(o.Status),
+    UpperName = o.Name.Trim().ToUpper(),
+    o.Total
+});
+// Result: "#proj_0, #proj_1, Total"
+// ExpressionAttributeNames: { "#proj_0": "Status", "#proj_1": "Name" }
 ```
+
+> **Unsupported expressions:** Arithmetic (`p.Price * 1.1m`), string concatenation (`p.First + " " + p.Last`), conditionals (`p.IsActive ? p.StartDate : p.EndDate`), and array indexing (`p.Tags[0]`) will throw `UnsupportedExpressionException`. Use method calls or plain property access instead.
 
 ### Filter Expressions
 

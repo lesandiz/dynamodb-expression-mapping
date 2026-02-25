@@ -141,8 +141,16 @@ dotnet test --filter "Category=Integration"  # integration tests only
 [Fact] MultipleNestedPaths_InSameAnonymousType_ExtractsAll()
 [Fact] DeeplyNestedPath_ThreeLevels_ExtractsFullPath()
 
+// Method call expressions (Spec 02 §4 — transparent traversal)
+[Fact] StaticMethodCall_EnumParse_ExtractsPropertyFromArgument()
+[Fact] MultipleMethodCalls_ExtractsAllProperties()
+[Fact] InstanceMethodCall_ToString_ExtractsProperty()
+[Fact] ChainedInstanceMethods_ExtractsUnderlyingProperty()
+[Fact] NestedMethodCalls_StaticWrappingInstance_ExtractsProperty()
+[Fact] CompositeWithMixedMethodCalls_ExtractsAllDistinctProperties()
+[Fact] StaticMethodWithMultiplePropertyArgs_ExtractsAllProperties()
+
 // Unsupported expressions (Spec 14 §2)
-[Fact] MethodCall_ThrowsUnsupportedExpressionException_WithNodeTypeAndText()
 [Fact] Arithmetic_ThrowsUnsupportedExpressionException_WithNodeTypeAndText()
 [Fact] Conditional_ThrowsUnsupportedExpressionException_WithNodeTypeAndText()
 [Fact] ArrayIndex_ThrowsUnsupportedExpressionException_WithNodeTypeAndText()

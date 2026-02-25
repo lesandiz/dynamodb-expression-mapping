@@ -158,23 +158,118 @@ public class ProjectionExpressionVisitorTests
 
     #endregion
 
-    #region Unsupported Expression Tests
+    #region Method Call Expression Tests
 
     [Fact]
-    public void MethodCall_ThrowsUnsupportedExpressionException_WithNodeTypeAndText()
+    public void StaticMethodCall_EnumParse_ExtractsPropertyFromArgument()
     {
         // Arrange
-        Expression<Func<TestEntity, string>> expr = p => p.OrderId.ToString();
+        Expression<Func<TestEntity, object>> expr =
+            p => new { Status = Enum.Parse<OrderStatus>(p.Status) };
 
         // Act
-        var act = () => ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
+        var paths = ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
 
         // Assert
-        act.Should().Throw<UnsupportedExpressionException>()
-            .Which.NodeType.Should().Be(ExpressionType.Call);
-        act.Should().Throw<UnsupportedExpressionException>()
-            .Which.ExpressionText.Should().Contain("ToString");
+        paths.Should().HaveCount(1);
+        paths[0].FullPath.Should().Be("Status");
     }
+
+    [Fact]
+    public void MultipleMethodCalls_ExtractsAllProperties()
+    {
+        // Arrange
+        Expression<Func<TestEntity, object>> expr =
+            p => new { Status = Enum.Parse<OrderStatus>(p.Status), p.OrderId };
+
+        // Act
+        var paths = ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
+
+        // Assert
+        paths.Should().HaveCount(2);
+        paths.Select(p => p.FullPath).Should().Equal("Status", "OrderId");
+    }
+
+    [Fact]
+    public void InstanceMethodCall_ToString_ExtractsProperty()
+    {
+        // Arrange
+        Expression<Func<TestEntity, string>> expr = p => p.Price.ToString();
+
+        // Act
+        var paths = ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
+
+        // Assert
+        paths.Should().HaveCount(1);
+        paths[0].FullPath.Should().Be("Price");
+    }
+
+    [Fact]
+    public void ChainedInstanceMethods_ExtractsUnderlyingProperty()
+    {
+        // Arrange — node.Object is itself a MethodCallExpression
+        Expression<Func<TestEntity, string>> expr = p => p.Name.Trim().ToUpper();
+
+        // Act
+        var paths = ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
+
+        // Assert
+        paths.Should().HaveCount(1);
+        paths[0].FullPath.Should().Be("Name");
+    }
+
+    [Fact]
+    public void NestedMethodCalls_StaticWrappingInstance_ExtractsProperty()
+    {
+        // Arrange — method call as argument to another method call
+        Expression<Func<TestEntity, object>> expr =
+            p => new { Status = Enum.Parse<OrderStatus>(p.Status.Trim()) };
+
+        // Act
+        var paths = ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
+
+        // Assert
+        paths.Should().HaveCount(1);
+        paths[0].FullPath.Should().Be("Status");
+    }
+
+    [Fact]
+    public void CompositeWithMixedMethodCalls_ExtractsAllDistinctProperties()
+    {
+        // Arrange — chained calls, nested calls, and a plain property
+        Expression<Func<TestEntity, object>> expr = p => new
+        {
+            Upper = p.Name.Trim().ToUpper(),
+            Status = Enum.Parse<OrderStatus>(p.Status.Trim()),
+            p.Price
+        };
+
+        // Act
+        var paths = ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
+
+        // Assert
+        paths.Should().HaveCount(3);
+        paths.Select(p => p.FullPath).Should().Equal("Name", "Status", "Price");
+    }
+
+    [Fact]
+    public void StaticMethodWithMultiplePropertyArgs_ExtractsAllProperties()
+    {
+        // Arrange — string.Equals receives two distinct property arguments
+        Expression<Func<TestEntity, bool>> expr =
+            p => string.Equals(p.Name, p.Title);
+
+        // Act
+        var paths = ProjectionExpressionVisitor.ExtractPropertyPaths(expr);
+
+        // Assert
+        paths.Should().HaveCount(2);
+        paths.Select(p => p.FullPath).Should().Equal("Name", "Title");
+    }
+
+    #endregion
+
+    #region Unsupported Expression Tests
 
     [Fact]
     public void Arithmetic_ThrowsUnsupportedExpressionException_WithNodeTypeAndText()
