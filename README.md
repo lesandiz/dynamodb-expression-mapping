@@ -465,14 +465,13 @@ dotnet run -c Release --project tests/DynamoDb.ExpressionMapping.Benchmarks
 dotnet run -c Release --project tests/DynamoDb.ExpressionMapping.Benchmarks -- --filter "*ProjectionBuilder*"
 ```
 
-Compare new results against the baselines manually or with the BenchmarkDotNet `ResultComparer` tool:
+Compare against baselines locally or via the **Benchmarks** GitHub Actions workflow (manually triggered from the Actions tab), which runs all benchmarks, compares against baselines, and surfaces a regression summary in the step summary:
 
 ```bash
-dotnet tool install -g BenchmarkDotNet.Tool
-dotnet benchmark compare \
-  tests/DynamoDb.ExpressionMapping.Benchmarks/baselines/<report>.json \
-  BenchmarkDotNet.Artifacts/results/<report>.json \
-  --threshold 20%
+# Local comparison (requires jq)
+bash .github/scripts/compare-benchmarks.sh \
+  tests/DynamoDb.ExpressionMapping.Benchmarks/baselines \
+  BenchmarkDotNet.Artifacts/results
 ```
 
 Regression thresholds (from [PR-04](.ralph/prod-readiness/specs/PR-04-benchmarking.md)):
