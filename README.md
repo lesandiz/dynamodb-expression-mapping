@@ -453,6 +453,36 @@ var result = builder.BuildProjection(o => new { o.OrderId, o.Name, o.Status });
 - **Compiled Delegates** — Result mappers run at native speed after initial compilation
 - **Benchmarks** — BenchmarkDotNet baselines available in `tests/DynamoDb.ExpressionMapping.Benchmarks/`
 
+### Comparing Benchmarks Against Baselines
+
+Committed baseline results live in `tests/DynamoDb.ExpressionMapping.Benchmarks/baselines/`. To check for performance regressions:
+
+```bash
+# 1. Run benchmarks (generates results in BenchmarkDotNet.Artifacts/results/)
+dotnet run -c Release --project tests/DynamoDb.ExpressionMapping.Benchmarks
+
+# Run a specific benchmark class
+dotnet run -c Release --project tests/DynamoDb.ExpressionMapping.Benchmarks -- --filter "*ProjectionBuilder*"
+```
+
+Compare new results against the baselines manually or with the BenchmarkDotNet `ResultComparer` tool:
+
+```bash
+dotnet tool install -g BenchmarkDotNet.Tool
+dotnet benchmark compare \
+  tests/DynamoDb.ExpressionMapping.Benchmarks/baselines/<report>.json \
+  BenchmarkDotNet.Artifacts/results/<report>.json \
+  --threshold 20%
+```
+
+Regression thresholds (from [PR-04](.ralph/prod-readiness/specs/PR-04-benchmarking.md)):
+
+| Metric              | Threshold                 |
+| ------------------- | ------------------------- |
+| Mean execution time | > 20% regression          |
+| Memory allocation   | > 50% regression          |
+| Gen0 GC collections | Any increase on hot paths |
+
 ## Testing
 
 ```bash

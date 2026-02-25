@@ -29,6 +29,7 @@ public class DirectResultMapperBenchmarks
     private Func<Dictionary<string, AttributeValue>, object> _anonymousThreePropsDelegate = null!;
     private Func<Dictionary<string, AttributeValue>, OrderDetail> _namedTenPropsDelegate = null!;
     private Func<Dictionary<string, AttributeValue>, object> _nestedTypeDelegate = null!;
+    private Func<Dictionary<string, AttributeValue>, object> _methodCallDelegate = null!;
 
     // Pre-built attribute dictionaries
     private Dictionary<string, AttributeValue> _threePropsAttrs = null!;
@@ -70,6 +71,9 @@ public class DirectResultMapperBenchmarks
 
     private static readonly Expression<Func<BenchmarkOrder, object>> NestedTypeExpr =
         o => new { o.OrderId, City = o.Address!.City, Zip = o.Address.ZipCode, CountryCode = o.Address.Country!.Code };
+
+    private static readonly Expression<Func<BenchmarkOrder, object>> MethodCallExpr =
+        o => new { o.OrderId, Upper = o.Name.Trim().ToUpper(), Price = o.TotalAmount.ToString() };
 
     [GlobalSetup]
     public void Setup()
@@ -144,6 +148,7 @@ public class DirectResultMapperBenchmarks
         _anonymousThreePropsDelegate = _warmMapper.CreateMapper(AnonymousThreePropsExpr);
         _namedTenPropsDelegate = _warmMapper.CreateMapper(NamedTenPropsExpr);
         _nestedTypeDelegate = _warmMapper.CreateMapper(NestedTypeExpr);
+        _methodCallDelegate = _warmMapper.CreateMapper(MethodCallExpr);
     }
 
     // --- Cold path: delegate compilation overhead ---
@@ -169,6 +174,13 @@ public class DirectResultMapperBenchmarks
         return mapper.CreateMapper(RecordExpr);
     }
 
+    [Benchmark]
+    public Func<Dictionary<string, AttributeValue>, object> CreateMapper_WithMethodCalls()
+    {
+        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
+        return mapper.CreateMapper(MethodCallExpr);
+    }
+
     // --- Warm path: mapping execution using pre-compiled delegates ---
 
     [Benchmark(Baseline = true)]
@@ -182,6 +194,10 @@ public class DirectResultMapperBenchmarks
     [Benchmark]
     public object Map_NestedType()
         => _nestedTypeDelegate(_nestedAttrs);
+
+    [Benchmark]
+    public object Map_WithMethodCalls()
+        => _methodCallDelegate(_threePropsAttrs);
 
     // --- Comparison: hand-written mapping baseline ---
 

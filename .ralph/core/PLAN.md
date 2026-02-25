@@ -79,7 +79,7 @@ Depends on Phases 1 + 2. Can be parallelized within this phase.
   - Unit tests per Spec 12
   - **Status: 36/36 tests passing** — Full implementation complete:
     - `SinglePropertyMappingStrategy` for single-property mappers
-    - `CompositeMappingStrategy` with expression compilation for multi-property scenarios
+    - `CompositeMappingStrategy` using `SelectorRewritingVisitor` for expression-tree rewriting (preserves method calls, casts, constructors)
     - `DirectResultMapper<TSource>` with caching for compiled delegates
     - Array converter support (T[]) for all array types
     - Full test coverage including anonymous types, named types, records, and complex nested projections

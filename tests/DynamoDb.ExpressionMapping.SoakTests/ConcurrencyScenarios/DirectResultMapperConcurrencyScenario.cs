@@ -41,7 +41,7 @@ public class DirectResultMapperConcurrencyScenario : IConcurrencyScenario
                         _sharedDependencies.ConverterRegistry);
 
                     // Create different mappers based on worker index
-                    var mappingType = index % 5;
+                    var mappingType = index % 7;
 
                     var (mappedValue, verificationPassed) = mappingType switch
                     {
@@ -50,6 +50,8 @@ public class DirectResultMapperConcurrencyScenario : IConcurrencyScenario
                         2 => MapAndVerify(resultMapperFactory, testItems[index], e => new { e.Name, e.Value }),
                         3 => MapAndVerify(resultMapperFactory, testItems[index], e => new { e.Id, e.Name, e.Value }),
                         4 => MapAndVerify(resultMapperFactory, testItems[index], e => new { e.Status, e.IsActive }),
+                        5 => MapAndVerify(resultMapperFactory, testItems[index], e => new { Upper = e.Name.ToUpper(), e.Value }),
+                        6 => MapAndVerify(resultMapperFactory, testItems[index], e => new { Trimmed = e.Name.Trim().ToUpper(), Price = e.Value.ToString() }),
                         _ => throw new InvalidOperationException("Unexpected mapping type")
                     };
 

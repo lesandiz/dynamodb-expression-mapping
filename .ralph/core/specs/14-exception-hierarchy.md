@@ -54,7 +54,7 @@ No additional properties — it exists purely as a catch target.
 
 ### 2. UnsupportedExpressionException
 
-Thrown by `ProjectionExpressionVisitor` (Spec 02 §4) when the expression tree contains a node type the library cannot translate.
+Thrown by `ProjectionExpressionVisitor` (Spec 02 §4) and `SelectorRewritingVisitor` (Spec 04 §3) when the expression tree contains a node type or pattern the library cannot translate. In the result mapping context, this is thrown for direct source parameter use in composite projections (e.g. `new { Whole = e }`) and non-property member access (fields).
 
 ```csharp
 namespace DynamoDb.ExpressionMapping.Exceptions;
@@ -62,7 +62,7 @@ namespace DynamoDb.ExpressionMapping.Exceptions;
 /// <summary>
 /// Thrown when an expression tree contains a node type that cannot
 /// be translated to a DynamoDB expression (e.g. arithmetic,
-/// conditional, array indexing).
+/// conditional, array indexing, direct parameter use in composites).
 /// </summary>
 public sealed class UnsupportedExpressionException : ExpressionMappingException
 {

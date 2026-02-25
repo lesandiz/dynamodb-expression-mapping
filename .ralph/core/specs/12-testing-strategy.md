@@ -715,9 +715,20 @@ dotnet test --filter "Category=Integration"  # integration tests only
 [Fact] DynamoDbConverterAttribute_UsesCustomConverter()
 [Fact] RegisteredConverter_UsedForType()
 
+// Method call support (Spec 04 §3)
+[Fact] MethodCallOnProperty_ReturnsTransformedValue()
+[Fact] WithEnumParse_ConvertsCorrectly()
+[Fact] WithToString_ConvertsCorrectly()
+[Fact] WithChainedMethods_ConvertsCorrectly()
+[Fact] WithMixedMethodCallsAndPlainAccess_ConvertsCorrectly()
+[Fact] Map_WithEnumParse_OneShot()
+[Fact] NestedPropertyWithMethodCall_ConvertsCorrectly()
+[Fact] MemberInitWithMethodCall_ConvertsCorrectly()
+[Fact] ConstructorArgsWithMethodCall_ConvertsCorrectly()
+
 // Validation (Spec 04 §10)
 [Fact] NoConverterForType_ThrowsMissingConverterException_AtCreationTime()
-[Fact] UnsupportedExpressionShape_ThrowsUnsupportedExpressionException_AtCreationTime()
+[Fact] DirectSourceParameterInComposite_ThrowsUnsupportedExpressionException()
 ```
 
 ### ProjectionExtensions (Spec 10 §1)
