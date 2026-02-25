@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - run: dotnet restore
-      - run: dotnet build --configuration Release --no-restore
+      - run: dotnet restore tests/DynamoDb.ExpressionMapping.Benchmarks
+      - run: dotnet build --configuration Release --no-restore tests/DynamoDb.ExpressionMapping.Benchmarks
       - name: Run benchmarks
         run: >
           dotnet run -c Release --no-build
