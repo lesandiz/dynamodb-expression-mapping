@@ -693,10 +693,188 @@ public class DirectResultMapperTests
     }
 
     [Fact]
-    public void CreateMapper_UnsupportedExpressionShape_ThrowsUnsupportedExpressionException()
+    public void CreateMapper_MethodCallOnProperty_ReturnsTransformedValue()
     {
-        // Act - method call is not supported
-        Action act = () => _mapper.CreateMapper(e => e.OrderId.ToUpper());
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["OrderId"] = new() { S = "order-123" }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => e.OrderId.ToUpper());
+        var result = mapper(attributes);
+
+        // Assert
+        result.Should().Be("ORDER-123");
+    }
+
+    [Fact]
+    public void CreateMapper_WithEnumParse_ConvertsCorrectly()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["Status"] = new() { S = "Active" }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => new { Status = Enum.Parse<OrderStatus>(e.Status) });
+        var result = mapper(attributes);
+
+        // Assert
+        result.Status.Should().Be(OrderStatus.Active);
+    }
+
+    [Fact]
+    public void CreateMapper_WithToString_ConvertsCorrectly()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["Price"] = new() { N = "42.50" }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => new { Price = e.Price.ToString() });
+        var result = mapper(attributes);
+
+        // Assert
+        result.Price.Should().Be("42.50");
+    }
+
+    [Fact]
+    public void CreateMapper_WithChainedMethods_ConvertsCorrectly()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["Name"] = new() { S = "  hello world  " }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => new { Name = e.Name.Trim().ToUpper() });
+        var result = mapper(attributes);
+
+        // Assert
+        result.Name.Should().Be("HELLO WORLD");
+    }
+
+    [Fact]
+    public void CreateMapper_WithMixedMethodCallsAndPlainAccess_ConvertsCorrectly()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["OrderId"] = new() { S = "order-789" },
+            ["Name"] = new() { S = "  test  " },
+            ["Price"] = new() { N = "99.99" }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => new
+        {
+            e.OrderId,
+            TrimmedName = e.Name.Trim(),
+            e.Price
+        });
+        var result = mapper(attributes);
+
+        // Assert
+        result.OrderId.Should().Be("order-789");
+        result.TrimmedName.Should().Be("test");
+        result.Price.Should().Be(99.99m);
+    }
+
+    [Fact]
+    public void Map_WithEnumParse_OneShot()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["Status"] = new() { S = "Inactive" }
+        };
+
+        // Act
+        var result = _mapper.Map(attributes, e => new { Status = Enum.Parse<OrderStatus>(e.Status) });
+
+        // Assert
+        result.Status.Should().Be(OrderStatus.Inactive);
+    }
+
+    [Fact]
+    public void CreateMapper_NestedPropertyWithMethodCall_ConvertsCorrectly()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["Address"] = new()
+            {
+                M = new Dictionary<string, AttributeValue>
+                {
+                    ["City"] = new() { S = "london" }
+                }
+            }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => new { City = e.Address!.City.ToUpper() });
+        var result = mapper(attributes);
+
+        // Assert
+        result.City.Should().Be("LONDON");
+    }
+
+    [Fact]
+    public void CreateMapper_MemberInitWithMethodCall_ConvertsCorrectly()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["OrderId"] = new() { S = "order-init" },
+            ["Name"] = new() { S = "  trimmed  " },
+            ["Price"] = new() { N = "55.00" }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => new OrderSummary
+        {
+            Id = e.OrderId,
+            Name = e.Name.Trim(),
+            Price = e.Price
+        });
+        var result = mapper(attributes);
+
+        // Assert
+        result.Id.Should().Be("order-init");
+        result.Name.Should().Be("trimmed");
+        result.Price.Should().Be(55.00m);
+    }
+
+    [Fact]
+    public void CreateMapper_ConstructorArgsWithMethodCall_ConvertsCorrectly()
+    {
+        // Arrange
+        var attributes = new Dictionary<string, AttributeValue>
+        {
+            ["OrderId"] = new() { S = "order-ctor" },
+            ["Status"] = new() { S = "active" }
+        };
+
+        // Act
+        var mapper = _mapper.CreateMapper(e => new OrderRecord(e.OrderId.ToUpper(), e.Status));
+        var result = mapper(attributes);
+
+        // Assert
+        result.Id.Should().Be("ORDER-CTOR");
+        result.Status.Should().Be("active");
+    }
+
+    [Fact]
+    public void CreateMapper_DirectSourceParameterInComposite_ThrowsUnsupportedExpressionException()
+    {
+        // Act - using source parameter directly (not a property access) in a composite
+        Action act = () => _mapper.CreateMapper(e => new { Whole = e });
 
         // Assert
         act.Should().Throw<UnsupportedExpressionException>();
@@ -977,6 +1155,13 @@ public class DirectResultMapperTests
     private class CustomType
     {
         public string Value { get; set; } = string.Empty;
+    }
+
+    private enum OrderStatus
+    {
+        Active,
+        Inactive,
+        Cancelled
     }
 
     #endregion

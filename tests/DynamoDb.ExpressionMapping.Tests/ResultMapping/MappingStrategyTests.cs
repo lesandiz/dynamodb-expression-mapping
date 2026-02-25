@@ -70,18 +70,6 @@ public class MappingStrategyTests
     }
 
     [Fact]
-    public void CompositeMappingStrategy_UnsupportedExpression_Throws()
-    {
-        var resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
-        var converterRegistry = AttributeValueConverterRegistry.Default;
-        var strategy = new CompositeMappingStrategy(resolverFactory, converterRegistry);
-
-        Action act = () => strategy.BuildMapper<TestEntity, string>(e => e.OrderId.ToUpper());
-
-        act.Should().Throw<UnsupportedExpressionException>();
-    }
-
-    [Fact]
     public void CompositeMappingStrategy_NonPropertyMember_Throws()
     {
         var resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
