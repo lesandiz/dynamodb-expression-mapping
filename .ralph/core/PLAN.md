@@ -40,7 +40,8 @@ Depends on Phase 1 (exception hierarchy). These three specs can be parallelized.
   - `PropertyPath` value object with `SegmentProperties` (`PropertyInfo[]`)
   - `ProjectionExpressionVisitor` — extracts paths from LINQ selectors
   - Supported patterns: member access, nested access, new anonymous/named types
-  - Throws `UnsupportedExpressionException` for unsupported node types
+  - Transparent traversal of method call expressions (extracts property paths from arguments)
+  - Throws `UnsupportedExpressionException` for unsupported node types (arithmetic, conditional, indexing)
   - Unit tests per Spec 12
 
 - [x] **Spec 01 — Attribute name mapping** (`Mapping/`)
@@ -161,8 +162,8 @@ Depends on all prior phases.
   - End-to-end scenarios: build expression → execute against DynamoDB Local → verify results
   - Round-trip tests for all expression types
   - Edge cases: deeply nested paths, reserved keywords in real queries, large batch operations
-  - **Status: 34/34 tests passing** — Full integration test coverage:
-    - `ProjectionIntegrationTests` (5 tests)
+  - **Status: 35/35 tests passing** — Full integration test coverage:
+    - `ProjectionIntegrationTests` (6 tests)
     - `FilterIntegrationTests` (7 tests)
     - `KeyConditionIntegrationTests` (6 tests)
     - `UpdateIntegrationTests` (5 tests)

@@ -233,7 +233,51 @@ public class ProjectionIntegrationTests : IAsyncLifetime
     }
 
     /// <summary>
-    /// Test 5: BatchGetItemRequest with per-table projections.
+    /// Test 5: Method call in projection extracts property and DynamoDB returns correct attributes.
+    /// </summary>
+    [Fact]
+    public async Task MethodCallInProjection_ExtractsPropertyAndReturnsCorrectAttribute()
+    {
+        // Arrange
+        var testId = Guid.NewGuid();
+        var item = AttributeValueFixtures.CreateTestEntityItem(
+            id: testId,
+            name: "MethodCall Test",
+            count: 5,
+            status: TestStatus.Suspended);
+
+        await _client.PutItemAsync(new PutItemRequest
+        {
+            TableName = _tableName,
+            Item = item
+        });
+
+        // Act — selector with instance method call (p.Name.ToUpper())
+        var getRequest = new GetItemRequest
+        {
+            TableName = _tableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                ["Id"] = new AttributeValue { S = testId.ToString() }
+            }
+        }.WithProjection(_projectionBuilder,
+            (TestIntegrationEntity p) => new { NameUpper = p.Name.ToUpper(), p.Count });
+
+        var response = await _client.GetItemAsync(getRequest);
+
+        // Assert — DynamoDB returns the underlying attributes
+        response.Item.Should().ContainKey("Name");
+        response.Item.Should().ContainKey("Count");
+        response.Item["Name"].S.Should().Be("MethodCall Test");
+        response.Item["Count"].N.Should().Be("5");
+
+        // Should NOT contain other attributes
+        response.Item.Should().NotContainKey("Status");
+        response.Item.Should().NotContainKey("Enabled");
+    }
+
+    /// <summary>
+    /// Test 6: BatchGetItemRequest with per-table projections.
     /// </summary>
     [Fact]
     public async Task BatchGetItemRequest_WithProjection_ReturnsProjectedAttributes()

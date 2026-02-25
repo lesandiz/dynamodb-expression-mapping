@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-02-25
+
+### Added
+- **Method Call Support in Projections** — `ProjectionExpressionVisitor.VisitMethodCall` now recurses into arguments and instance objects to extract property paths, instead of throwing `UnsupportedExpressionException`. Enables selectors with `Enum.Parse<T>(p.Property)`, `p.Property.ToString()`, chained methods (`p.Name.Trim().ToUpper()`), and multi-argument static methods (`string.Equals(p.Name, p.Title)`)
+- **Integration Test** — `MethodCallInProjection_ExtractsPropertyAndReturnsCorrectAttribute` verifies DynamoDB accepts projections built from method-call selectors
+
+### Changed
+- **ProjectionBuilderTests** — `BuildProjection_UnsupportedExpression_ThrowsUnsupportedExpressionException` replaced with `BuildProjection_MethodCallExpression_ExtractsUnderlyingProperty`
+- Updated Spec 02, 03, 12, 14 and PLAN.md to reflect method call support
+- Updated README with method call projection examples and unsupported expression types note
+
 ## [0.1.2] - 2026-02-24
 
 ### Added
@@ -110,5 +121,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Microsoft.Extensions.Options` (>= 8.0.0)
 - `MinVer` (>= 6.0.0) — build-time only
 
+[0.2.0]: https://github.com/lesandiz/dynamodb-expression-mapping/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/lesandiz/dynamodb-expression-mapping/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/lesandiz/dynamodb-expression-mapping/releases/tag/v0.1.1

@@ -206,8 +206,32 @@ catch (ConditionalCheckFailedException)
 
 Console.WriteLine();
 
-// === Scenario 7: Result Mapping (Anonymous Type) ===
-Console.WriteLine("=== Scenario 7: Result Mapping (Anonymous) ===");
+// === Scenario 7: Projection with Method Calls ===
+Console.WriteLine("=== Scenario 7: Projection with Method Calls ===");
+
+// Method calls in selectors — the builder extracts the underlying properties,
+// the methods themselves run client-side during result mapping.
+var methodCallRequest = new GetItemRequest
+{
+    TableName = "Orders",
+    Key = new Dictionary<string, AttributeValue>
+    {
+        ["PK"] = new AttributeValue { S = "CUSTOMER#alice" },
+        ["SK"] = new AttributeValue { S = "ORDER#002" }
+    }
+}.WithProjection(projectionBuilder,
+    o => new { UpperName = o.Name.Trim().ToUpper(), o.Status, o.Quantity });
+
+var methodCallResponse = await client.GetItemAsync(methodCallRequest);
+
+// DynamoDB returns raw attributes — method calls run during mapping
+Console.WriteLine($"  Name (raw): {methodCallResponse.Item["Name"].S}");
+Console.WriteLine($"  Status: {methodCallResponse.Item["Status"].S}");
+Console.WriteLine($"  Quantity: {methodCallResponse.Item["Quantity"].N}");
+Console.WriteLine();
+
+// === Scenario 8: Result Mapping (Anonymous Type) ===
+Console.WriteLine("=== Scenario 8: Result Mapping (Anonymous) ===");
 
 var anonymousMapper = resultMapper.CreateMapper(o => new { o.Name, o.Status, o.Quantity });
 
@@ -229,8 +253,8 @@ Console.WriteLine($"  Status: {mapped7.Status}");
 Console.WriteLine($"  Quantity: {mapped7.Quantity}");
 Console.WriteLine();
 
-// === Scenario 8: Result Mapping (Named DTO) ===
-Console.WriteLine("=== Scenario 8: Result Mapping (Named DTO) ===");
+// === Scenario 9: Result Mapping (Named DTO) ===
+Console.WriteLine("=== Scenario 9: Result Mapping (Named DTO) ===");
 
 var dtoMapper = resultMapper.CreateMapper(o => new OrderSummary
 {

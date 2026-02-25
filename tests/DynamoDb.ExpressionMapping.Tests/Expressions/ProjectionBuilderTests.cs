@@ -184,13 +184,13 @@ public class ProjectionBuilderTests
     }
 
     [Fact]
-    public void BuildProjection_UnsupportedExpression_ThrowsUnsupportedExpressionException()
+    public void BuildProjection_MethodCallExpression_ExtractsUnderlyingProperty()
     {
-        // Act - method call is not supported
-        Action act = () => _builder.BuildProjection(p => p.OrderId.ToUpper());
+        // Act - method call extracts the underlying property
+        var result = _builder.BuildProjection(p => p.OrderId.ToUpper());
 
         // Assert
-        act.Should().Throw<UnsupportedExpressionException>();
+        result.ProjectionExpression.Should().Contain("OrderId");
     }
 
     #endregion

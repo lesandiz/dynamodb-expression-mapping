@@ -61,8 +61,8 @@ namespace DynamoDb.ExpressionMapping.Exceptions;
 
 /// <summary>
 /// Thrown when an expression tree contains a node type that cannot
-/// be translated to a DynamoDB expression (e.g. method calls,
-/// arithmetic, conditional, array indexing).
+/// be translated to a DynamoDB expression (e.g. arithmetic,
+/// conditional, array indexing).
 /// </summary>
 public sealed class UnsupportedExpressionException : ExpressionMappingException
 {

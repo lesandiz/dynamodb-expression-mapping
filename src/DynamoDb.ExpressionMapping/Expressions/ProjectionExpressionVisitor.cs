@@ -164,7 +164,19 @@ public sealed class ProjectionExpressionVisitor : ExpressionVisitor
 
     protected override Expression VisitMethodCall(MethodCallExpression node)
     {
-        throw new UnsupportedExpressionException(node.NodeType, node.ToString());
+        // Method calls (e.g. Enum.Parse<T>(p.Property), p.Property.ToString())
+        // are treated as client-side transformations.
+        // We recurse into the arguments (and instance) to extract any
+        // property paths referenced, but the method itself is not translated
+        // to a DynamoDB expression — it runs during result mapping.
+
+        if (node.Object != null)
+            Visit(node.Object);
+
+        foreach (var arg in node.Arguments)
+            Visit(arg);
+
+        return node;
     }
 
     protected override Expression VisitBinary(BinaryExpression node)

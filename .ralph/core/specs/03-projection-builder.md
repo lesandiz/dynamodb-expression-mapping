@@ -214,7 +214,7 @@ internal static class ProjectionAliasGenerator
 |---|---|
 | `selector` is null | `ArgumentNullException` |
 | Property marked `[DynamoDbIgnore]` in strict mode | `InvalidProjectionException` with `PropertyName` and `EntityType` (Spec 14 §6) |
-| Expression contains method calls | `UnsupportedExpressionException` with `NodeType` and `ExpressionText` (Spec 14 §2) |
+| Expression contains method calls | Transparent traversal — recurses into arguments to extract property paths (Spec 02 §4) |
 | Empty property name after resolution | `InvalidOperationException` |
 
 ### 8. Thread Safety
