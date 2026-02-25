@@ -1,0 +1,38 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+      - name: Run benchmarks
+        run: >
+          dotnet run -c Release --no-build
+          --project tests/DynamoDb.ExpressionMapping.Benchmarks
+          -- --exporters json
+      - name: Compare against baselines
+        run: >
+          bash .github/scripts/compare-benchmarks.sh
+          tests/DynamoDb.ExpressionMapping.Benchmarks/baselines
+          BenchmarkDotNet.Artifacts/results
+          >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: BenchmarkDotNet.Artifacts/
