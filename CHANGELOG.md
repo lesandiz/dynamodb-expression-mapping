@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-02-25
+
+### Fixed
+- **Method Call Support in Result Mapping** — `CompositeMappingStrategy` now preserves method calls, casts, and other transformations in selector expressions instead of throwing `UnsupportedExpressionException`. Selectors like `e => new { Status = Enum.Parse<OrderStatus>(e.Status) }`, `e => e.Name.Trim().ToUpper()`, and `e => new Dto { Name = e.Name.Trim() }` now work correctly across anonymous types, named types (MemberInit), and record/constructor projections
+
+### Changed
+- **CompositeMappingStrategy rewritten** — Replaced manual `NewExpression`/`MemberInitExpression` decomposition with `SelectorRewritingVisitor`, an `ExpressionVisitor` that rewrites only source parameter property accesses to dictionary reads while preserving all other expression nodes unchanged
+
 ## [0.2.0] - 2026-02-25
 
 ### Added
@@ -121,6 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Microsoft.Extensions.Options` (>= 8.0.0)
 - `MinVer` (>= 6.0.0) — build-time only
 
+[0.2.1]: https://github.com/lesandiz/dynamodb-expression-mapping/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/lesandiz/dynamodb-expression-mapping/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/lesandiz/dynamodb-expression-mapping/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/lesandiz/dynamodb-expression-mapping/releases/tag/v0.1.1

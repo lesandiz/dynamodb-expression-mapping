@@ -53,45 +53,55 @@ The mapper selects a strategy based on the `ProjectionShape` from the visitor:
 - Return directly (no intermediate object construction)
 
 #### Composite (p => new { p.A, p.B } or p => new Dto { X = p.A })
-- Read each required attribute from dictionary
-- Convert each to the appropriate .NET type
-- Construct the result object via expression compilation
+- Rewrite the selector expression tree via `SelectorRewritingVisitor`
+- Replace source parameter property accesses with dictionary reads and type conversion
+- Preserve all other expression nodes unchanged (method calls, casts, constructors, member inits)
+- Compile the rewritten expression to a delegate
 
-### 3. Direct Mapping Algorithm
+### 3. Expression Rewriting Algorithm (SelectorRewritingVisitor)
 
-For a composite projection `p => new { p.OrderId, p.CustomerId, p.Enabled }`:
+`CompositeMappingStrategy` uses a `SelectorRewritingVisitor : ExpressionVisitor` that walks the original selector expression tree and only replaces `MemberExpression` nodes rooted on the source parameter with attribute-read-and-convert expressions. Everything else passes through unchanged.
 
 ```
-1. Analyse expression to extract:
-   - PropertyPaths: [OrderId, CustomerId, Enabled]
-   - Result type: anonymous type or named type
-   - Constructor/initialiser shape
+1. Create a SelectorRewritingVisitor with the source parameter, attrs parameter,
+   source type, resolver factory, and converter registry
 
-2. For each property path:
-   a. Resolve DynamoDB attribute name via IAttributeNameResolver
-   b. Determine .NET target type from PropertyInfo
-   c. Select IAttributeValueConverter for that type
-   d. Build an attribute reader: (dict) => converter.FromAttributeValue(dict["OrderId"])
+2. Visit the selector body — the visitor:
+   a. VisitMember: if the member chain is rooted on the source parameter,
+      extract the property path, resolve attribute names, build a dictionary
+      read expression that converts to the source property type. Return it
+      without recursing into children (handles the entire chain at once).
+   b. VisitParameter: if the source parameter is used directly (not via
+      property access), throw UnsupportedExpressionException.
+   c. All other nodes: delegate to base ExpressionVisitor, which recursively
+      visits children. Method calls, new expressions, member inits, casts,
+      etc. are preserved unchanged — only their leaf property accesses are
+      replaced.
 
-3. Build a compiled delegate that:
-   a. Reads each attribute from the dictionary
-   b. Converts each to the .NET type
-   c. Constructs TResult (via constructor args or property setters)
+3. Wrap the rewritten body in a new lambda with the attrs parameter
 
-4. Cache the compiled delegate for reuse
+4. Compile and cache the delegate
 ```
+
+This approach naturally supports all expression shapes:
+- `new { p.A }` → property access replaced, anonymous constructor preserved
+- `new { X = Enum.Parse<T>(p.A) }` → `p.A` replaced inside method argument, `Enum.Parse` preserved
+- `new { X = p.A.ToUpper() }` → `p.A` replaced as instance, `.ToUpper()` preserved
+- `new Dto { X = p.A }` → `p.A` replaced in member assignment, `MemberInit` preserved
+- `new Record(p.A, p.B)` → each argument replaced, constructor call preserved
+- `p.Address.City` → full chain detected, nested navigation read built
 
 ### 4. Expression-Based Delegate Compilation
 
-Instead of using reflection at runtime, build the mapping function as an expression tree and compile it once:
+The rewritten expression tree is compiled once to a native delegate:
 
 ```csharp
-// For: p => new { p.OrderId, p.CustomerId }
-// Build equivalent of:
+// For: p => new { p.OrderId, Name = p.Name.Trim() }
+// Rewritten to equivalent of:
 // (Dictionary<string, AttributeValue> attrs) =>
-//     new <>f__AnonymousType<Guid, Guid>(
-//         GuidConverter.Read(attrs, "OrderId"),
-//         GuidConverter.Read(attrs, "CustomerId")
+//     new <>f__AnonymousType<string, string>(
+//         converter.FromAttributeValue(attrs.TryGetValue("OrderId", ...) ? av : null),
+//         converter.FromAttributeValue(attrs.TryGetValue("Name", ...) ? av : null).Trim()
 //     )
 
 // Compiled to a Func<Dictionary<string, AttributeValue>, TResult>
@@ -101,7 +111,8 @@ This approach:
 - Runs at native speed after initial compilation
 - No per-invocation reflection
 - No boxing for value types
-- Handles both anonymous types (constructor) and named types (property setters)
+- Handles anonymous types (constructor), named types (property setters), and records
+- Preserves user-specified transformations (method calls, casts, etc.)
 
 ### 5. Attribute Value Readers
 
@@ -249,7 +260,8 @@ The mapper handles all three by inspecting the original selector expression shap
 | Attribute missing from dictionary | Return default value for type (null, 0, Guid.Empty, etc.) |
 | Attribute present but wrong DynamoDB type | Attempt conversion, return default on failure, log warning |
 | No converter registered for .NET type | `MissingConverterException` with `TargetType` and `PropertyName` at mapper creation time (Spec 14 §3) |
-| Expression shape not supported | `UnsupportedExpressionException` with `NodeType` and `ExpressionText` at mapper creation time (Spec 14 §2) |
+| Direct source parameter use in composite (e.g. `new { Whole = e }`) | `UnsupportedExpressionException` at mapper creation time (Spec 14 §2) |
+| Non-property member access (field) | `UnsupportedExpressionException` at mapper creation time (Spec 14 §2) |
 
 ### 11. Example
 
@@ -262,9 +274,13 @@ var mapper = directResultMapper.CreateMapper<OrderSummary>(
 // Internally equivalent to:
 // (attrs) => new OrderSummary
 // {
-//     Id = AttributeReaders.ReadGuid(attrs, "OrderId"),
-//     Total = AttributeReaders.ReadDecimal(attrs, "Total")
+//     Id = converter.FromAttributeValue(attrs["OrderId"]),
+//     Total = converter.FromAttributeValue(attrs["Total"])
 // }
+
+// Method calls and transformations are preserved in the compiled delegate:
+var enrichedMapper = directResultMapper.CreateMapper(
+    p => new { p.OrderId, Status = Enum.Parse<OrderStatus>(p.Status), Name = p.Name.Trim() });
 
 // Use in streaming query:
 await foreach (var response in paginator.Responses)
