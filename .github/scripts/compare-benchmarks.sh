@@ -54,13 +54,15 @@ for baseline_file in "$BASELINES_DIR"/*-report-full-compressed.json; do
   echo "| Method | Parameters | Baseline Mean (ns) | New Mean (ns) | Time Δ% | Baseline Alloc (B) | New Alloc (B) | Alloc Δ% | Status |"
   echo "|--------|------------|-------------------:|-------------:|--------:|------------------:|-------------:|---------:|--------|"
 
-  # Read baseline benchmarks as TSV lines: Method\tParameters\tMean\tAlloc\tGen0
-  while IFS=$'\t' read -r method params base_mean base_alloc base_gen0; do
+  # Read baseline benchmarks as pipe-delimited lines: Method|Parameters|Mean|Alloc|Gen0
+  # Pipe delimiter avoids bash IFS collapsing consecutive tab/whitespace delimiters
+  # when Parameters is empty (null).
+  while IFS='|' read -r method params base_mean base_alloc base_gen0; do
     TOTAL=$((TOTAL + 1))
 
     # Look up same method+params in results
     new_data=$(jq -r --arg m "$method" --arg p "$params" \
-      '.Benchmarks[] | select(.Method == $m and .Parameters == $p) | [.Statistics.Mean, .Memory.BytesAllocatedPerOperation, .Memory.Gen0Collections] | @tsv' \
+      '.Benchmarks[] | select(.Method == $m and ((.Parameters // "") == $p)) | [.Statistics.Mean, .Memory.BytesAllocatedPerOperation, .Memory.Gen0Collections] | join("|")' \
       "$results_file" 2>/dev/null || true)
 
     if [[ -z "$new_data" ]]; then
@@ -68,7 +70,7 @@ for baseline_file in "$BASELINES_DIR"/*-report-full-compressed.json; do
       continue
     fi
 
-    IFS=$'\t' read -r new_mean new_alloc new_gen0 <<< "$new_data"
+    IFS='|' read -r new_mean new_alloc new_gen0 <<< "$new_data"
 
     time_pct=$(pct_change "$base_mean" "$new_mean")
     alloc_pct=$(pct_change "$base_alloc" "$new_alloc")
@@ -107,7 +109,7 @@ for baseline_file in "$BASELINES_DIR"/*-report-full-compressed.json; do
 
     echo "| ${method} | ${params:-—} | ${base_mean_fmt} | ${new_mean_fmt} | ${time_pct}% | ${base_alloc:-0} | ${new_alloc:-0} | ${alloc_pct}% | ${status} |"
 
-  done < <(jq -r '.Benchmarks[] | [.Method, .Parameters, .Statistics.Mean, .Memory.BytesAllocatedPerOperation, .Memory.Gen0Collections] | @tsv' "$baseline_file")
+  done < <(jq -r '.Benchmarks[] | [.Method, (.Parameters // ""), .Statistics.Mean, .Memory.BytesAllocatedPerOperation, .Memory.Gen0Collections] | join("|")' "$baseline_file")
 
   echo ""
 done
