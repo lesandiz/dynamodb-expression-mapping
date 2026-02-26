@@ -10,13 +10,13 @@ using DynamoDb.ExpressionMapping.ReservedKeywords;
 namespace DynamoDb.ExpressionMapping.Benchmarks.Benchmarks;
 
 /// <summary>
-/// Benchmarks for ExpressionCache — cache lookup performance at various sizes
-/// and key generation overhead.
+/// Benchmarks for ExpressionCache — cache lookup performance at various sizes.
+/// CacheMiss is included as a control to validate that miss cost is constant across cache sizes.
 /// PR-04.7
 /// </summary>
 [MemoryDiagnoser]
 [SimpleJob(RuntimeMoniker.Net80)]
-public class ExpressionCacheBenchmarks
+public class ExpressionCacheLookupBenchmarks
 {
     private ExpressionCache _cache = null!;
     private ProjectionBuilder<BenchmarkOrder> _hitBuilder = null!;
@@ -30,19 +30,6 @@ public class ExpressionCacheBenchmarks
     // Uses NullExpressionCache so the factory is always invoked without growing the cache.
     private static readonly Expression<Func<BenchmarkOrder, object>> MissExpr =
         o => new { o.Score, o.Prop8, o.Prop7, o.Prop6, o.Prop5 };
-
-    // Key generation targets
-    private static readonly Expression<Func<BenchmarkOrder, object>> SimpleKeyExpr =
-        o => o.OrderId;
-
-    private static readonly Expression<Func<BenchmarkOrder, object>> ComplexKeyExpr =
-        o => new
-        {
-            o.OrderId, o.CustomerId, o.Name, o.Status,
-            o.TotalAmount, o.Quantity, o.IsActive, o.CreatedAt,
-            o.ShippedAt, o.Priority, o.Score,
-            City = o.Address!.City, Zip = o.Address.ZipCode
-        };
 
     /// <summary>
     /// Number of entries pre-populated in the cache before benchmarks run.
@@ -79,8 +66,6 @@ public class ExpressionCacheBenchmarks
         }
     }
 
-    // --- Cache lookup at various sizes ---
-
     [Benchmark(Baseline = true)]
     public ProjectionResult CacheHit()
         => _hitBuilder.BuildProjection(HitExpr);
@@ -88,10 +73,29 @@ public class ExpressionCacheBenchmarks
     [Benchmark]
     public ProjectionResult CacheMiss()
         => _missBuilder.BuildProjection(MissExpr);
+}
 
-    // --- Key generation overhead ---
+/// <summary>
+/// Benchmarks for ExpressionKeyGenerator — key generation overhead independent of cache size.
+/// PR-04.7
+/// </summary>
+[MemoryDiagnoser]
+[SimpleJob(RuntimeMoniker.Net80)]
+public class ExpressionKeyGeneratorBenchmarks
+{
+    private static readonly Expression<Func<BenchmarkOrder, object>> SimpleKeyExpr =
+        o => o.OrderId;
 
-    [Benchmark]
+    private static readonly Expression<Func<BenchmarkOrder, object>> ComplexKeyExpr =
+        o => new
+        {
+            o.OrderId, o.CustomerId, o.Name, o.Status,
+            o.TotalAmount, o.Quantity, o.IsActive, o.CreatedAt,
+            o.ShippedAt, o.Priority, o.Score,
+            City = o.Address!.City, Zip = o.Address.ZipCode
+        };
+
+    [Benchmark(Baseline = true)]
     public string GenerateKey_SimpleExpression()
         => ExpressionKeyGenerator.GenerateKey(SimpleKeyExpr);
 

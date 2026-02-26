@@ -132,10 +132,10 @@ public class EndToEndBenchmarks
     // --- Full pipeline cold: build + apply + map result (no caching) ---
 
     [Benchmark(Baseline = true)]
-    public OrderSummary FullPipeline_Cold()
+    public (QueryRequest, OrderSummary) FullPipeline_Cold()
     {
         // Build and apply expressions via public extension methods
-        new QueryRequest { TableName = "Orders" }
+        var request = new QueryRequest { TableName = "Orders" }
             .WithProjection(_coldProjectionBuilder, ProjectionExpr)
             .WithFilter(_coldFilterBuilder, FilterExpr)
             .WithKeyCondition(_keyConditionBuilder,
@@ -143,16 +143,17 @@ public class EndToEndBenchmarks
                        .WithSortKeyBeginsWith(o => o.SK, "ORDER#"));
 
         // Map result (cold — compiles delegate)
-        return _resultMapper.Map(_responseAttrs, ProjectionExpr);
+        var result = _resultMapper.Map(_responseAttrs, ProjectionExpr);
+        return (request, result);
     }
 
     // --- Full pipeline warm: cached expressions + pre-compiled mapper ---
 
     [Benchmark]
-    public OrderSummary FullPipeline_Warm()
+    public (QueryRequest, OrderSummary) FullPipeline_Warm()
     {
         // Build and apply expressions via public extension methods (projection from cache)
-        new QueryRequest { TableName = "Orders" }
+        var request = new QueryRequest { TableName = "Orders" }
             .WithProjection(_warmProjectionBuilder, ProjectionExpr)
             .WithFilter(_warmFilterBuilder, FilterExpr)
             .WithKeyCondition(_keyConditionBuilder,
@@ -160,6 +161,7 @@ public class EndToEndBenchmarks
                        .WithSortKeyBeginsWith(o => o.SK, "ORDER#"));
 
         // Map result (warm — uses pre-compiled delegate)
-        return _warmMapperDelegate(_responseAttrs);
+        var result = _warmMapperDelegate(_responseAttrs);
+        return (request, result);
     }
 }

@@ -23,10 +23,6 @@ public class TypeConverterBenchmarks
     private IAttributeValueConverter _listOfStringConverter = null!;
     private IAttributeValueConverter _dictionaryConverter = null!;
 
-    // Registry for resolution benchmarks — fresh clone per iteration
-    // to avoid cached resolution results from prior invocations
-    private AttributeValueConverterRegistry _registryForResolution = null!;
-
     // Test values
     private readonly string _stringValue = "benchmark-value";
     private readonly Guid _guidValue = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
@@ -51,28 +47,6 @@ public class TypeConverterBenchmarks
         _enumConverter = registry.GetConverter(typeof(OrderPriority));
         _listOfStringConverter = registry.GetConverter(typeof(List<string>));
         _dictionaryConverter = registry.GetConverter(typeof(Dictionary<string, string>));
-    }
-
-    [IterationSetup(Target = nameof(Resolve_ExactType))]
-    public void SetupResolution_Exact()
-    {
-        // Fresh clone each iteration — exact types (string, int, etc.) are pre-registered
-        // in the default registry, so the clone has them. Measures dictionary lookup only.
-        _registryForResolution = AttributeValueConverterRegistry.Default.Clone();
-    }
-
-    [IterationSetup(Targets = new[]
-    {
-        nameof(Resolve_Nullable),
-        nameof(Resolve_Enum),
-        nameof(Resolve_GenericCollection)
-    })]
-    public void SetupResolution_Dynamic()
-    {
-        // Fresh clone each iteration — dynamic types (Nullable, Enum, generic collection)
-        // are NOT pre-registered, so each resolution triggers the fallback chain
-        // (reflection + Activator.CreateInstance + cache insertion).
-        _registryForResolution = AttributeValueConverterRegistry.Default.Clone();
     }
 
     // --- Per-type conversion overhead ---
@@ -102,20 +76,23 @@ public class TypeConverterBenchmarks
         => _dictionaryConverter.ToAttributeValue(_dictValue);
 
     // --- Converter resolution overhead ---
+    // Each method creates a fresh Clone() so the resolution chain is exercised without
+    // prior cached results. Clone cost is constant across all methods, so the differential
+    // reveals the resolution chain overhead for each type category.
 
     [Benchmark]
     public IAttributeValueConverter Resolve_ExactType()
-        => _registryForResolution.GetConverter(typeof(string));
+        => AttributeValueConverterRegistry.Default.Clone().GetConverter(typeof(string));
 
     [Benchmark]
     public IAttributeValueConverter Resolve_Nullable()
-        => _registryForResolution.GetConverter(typeof(int?));
+        => AttributeValueConverterRegistry.Default.Clone().GetConverter(typeof(int?));
 
     [Benchmark]
     public IAttributeValueConverter Resolve_Enum()
-        => _registryForResolution.GetConverter(typeof(OrderPriority));
+        => AttributeValueConverterRegistry.Default.Clone().GetConverter(typeof(OrderPriority));
 
     [Benchmark]
     public IAttributeValueConverter Resolve_GenericCollection()
-        => _registryForResolution.GetConverter(typeof(List<Guid>));
+        => AttributeValueConverterRegistry.Default.Clone().GetConverter(typeof(List<Guid>));
 }

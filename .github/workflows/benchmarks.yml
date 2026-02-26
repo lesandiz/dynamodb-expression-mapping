@@ -24,7 +24,7 @@ jobs:
         run: >
           dotnet run -c Release --no-build
           --project tests/DynamoDb.ExpressionMapping.Benchmarks
-          -- --filter '*' --exporters json
+          -- --filter '*'
       - name: Compare against baselines
         run: >
           bash .github/scripts/compare-benchmarks.sh

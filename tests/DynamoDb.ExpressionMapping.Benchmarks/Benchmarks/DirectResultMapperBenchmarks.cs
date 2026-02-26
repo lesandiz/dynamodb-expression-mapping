@@ -10,34 +10,16 @@ using DynamoDb.ExpressionMapping.ResultMapping;
 namespace DynamoDb.ExpressionMapping.Benchmarks.Benchmarks;
 
 /// <summary>
-/// Benchmarks for DirectResultMapper — delegate compilation (cold), mapping execution (warm),
-/// and comparison against hand-written mapping code.
+/// Benchmarks for DirectResultMapper — delegate compilation (cold path).
 /// PR-04.5
 /// </summary>
 [MemoryDiagnoser]
 [SimpleJob(RuntimeMoniker.Net80)]
-public class DirectResultMapperBenchmarks
+public class DirectResultMapperCompilationBenchmarks
 {
     private IAttributeNameResolverFactory _resolverFactory = null!;
     private IAttributeValueConverterRegistry _converterRegistry = null!;
 
-    // Cold mapper: no internal caching (new instance per benchmark iteration group)
-    // Warm mapper: pre-compiled delegates cached internally
-    private DirectResultMapper<BenchmarkOrder> _warmMapper = null!;
-
-    // Pre-compiled delegates for warm-path benchmarks
-    private Func<Dictionary<string, AttributeValue>, object> _anonymousThreePropsDelegate = null!;
-    private Func<Dictionary<string, AttributeValue>, OrderDetail> _namedTenPropsDelegate = null!;
-    private Func<Dictionary<string, AttributeValue>, object> _nestedTypeDelegate = null!;
-    private Func<Dictionary<string, AttributeValue>, object> _methodCallDelegate = null!;
-
-    // Pre-built attribute dictionaries
-    private Dictionary<string, AttributeValue> _threePropsAttrs = null!;
-    private Dictionary<string, AttributeValue> _fivePropsAttrs = null!;
-    private Dictionary<string, AttributeValue> _tenPropsAttrs = null!;
-    private Dictionary<string, AttributeValue> _nestedAttrs = null!;
-
-    // Pre-defined expressions (stable references)
     private static readonly Expression<Func<BenchmarkOrder, object>> AnonymousThreePropsExpr =
         o => new { o.OrderId, o.Name, o.TotalAmount };
 
@@ -53,6 +35,68 @@ public class DirectResultMapperBenchmarks
 
     private static readonly Expression<Func<BenchmarkOrder, OrderRecord>> RecordExpr =
         o => new OrderRecord(o.OrderId, o.Name, o.TotalAmount);
+
+    private static readonly Expression<Func<BenchmarkOrder, object>> MethodCallExpr =
+        o => new { o.OrderId, Upper = o.Name.Trim().ToUpper(), Price = o.TotalAmount.ToString() };
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        _resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
+        _converterRegistry = AttributeValueConverterRegistry.Default;
+    }
+
+    [Benchmark(Baseline = true)]
+    public Func<Dictionary<string, AttributeValue>, object> CreateMapper_AnonymousType()
+    {
+        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
+        return mapper.CreateMapper(AnonymousThreePropsExpr);
+    }
+
+    [Benchmark]
+    public Func<Dictionary<string, AttributeValue>, OrderSummary> CreateMapper_NamedType_FiveProps()
+    {
+        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
+        return mapper.CreateMapper(NamedFivePropsExpr);
+    }
+
+    [Benchmark]
+    public Func<Dictionary<string, AttributeValue>, OrderRecord> CreateMapper_Record()
+    {
+        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
+        return mapper.CreateMapper(RecordExpr);
+    }
+
+    [Benchmark]
+    public Func<Dictionary<string, AttributeValue>, object> CreateMapper_WithMethodCalls()
+    {
+        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
+        return mapper.CreateMapper(MethodCallExpr);
+    }
+}
+
+/// <summary>
+/// Benchmarks for DirectResultMapper — mapping execution (warm path) using pre-compiled delegates,
+/// with comparison against hand-written mapping code.
+/// PR-04.5
+/// </summary>
+[MemoryDiagnoser]
+[SimpleJob(RuntimeMoniker.Net80)]
+public class DirectResultMapperExecutionBenchmarks
+{
+    // Pre-compiled delegates for warm-path benchmarks
+    private Func<Dictionary<string, AttributeValue>, object> _anonymousThreePropsDelegate = null!;
+    private Func<Dictionary<string, AttributeValue>, OrderDetail> _namedTenPropsDelegate = null!;
+    private Func<Dictionary<string, AttributeValue>, object> _nestedTypeDelegate = null!;
+    private Func<Dictionary<string, AttributeValue>, object> _methodCallDelegate = null!;
+
+    // Pre-built attribute dictionaries
+    private Dictionary<string, AttributeValue> _threePropsAttrs = null!;
+    private Dictionary<string, AttributeValue> _tenPropsAttrs = null!;
+    private Dictionary<string, AttributeValue> _nestedAttrs = null!;
+
+    private static readonly Expression<Func<BenchmarkOrder, object>> AnonymousThreePropsExpr =
+        o => new { o.OrderId, o.Name, o.TotalAmount };
 
     private static readonly Expression<Func<BenchmarkOrder, OrderDetail>> NamedTenPropsExpr =
         o => new OrderDetail
@@ -78,13 +122,10 @@ public class DirectResultMapperBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
-        _converterRegistry = AttributeValueConverterRegistry.Default;
+        var resolverFactory = new AttributeNameResolverFactoryBuilder().Build();
+        var converterRegistry = AttributeValueConverterRegistry.Default;
 
-        // Warm mapper with pre-compiled delegates
-        _warmMapper = new DirectResultMapper<BenchmarkOrder>(
-            _resolverFactory,
-            _converterRegistry);
+        var warmMapper = new DirectResultMapper<BenchmarkOrder>(resolverFactory, converterRegistry);
 
         // Build attribute dictionaries
         _threePropsAttrs = new Dictionary<string, AttributeValue>
@@ -92,21 +133,6 @@ public class DirectResultMapperBenchmarks
             ["OrderId"] = new() { S = "ORD-001" },
             ["Name"] = new() { S = "Test Order" },
             ["TotalAmount"] = new() { N = "199.99" }
-        };
-
-        _fivePropsAttrs = new Dictionary<string, AttributeValue>
-        {
-            ["OrderId"] = new() { S = "ORD-002" },
-            ["Name"] = new() { S = "Five Prop Order" },
-            ["Status"] = new() { S = "Active" },
-            ["TotalAmount"] = new() { N = "299.99" },
-            ["Address"] = new()
-            {
-                M = new Dictionary<string, AttributeValue>
-                {
-                    ["City"] = new() { S = "London" }
-                }
-            }
         };
 
         _tenPropsAttrs = new Dictionary<string, AttributeValue>
@@ -145,43 +171,11 @@ public class DirectResultMapperBenchmarks
         };
 
         // Prime warm mapper by creating and caching delegates
-        _anonymousThreePropsDelegate = _warmMapper.CreateMapper(AnonymousThreePropsExpr);
-        _namedTenPropsDelegate = _warmMapper.CreateMapper(NamedTenPropsExpr);
-        _nestedTypeDelegate = _warmMapper.CreateMapper(NestedTypeExpr);
-        _methodCallDelegate = _warmMapper.CreateMapper(MethodCallExpr);
+        _anonymousThreePropsDelegate = warmMapper.CreateMapper(AnonymousThreePropsExpr);
+        _namedTenPropsDelegate = warmMapper.CreateMapper(NamedTenPropsExpr);
+        _nestedTypeDelegate = warmMapper.CreateMapper(NestedTypeExpr);
+        _methodCallDelegate = warmMapper.CreateMapper(MethodCallExpr);
     }
-
-    // --- Cold path: delegate compilation overhead ---
-
-    [Benchmark]
-    public Func<Dictionary<string, AttributeValue>, object> CreateMapper_AnonymousType()
-    {
-        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
-        return mapper.CreateMapper(AnonymousThreePropsExpr);
-    }
-
-    [Benchmark]
-    public Func<Dictionary<string, AttributeValue>, OrderSummary> CreateMapper_NamedType_FiveProps()
-    {
-        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
-        return mapper.CreateMapper(NamedFivePropsExpr);
-    }
-
-    [Benchmark]
-    public Func<Dictionary<string, AttributeValue>, OrderRecord> CreateMapper_Record()
-    {
-        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
-        return mapper.CreateMapper(RecordExpr);
-    }
-
-    [Benchmark]
-    public Func<Dictionary<string, AttributeValue>, object> CreateMapper_WithMethodCalls()
-    {
-        var mapper = new DirectResultMapper<BenchmarkOrder>(_resolverFactory, _converterRegistry);
-        return mapper.CreateMapper(MethodCallExpr);
-    }
-
-    // --- Warm path: mapping execution using pre-compiled delegates ---
 
     [Benchmark(Baseline = true)]
     public object Map_AnonymousType_ThreeProps()

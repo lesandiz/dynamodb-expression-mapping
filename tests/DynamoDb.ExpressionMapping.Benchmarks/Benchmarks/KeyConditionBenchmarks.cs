@@ -28,6 +28,9 @@ public class KeyConditionBenchmarks
 
     // --- Partition key only ---
 
+    // .Build() is required here because WithPartitionKey returns a SortKeyConditionBuilder,
+    // not a KeyConditionExpressionResult. Other benchmarks chain sort-key methods that
+    // implicitly produce the result, but partition-only usage must call .Build() explicitly.
     [Benchmark(Baseline = true)]
     public KeyConditionExpressionResult PartitionKeyOnly()
         => _builder

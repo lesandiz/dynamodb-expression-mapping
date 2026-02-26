@@ -17,11 +17,6 @@ public class FilterExpressionBenchmarks
 {
     private FilterExpressionBuilder<BenchmarkOrder> _builder = null!;
 
-    // Captured variables for closure benchmarks
-    private string _capturedString = "CUST-12345";
-    private OrderPriority _capturedEnum = OrderPriority.High;
-    private DateTime _capturedDateTime = new(2024, 6, 15, 12, 0, 0, DateTimeKind.Utc);
-
     // Pre-defined expressions
     private static readonly Expression<Func<BenchmarkOrder, bool>> SimpleEqualityExpr =
         x => x.OrderId == "ORD-001";
@@ -35,6 +30,15 @@ public class FilterExpressionBenchmarks
     private static readonly Expression<Func<BenchmarkOrder, bool>> NestedPropertyExpr =
         x => x.Address!.City == "London";
 
+    private static readonly Expression<Func<BenchmarkOrder, bool>> StringMethodExpr =
+        x => x.Name.Contains("test") && x.OrderId.StartsWith("ORD");
+
+    // Pre-built closure expressions — built in GlobalSetup so the expression tree
+    // allocation is excluded from per-invocation measurement
+    private Expression<Func<BenchmarkOrder, bool>> _capturedStringExpr = null!;
+    private Expression<Func<BenchmarkOrder, bool>> _capturedEnumExpr = null!;
+    private Expression<Func<BenchmarkOrder, bool>> _capturedDateTimeExpr = null!;
+
     [GlobalSetup]
     public void Setup()
     {
@@ -42,6 +46,16 @@ public class FilterExpressionBenchmarks
         var converterRegistry = AttributeValueConverterRegistry.Default;
 
         _builder = new FilterExpressionBuilder<BenchmarkOrder>(resolverFactory, converterRegistry);
+
+        // Build closure expressions with captured variables — same MemberAccess
+        // structure as inline lambdas but allocated once
+        var capturedString = "CUST-12345";
+        var capturedEnum = OrderPriority.High;
+        var capturedDateTime = new DateTime(2024, 6, 15, 12, 0, 0, DateTimeKind.Utc);
+
+        _capturedStringExpr = x => x.CustomerId == capturedString;
+        _capturedEnumExpr = x => x.Priority == capturedEnum;
+        _capturedDateTimeExpr = x => x.CreatedAt > capturedDateTime;
     }
 
     // --- Complexity tiers ---
@@ -62,17 +76,23 @@ public class FilterExpressionBenchmarks
     public FilterExpressionResult WithNestedProperty()
         => _builder.BuildFilter(NestedPropertyExpr);
 
+    // --- Method call visitor path (contains / begins_with) ---
+
+    [Benchmark]
+    public FilterExpressionResult StringMethods()
+        => _builder.BuildFilter(StringMethodExpr);
+
     // --- Captured variable evaluation ---
 
     [Benchmark]
     public FilterExpressionResult CapturedVariable_String()
-        => _builder.BuildFilter(x => x.CustomerId == _capturedString);
+        => _builder.BuildFilter(_capturedStringExpr);
 
     [Benchmark]
     public FilterExpressionResult CapturedVariable_Enum()
-        => _builder.BuildFilter(x => x.Priority == _capturedEnum);
+        => _builder.BuildFilter(_capturedEnumExpr);
 
     [Benchmark]
     public FilterExpressionResult CapturedVariable_DateTime()
-        => _builder.BuildFilter(x => x.CreatedAt > _capturedDateTime);
+        => _builder.BuildFilter(_capturedDateTimeExpr);
 }
